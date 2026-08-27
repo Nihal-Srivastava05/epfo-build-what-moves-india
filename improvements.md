@@ -115,7 +115,41 @@ Everything here is one line so it can be read in a hurry and cut fast.
 
 ---
 
-## 7. If we only have hackathon hours — build these four
+## 7. Making the jargon understandable
+
+- **Plain title first, official term second** — "Your withdrawal (Form 19)", never "Form 19" on its own.
+- **Every acronym is tappable** — UAN, EPS, EDLI, PPO, ECR show their meaning right where they appear.
+- **Meaning opens in place**, never on a new page — nobody should lose a half-filled form to look up a word.
+- **One line first, "explain more" second** — the short answer is usually all anyone wanted.
+- **Mark the term only the first time** it appears on a screen, not every time.
+- **A searchable glossary page**, A–Z, filtered by member / pensioner / employer.
+- **Every term gets its own link** (`/glossary/edli`) so SMS, emails and rejection notices can point straight at it.
+- **"Where you'll see this"** on each entry — the actual forms and screens the term shows up on.
+- **Common wrong names work too** — "PF number", "account number" and "member ID" all find the same answer.
+- **Meanings work offline** — the glossary ships with the app, so it opens on 2G and in lite mode.
+- **One dictionary feeds everything** — tooltips, glossary page and chatbot never disagree.
+
+### The chatbot
+
+- **On every screen**, collapsed by default, Hindi and English, with voice input on mobile.
+- **"What does this mean?"** — answered instantly from the glossary, no network needed.
+- **"How do I do this?"** — answered by taking you to the actual screen, not by explaining it in a paragraph.
+- **"Where is my claim?"** — answered from your own record, in a fixed format, never a guessed answer.
+- **Never invents an amount, a date or an eligibility verdict** — those come from your record or not at all.
+- **Says "I don't know, here's a human"** and opens a grievance with your question already filled in.
+- **Not logged in? Meanings and directions only** — nothing about anyone's account.
+- **Same bot on WhatsApp**, so the answer is identical wherever it's asked.
+- **Chat attaches to a grievance in one tap**, so nobody retypes their problem a third time.
+
+### Why this also fixes the writing
+
+- **Every lookup is a label that failed** — track which words get tapped most on each screen.
+- **Weekly "top 20 looked-up terms"** goes to whoever writes the interface text.
+- **Success is lookups going down**, not a busier glossary.
+
+---
+
+## 8. If we only have hackathon hours — build these four
 
 1. **Unified role-aware dashboard** — the single strongest visual before/after.
 2. **Claim flow with live mismatch detection** — demos the actual problem being solved.
@@ -124,7 +158,7 @@ Everything here is one line so it can be read in a hurry and cut fast.
 
 ---
 
-## 8. What we are deliberately not doing
+## 9. What we are deliberately not doing
 
 - Not rebuilding the backend — CITES 2.01, CPPS and auto-settlement already exist.
 - Not absorbing Shram Suvidha — it's jointly owned with the Labour Ministry, so we cross-link instead.
@@ -133,9 +167,10 @@ Everything here is one line so it can be read in a hurry and cut fast.
 
 ---
 
-## 9. Demo talking points
+## 10. Demo talking points
 
 - "Nine logins become one."
 - "The rejection that takes 45 days now takes 45 seconds to prevent."
 - "Built for a mid-range Android on patchy 4G — desktop is the enhancement."
 - "The backend is already modern. We're fixing the part citizens actually touch."
+- "You shouldn't need to know what EDLI means to use it — but if you ask, we tell you in one line."
