@@ -149,7 +149,75 @@ Everything here is one line so it can be read in a hurry and cut fast.
 
 ---
 
-## 8. If we only have hackathon hours — build these four
+## 8. Product thinking — build the relations, not the pages
+
+Almost every problem above is a missing link between two things EPFO already knows.
+The record is a graph — person, employer, claim, challan, contribution, document, nominee, grievance — and today the interface shows one node at a time. Show the edge and most of the confusion goes away.
+
+| The relation | Today | The product move |
+|---|---|---|
+| Member ↔ employer | Two portals, neither shows the other | One object, two views — same claim, same month, same truth |
+| Member ↔ their own past jobs | A passbook per employer | One continuous money timeline under one UAN |
+| Claim ↔ grievance | Different website, retype everything | Grievance is a state on the claim, not a destination |
+| Member ↔ nominee/family | Discovered only after a death | Nominees verified while the member is alive |
+| Member ↔ EPFO's own messages | SMS you can't verify | Every message EPFO sent is in your inbox — if it isn't there, it's a scam |
+| Rejection ↔ next applicant | Same rejection, forever | Each rejection reason becomes tomorrow's inline check |
+
+### One person, many relationships
+
+- **The account is a person, not an employment** — the same human is a member at one employer, an ex-member at three, a nominee for a parent, and a pensioner in 2044.
+- **Persona is a switcher, not a separate login** — a top-of-screen "Viewing as: Member · Pensioner · Employer · Nominee" that re-skins navigation, vocabulary and help for the session; only roles you actually hold appear.
+- **Every employer relationship on one timeline** — portability is the entire point of UAN, so show it as one continuous money story, not four disconnected passbooks.
+- **Delegated access as a real feature** — a CSC operator, an HR executive, an adult child filing for a parent: named delegate, scoped permission, expiry, audit trail, one-tap revoke. Today all of this happens by sharing a password.
+- **Passkey / 2FA on the one door** — if we collapse nine logins into one, that login has to be worth more than an OTP that any caller can talk you out of.
+
+### Both sides of the same object
+
+- **A member's missing month is an employer's unfiled ECR** — one fact, two audiences; each side should see the other's state.
+- **Name the counterparty on every pending item** — "Waiting on Acme Pvt Ltd, HR verified 12 Aug" beats "under process."
+- **Every pending object has an owner and a clock** — who holds it, since when, what happens when the clock runs out.
+- **Nudges travel along the relation, not through the citizen** — when a member is blocked by their employer, EPFO chases the employer; the member never becomes the messenger.
+- **Give the delay a face on the employer side** — "4 claims waiting · longest 9 days · 1 person has been waiting since you last logged in."
+- **Cross-side receipts** — when the employer files, the member gets told; when the member raises a mismatch, the employer sees the exact month and amount in dispute.
+
+### Life events, not modules
+
+- **The entry point is the event, not the form** — new job, job change, marriage, buying a home, illness, going abroad, retirement, death in the family. The system picks the forms.
+- **One event fans out to every dependent task** — marriage updates the nominee, a new job offers transfer + KYC carry-over, an exit date unlocks withdrawal and starts the 2-month clock.
+- **Age- and stage-aware home** — activate at 22, transfer at 28, the eligibility window for a house at 35, EPS mechanics at 50, pension paperwork at 57. Surface the next thing, not all things.
+- **The death claim is the flow that must be perfect** — pre-filled from the member's record, jargon removed, no document the family has to hunt for, a human phone number on the same screen.
+- **Retirement as a countdown, not a cliff** — a visible 12-month checklist before 58 so pension paperwork isn't discovered on the last day.
+
+### Health, not forms
+
+- **A standing account-health score with a "Needs action" list** — computed continuously, so nothing fails at submit that could have been known at rest.
+- **Eligibility precomputed and shown before the form opens** — the system already knows the balance, service length and reason caps; making the user derive them from a circular is the bug.
+- **Every warning carries its consequence and its fix in the same card** — no warning that only announces.
+- **The best visit is the one that didn't happen** — auto-transfer on job change, auto-settlement inside the cap, auto-renewed life certificates via face auth. Success is fewer logins, not more engagement.
+
+### Trust as a product surface
+
+- **"Did EPFO really send this?"** — every SMS, email and outbound call logged in the notification centre; anything not listed there is a scam, and we say so in one line.
+- **Scam awareness placed where fraud happens** — the withdrawal and bank-change screens, not a circular in a PDF.
+- **Login and action history** — device, location, what changed, sign out everywhere.
+- **Verifiable documents** — every downloaded passbook, PPO or claim letter carries a code a bank or employer can check.
+
+### Grievance as a state, not a website
+
+- **Raise it from the object it's about** — the claim, the month, the challan. The context is attached automatically.
+- **A visible escalation ladder with an SLA at each rung** — office → regional → CPGRAMS, with the date it moves up on its own.
+- **Resolution writes back to the object** — the claim shows what was fixed, not just that a ticket closed.
+
+### Loops that make it better every month
+
+- **Rejections feed the pre-submit check** — every new rejection reason becomes an inline validation within a release.
+- **Glossary lookups feed the copy** — a looked-up word is a label that failed; the top 20 each week goes to whoever writes the interface.
+- **Grievance categories are the roadmap** — the top ten categories each quarter are the next quarter's backlog.
+- **Measure outcomes, not sessions** — days to credit, % auto-settled, % rejected, grievances per 10,000 claims, office and CSC visits avoided, tasks finished on a phone in under three minutes. Time-on-site going *down* is a win.
+
+---
+
+## 9. If we only have hackathon hours — build these four
 
 1. **Unified role-aware dashboard** — the single strongest visual before/after.
 2. **Claim flow with live mismatch detection** — demos the actual problem being solved.
@@ -158,7 +226,7 @@ Everything here is one line so it can be read in a hurry and cut fast.
 
 ---
 
-## 9. What we are deliberately not doing
+## 10. What we are deliberately not doing
 
 - Not rebuilding the backend — CITES 2.01, CPPS and auto-settlement already exist.
 - Not absorbing Shram Suvidha — it's jointly owned with the Labour Ministry, so we cross-link instead.
@@ -167,7 +235,7 @@ Everything here is one line so it can be read in a hurry and cut fast.
 
 ---
 
-## 10. Demo talking points
+## 11. Demo talking points
 
 - "Nine logins become one."
 - "The rejection that takes 45 days now takes 45 seconds to prevent."
