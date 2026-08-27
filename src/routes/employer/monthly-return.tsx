@@ -121,11 +121,9 @@ export default function MonthlyReturn() {
           <div className="mt-4 rounded-lg border border-info-line bg-info-soft p-4 text-left">
             <p className="text-sm leading-relaxed">
               <span className="font-medium">{active.length} employees</span> just had this month credited
-              to their passbooks. The gap Priya Sharma could see on her home screen is now closed.
+              to their passbooks, and each of them has been told. The gap they could see on their own
+              home screen is now closed.
             </p>
-            <Button asChild variant="link" size="sm" className="mt-1 -ml-4">
-              <Link to="/member">{t('common.otherSide')} →</Link>
-            </Button>
           </div>
         </motion.div>
         <Button asChild size="lg" className="mt-6 w-full">

@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
-import { CheckCircle2, ExternalLink } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -8,7 +7,6 @@ import { Money } from '@/components/patterns/money'
 import { OwnerClock } from '@/components/patterns/owner-clock'
 import { StatusPill } from '@/components/patterns/status-pill'
 import { useData } from '@/store/data'
-import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
 import { daysBetween, fmtUan } from '@/lib/format'
 
@@ -21,7 +19,6 @@ const kindLabel = {
 
 export default function Approvals() {
   const { approvals, approveClaim } = useData()
-  const { t } = useT()
   const motionOk = useMotionOk()
 
   /** Sorted by how long a person has been waiting, not by when it arrived. */
@@ -76,12 +73,10 @@ export default function Approvals() {
                       ) : null}
                       <OwnerClock holder="employer" since={a.waitingSince} className="mt-3" compact />
                       {a.claimId ? (
-                        <Button asChild variant="link" size="sm" className="mt-1 -ml-4 h-8">
-                          <Link to="/member/claims">
-                            {t('common.otherSide')}
-                            <ExternalLink className="size-3" aria-hidden />
-                          </Link>
-                        </Button>
+                        <p className="ident mt-2 text-xs text-muted-foreground">
+                          {a.claimId} — {a.personName.split(' ')[0]} is watching this reference on their
+                          own claim tracker.
+                        </p>
                       ) : null}
                     </div>
                     <Button

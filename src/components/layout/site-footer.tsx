@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Emblem } from '@/components/layout/emblem'
+import { useSession } from '@/store/session'
 import { useT } from '@/i18n'
 
 /**
@@ -8,6 +9,7 @@ import { useT } from '@/i18n'
  */
 export function SiteFooter() {
   const { t } = useT()
+  const signedIn = useSession((s) => s.signedIn)
   return (
     <footer className="mt-auto border-t bg-secondary/40">
       <div className="mx-auto max-w-6xl px-4 py-8 pb-28 lg:pb-8">
@@ -37,9 +39,12 @@ export function SiteFooter() {
             <Link to="/about" className="text-muted-foreground hover:text-foreground">
               About this prototype
             </Link>
-            <Link to="/settings" className="text-muted-foreground hover:text-foreground">
-              {t('nav.settings')}
-            </Link>
+            {/* Settings sits behind the sign-in guard, so it is not offered before one. */}
+            {signedIn ? (
+              <Link to="/settings" className="text-muted-foreground hover:text-foreground">
+                {t('nav.settings')}
+              </Link>
+            ) : null}
           </nav>
         </div>
       </div>

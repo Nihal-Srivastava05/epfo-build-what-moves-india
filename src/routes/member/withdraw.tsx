@@ -24,7 +24,8 @@ import { MockBadge } from '@/components/patterns/mock-badge'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
-import { preflight, withdrawalReasons } from '@/lib/derive'
+import { preflight, totalBalance, withdrawalReasons } from '@/lib/derive'
+import { WITHDRAW_STEPS } from '@/lib/claims'
 import { fmtDate, rupees } from '@/lib/format'
 import { TODAY, establishments } from '@/lib/mock/db'
 import { cn } from '@/lib/utils'
@@ -38,6 +39,7 @@ export default function Withdraw() {
   const { contributions, kyc, claimDraft, saveDraft, fileClaim, fixKyc } = useData()
 
   const reasons = useMemo(() => withdrawalReasons(contributions), [contributions])
+  const balance = useMemo(() => totalBalance(contributions), [contributions])
   const [step, setStep] = useState(claimDraft?.step ?? 1)
   const [reasonKey, setReasonKey] = useState(claimDraft?.reasonKey ?? '')
   const [amount, setAmount] = useState<string>(claimDraft?.amount ? String(claimDraft.amount) : '')
@@ -60,7 +62,7 @@ export default function Withdraw() {
     saveDraft({ reasonKey, amount: amountNum, step, startedAt: claimDraft?.startedAt ?? TODAY })
   }, [reasonKey, amountNum, step, filedId, saveDraft, claimDraft?.startedAt])
 
-  const labels = [t('withdraw.step1'), t('withdraw.step2'), t('withdraw.step3')]
+  const labels = WITHDRAW_STEPS.map((s) => t(s.titleKey))
 
   if (filedId) {
     const claim = useData.getState().claims.find((c) => c.id === filedId)!
@@ -101,7 +103,7 @@ export default function Withdraw() {
             <Link to="/member">Back to home</Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="flex-1">
-            <Link to="/member/claims">{t('member.trackClaim')}</Link>
+            <Link to={`/member/claims/${claim.id}`}>{t('member.trackClaim')}</Link>
           </Button>
         </div>
       </div>
@@ -116,6 +118,9 @@ export default function Withdraw() {
         labels={labels}
         onBack={step > 1 ? () => setStep(step - 1) : undefined}
       />
+      <p className="-mt-6 mb-8 text-sm leading-relaxed text-muted-foreground">
+        {t(WITHDRAW_STEPS[step - 1].blurbKey)}
+      </p>
 
       {/* Step 1 — name the task, not the form. Choosing a reason picks the form silently. */}
       {step === 1 ? (
@@ -229,6 +234,14 @@ export default function Withdraw() {
                   </Button>
                 ))}
               </div>
+
+              {/* The consequence of the number, shown as it is typed. */}
+              {amountNum > 0 && !overCap ? (
+                <div className="mt-4 flex flex-wrap items-baseline justify-between gap-2 border-t pt-4">
+                  <span className="text-sm text-muted-foreground">{t('withdraw.leftAfter')}</span>
+                  <Money value={Math.max(0, balance - amountNum)} className="font-medium" />
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -249,6 +262,15 @@ export default function Withdraw() {
               ) : (
                 <StatusPill tone="stop">Needs fixing</StatusPill>
               )}
+            </div>
+            {/* Shown, not re-entered — but changeable, so it is a decision. */}
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+              <p className="text-sm text-muted-foreground">
+                This is the account EPFO has already verified against your UAN.
+              </p>
+              <Button asChild variant="outline" size="sm" className="h-9">
+                <Link to="/member/kyc">{t('withdraw.changeBank')}</Link>
+              </Button>
             </div>
           </div>
 
@@ -334,15 +356,29 @@ export default function Withdraw() {
         <div className="space-y-6">
           <dl className="divide-y rounded-xl border bg-card">
             {[
-              ['Reason', lang === 'hi' ? reason.titleHi : reason.title],
-              ['Amount', rupees(amountNum)],
-              ['Paid into', bank.value],
-              ['Form used', reason.formNumber],
-              ['Documents needed', 'None'],
-            ].map(([k, v]) => (
-              <div key={k} className="flex flex-wrap items-baseline justify-between gap-2 px-5 py-3.5">
-                <dt className="text-sm text-muted-foreground">{k}</dt>
-                <dd className={cn('text-right font-medium', k === 'Amount' && 'num text-lg')}>{v}</dd>
+              { k: 'Reason', v: lang === 'hi' ? reason.titleHi : reason.title, editStep: 1 },
+              { k: 'Amount', v: rupees(amountNum), editStep: 2, big: true },
+              { k: 'Paid into', v: bank.value, editStep: 2 },
+              { k: 'Form used', v: reason.formNumber },
+              { k: 'Documents needed', v: 'None' },
+            ].map((row) => (
+              <div
+                key={row.k}
+                className="flex flex-wrap items-baseline justify-between gap-2 px-5 py-3.5"
+              >
+                <dt className="text-sm text-muted-foreground">{row.k}</dt>
+                <dd className="flex items-baseline gap-3 text-right">
+                  <span className={cn('font-medium', row.big && 'num text-lg')}>{row.v}</span>
+                  {row.editStep ? (
+                    <button
+                      type="button"
+                      onClick={() => setStep(row.editStep!)}
+                      className="!min-h-0 text-sm font-medium text-info underline underline-offset-4"
+                    >
+                      {t('withdraw.edit')}
+                    </button>
+                  ) : null}
+                </dd>
               </div>
             ))}
           </dl>

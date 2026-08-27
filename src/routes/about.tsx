@@ -3,10 +3,10 @@ import { AlertTriangle, CheckCircle2, FlaskConical, Server } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 const works = [
-  'Signing in as any of the three personas, from one account with one code',
+  'Signing in as an employee, an employer or a pensioner — one sign-in each, no second portal',
   'The full withdrawal journey: reason, computed cap, pre-submit check, fix, confirm, reference number',
   'The employer monthly return: carried-over wages, detected changes, computed totals, payment, TRRN',
-  'Approving a claim as the employer and watching the member’s tracker advance',
+  'Approving a claim as the employer, then signing in as the employee to see the tracker advanced',
   'The contribution gap: who is holding it, how long, and asking EPFO to chase the employer',
   'The life certificate, with three routes and a new validity date',
   'Passbook with real arithmetic — 91 ledger rows, interest computed on the monthly running balance',

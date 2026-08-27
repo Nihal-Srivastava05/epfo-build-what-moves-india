@@ -25,7 +25,8 @@ every persona reads and writes. The clearest demonstration:
 
 ## Try it
 
-Sign in as any persona — one account covers all three. The OTP is printed on screen: **`284116`**.
+Sign in as any of the three. Each is a different person with their own identifier, so seeing both
+sides of the same object means signing out and back in. The OTP is printed on screen: **`284116`**.
 
 | View | Sign in with | What to look at |
 |---|---|---|
@@ -39,10 +40,10 @@ Sign in as any persona — one account covers all three. The OTP is printed on s
    and the computed cap on each card; one is correctly locked with the reason why. The pre-submit
    check names the exact stale IFSC and fixes it inline — the rejection that takes 45 days to arrive
    takes 45 seconds to prevent.
-2. Switch to **Employer**. The claim you just filed is already in the approval queue. File the June
-   return, then approve the claim.
-3. Switch back to **Employee**. The gap is gone, the balance rose by exactly ₹11,230, and the tracker
-   has moved on.
+2. Sign out and sign in as the **Employer**. The claim you just filed is already in the approval
+   queue, top of the list. File the June return, then approve the claim.
+3. Sign out and sign back in as the **Employee**. The gap is gone, the balance rose by exactly
+   ₹11,230, and the tracker has moved on.
 
 Also worth a look: `Settings → Lite mode` (drops every webfont request, not just the font stack),
 the Hindi toggle, the on-device assistant, and `/about` for what is real and what is mocked.

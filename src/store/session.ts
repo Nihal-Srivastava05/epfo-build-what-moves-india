@@ -7,8 +7,9 @@ export type ThemePref = 'system' | 'light' | 'dark'
 
 interface SessionState {
   /**
-   * One account, not one account per portal. Signing in gives you every role
-   * you actually hold; the persona switcher changes the view, not the identity.
+   * One account per person, not one account per portal. An employee, an
+   * employer's HR and a pensioner are different people, so signing in as one
+   * never gives you another's screens — see RequireSignIn.
    */
   signedIn: boolean
   persona: Persona

@@ -8,19 +8,6 @@ import { useSession } from '@/store/session'
 import type { Persona } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
-/** The nine front doors this one page replaces. */
-const REPLACED = [
-  'Member e-Sewa',
-  'Member Passbook',
-  'Unified Member Portal',
-  'Pensioners’ Portal',
-  'Employer e-Sewa',
-  'EPFiGMS grievances',
-  'Jeevan Pramaan',
-  'Claim status enquiry',
-  'Know your UAN',
-]
-
 const personas: {
   key: Persona
   icon: typeof CircleUser
@@ -47,24 +34,6 @@ export default function Landing() {
           {t('landing.headline')}
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{t('landing.sub')}</p>
-      </section>
-
-      {/* The pitch, made visible: nine doors collapsing into three. */}
-      <section className="mt-10 rounded-xl border bg-card p-5 sm:p-6" aria-label="What this replaces">
-        <p className="eyebrow mb-3">Replaces</p>
-        <ul className="flex flex-wrap gap-x-2 gap-y-2">
-          {REPLACED.map((name, i) => (
-            <motion.li
-              key={name}
-              initial={motionOk ? { opacity: 0, y: 4 } : false}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: motionOk ? 0.25 : 0, delay: motionOk ? i * 0.03 : 0 }}
-              className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground line-through decoration-stop/60"
-            >
-              {name}
-            </motion.li>
-          ))}
-        </ul>
       </section>
 
       <section className="mt-12" aria-labelledby="choose">

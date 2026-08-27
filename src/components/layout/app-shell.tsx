@@ -1,10 +1,10 @@
-import { Suspense, useEffect } from 'react'
+import { Suspense } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { Bell, Languages, Settings2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { PersonaSwitcher } from '@/components/layout/persona-switcher'
+import { AccountMenu } from '@/components/layout/account-menu'
 import { SiteFooter } from '@/components/layout/site-footer'
 import { Emblem } from '@/components/layout/emblem'
 import { useSession } from '@/store/session'
@@ -84,25 +84,7 @@ function BottomNav() {
   )
 }
 
-/**
- * The URL is the source of truth for which persona is on screen. Landing on
- * /employer by a deep link switches the whole shell, rather than leaving the
- * navigation showing whoever was last active.
- */
-function usePersonaFromRoute() {
-  const { pathname } = useLocation()
-  const persona = useSession((s) => s.persona)
-  const setPersona = useSession((s) => s.setPersona)
-  const segment = pathname.split('/')[1]
-  useEffect(() => {
-    if ((segment === 'member' || segment === 'employer' || segment === 'pensioner') && segment !== persona) {
-      setPersona(segment)
-    }
-  }, [segment, persona, setPersona])
-}
-
 export function AppShell() {
-  usePersonaFromRoute()
   const location = useLocation()
   const motionOk = useMotionOk()
   const { t, lang } = useT()
@@ -148,7 +130,7 @@ export function AppShell() {
                 <Settings2 className="size-[1.125rem]" aria-hidden />
               </Link>
             </Button>
-            <PersonaSwitcher />
+            <AccountMenu />
           </div>
         </div>
       </header>
