@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MockBadge } from '@/components/patterns/mock-badge'
 import {
@@ -26,6 +27,12 @@ const RETIREMENT_AGE = 58
 export default function MemberCalculators() {
   const contributions = useData((s) => s.contributions)
   const { t } = useT()
+  const [params, setParams] = useSearchParams()
+
+  /* A ?tab= in the URL lets other pages point straight at one tool — the
+     balance card sends people to the EPF growth tab, for instance. */
+  const requested = params.get('tab')
+  const tab = calculatorTabs.some((c) => c.value === requested) ? requested! : 'contribution'
 
   const { wage, balance, yearsToRetirement, yearsAtRetirement } = useMemo(() => {
     const me = personById('p-priya')
@@ -50,7 +57,7 @@ export default function MemberCalculators() {
         <MockBadge what="Your wage, balance and service years here come from this prototype's demo record, not a real EPFO account." />
       </div>
 
-      <Tabs defaultValue="contribution">
+      <Tabs value={tab} onValueChange={(v) => setParams({ tab: v }, { replace: true })}>
         <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
           <TabsList className="w-full min-w-max gap-1 sm:w-full">
             {calculatorTabs.map((tab) => (

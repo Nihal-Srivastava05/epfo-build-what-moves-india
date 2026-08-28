@@ -1,6 +1,16 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowRight, Building2, CheckCircle2 } from 'lucide-react'
+import {
+  ArrowRight,
+  Building2,
+  Calculator,
+  CheckCircle2,
+  HandCoins,
+  Home,
+  LifeBuoy,
+  ScrollText,
+  ShieldCheck,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Money } from '@/components/patterns/money'
 import { ActionCard } from '@/components/patterns/action-card'
@@ -16,12 +26,23 @@ import { employments, establishmentByCode, TODAY } from '@/lib/mock/db'
 import { fmtDate, fmtMonth, fmtMonthLong } from '@/lib/format'
 import type { StringKey } from '@/i18n/strings'
 
-const quickActions: { to: string; titleKey: StringKey; subKey: StringKey }[] = [
-  { to: '/member/claims', titleKey: 'member.withdraw', subKey: 'member.withdrawSub' },
-  { to: '/member/passbook', titleKey: 'member.viewPassbook', subKey: 'member.passbookSub' },
-  { to: '/member/kyc', titleKey: 'nav.kyc', subKey: 'member.kycSub' },
-  { to: '/member/calculators', titleKey: 'nav.calculators', subKey: 'member.calculatorsSub' },
-  { to: '/member/help', titleKey: 'nav.help', subKey: 'member.helpSub' },
+/**
+ * Each link wears the icon its destination already wears in the nav rail, so
+ * the same screen is recognisable by the same mark wherever it is reached from.
+ * A quick link with a new icon for an existing screen would teach two marks for
+ * one place.
+ */
+const quickActions: {
+  to: string
+  titleKey: StringKey
+  subKey: StringKey
+  icon: typeof Home
+}[] = [
+  { to: '/member/claims', titleKey: 'member.withdraw', subKey: 'member.withdrawSub', icon: HandCoins },
+  { to: '/member/passbook', titleKey: 'member.viewPassbook', subKey: 'member.passbookSub', icon: ScrollText },
+  { to: '/member/kyc', titleKey: 'nav.kyc', subKey: 'member.kycSub', icon: ShieldCheck },
+  { to: '/member/calculators', titleKey: 'nav.calculators', subKey: 'member.calculatorsSub', icon: Calculator },
+  { to: '/member/help', titleKey: 'nav.help', subKey: 'member.helpSub', icon: LifeBuoy },
 ]
 
 export default function MemberHome() {
@@ -50,11 +71,17 @@ export default function MemberHome() {
               <Link
                 key={a.to}
                 to={a.to}
-                className="flex flex-col justify-center gap-1 rounded-md border p-3.5 transition-colors duration-[var(--dur-fast)] hover:border-brand hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                className="group flex items-center gap-2.5 rounded-md border p-3.5 transition-colors duration-[var(--dur-fast)] hover:border-brand hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
-                <span className="text-[0.8125rem] font-semibold">{t(a.titleKey)}</span>
-                <span className="text-[0.6875rem] leading-snug text-muted-foreground">
-                  {t(a.subKey)}
+                <a.icon
+                  className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary"
+                  aria-hidden
+                />
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className="text-[0.8125rem] font-semibold">{t(a.titleKey)}</span>
+                  <span className="text-[0.6875rem] leading-snug text-muted-foreground">
+                    {t(a.subKey)}
+                  </span>
                 </span>
               </Link>
             ))}

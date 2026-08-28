@@ -154,7 +154,7 @@ export function TotalBalanceCard({
       </p>
 
       <Link
-        to="/member/calculators"
+        to="/member/calculators?tab=growth"
         className="group inline-flex items-center gap-1 self-start text-[0.8125rem] font-semibold text-hero-foreground underline decoration-hero-foreground/40 underline-offset-4 hover:decoration-hero-foreground"
       >
         {t('member.seeCalculators')}
