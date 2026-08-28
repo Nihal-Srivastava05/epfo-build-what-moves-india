@@ -1,6 +1,14 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Building2, ChartColumn, Download, Info, Table2 } from 'lucide-react'
+import {
+  ArrowRight,
+  Building2,
+  ChartColumn,
+  ChevronDown,
+  Download,
+  Info,
+  Table2,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -20,10 +28,12 @@ import { ContributionBars } from '@/components/charts/contribution-bars'
 import { EmployerSplit } from '@/components/charts/employer-split'
 import { Term } from '@/components/patterns/term'
 import { TotalBalanceCard } from '@/components/patterns/total-balance-card'
+import { InterestWorking } from '@/components/patterns/interest-working'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
-import { buildLedger } from '@/lib/derive'
-import { financialYear, fmtDate, fmtMonth } from '@/lib/format'
+import { buildLedger, interestBreakdown } from '@/lib/derive'
+import { financialYear, fmtDate, fmtMonth, inr } from '@/lib/format'
+import { cn } from '@/lib/utils'
 import {
   EPF_RATE,
   INTEREST_RATE,
@@ -41,6 +51,9 @@ export default function Passbook() {
   const contributions = useData((s) => s.contributions)
   const { lang } = useT()
   const ledger = useMemo(() => buildLedger(contributions), [contributions])
+  /** The working behind each interest row, from the same pass that built it. */
+  const interestWorking = useMemo(() => interestBreakdown(contributions), [contributions])
+  const [openInterest, setOpenInterest] = useState<string | null>(null)
 
   const years = useMemo(() => {
     const set = new Set(ledger.map((r) => financialYear(r.month ?? r.date.slice(0, 7))))
@@ -221,7 +234,9 @@ export default function Passbook() {
       <p className="mb-4 max-w-prose text-[0.8125rem] leading-relaxed text-muted-foreground">
         Every rupee, per employer, per year — searchable here rather than locked in a PDF. Interest
         is credited once a year at {(INTEREST_RATE * 100).toFixed(2)}%, calculated on your monthly
-        running balance.
+        running balance — open any interest row to see the months it was built from. The year now in
+        progress carries no interest yet: EPFO declares the rate after the year closes, which is why
+        the last credit is dated 31 March.
       </p>
 
       {/* One control row above everything it scopes: the view switch, then the
@@ -305,34 +320,95 @@ export default function Passbook() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {rows.map((r) => (
-                  <tr
-                    key={r.id}
-                    className={r.kind === 'interest' ? 'bg-brand-tint' : 'transition-colors hover:bg-muted'}
-                  >
-                    <td className="num px-4 py-3 whitespace-nowrap text-muted-foreground">{fmtDate(r.date, lang)}</td>
-                    <td className="px-4 py-3 font-medium">
-                      {r.particulars}
-                      {r.kind === 'interest' ? (
-                        <StatusPill tone="neutral" className="ml-2">
-                          Interest
-                        </StatusPill>
+                {rows.map((r) => {
+                  const working = r.kind === 'interest' ? interestWorking.get(r.id) : undefined
+                  const open = openInterest === r.id
+                  return (
+                    <Fragment key={r.id}>
+                      <tr
+                        className={
+                          r.kind === 'interest' ? 'bg-brand-tint' : 'transition-colors hover:bg-muted'
+                        }
+                      >
+                        <td className="num px-4 py-3 whitespace-nowrap text-muted-foreground align-top">
+                          {fmtDate(r.date, lang)}
+                        </td>
+                        <td className="px-4 py-3 font-medium">
+                          {working ? (
+                            /* One lump figure with no working is the second-biggest
+                               source of grievance on a passbook. The rate and the
+                               balance it was charged to are stated on the row; the
+                               month-by-month arithmetic is one click under it. */
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => setOpenInterest(open ? null : r.id)}
+                                aria-expanded={open}
+                                aria-controls={`working-${r.id}`}
+                                className="flex items-start gap-2 text-left font-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                              >
+                                <ChevronDown
+                                  className={cn(
+                                    'mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform duration-[var(--dur-fast)]',
+                                    open && 'rotate-180',
+                                  )}
+                                  aria-hidden
+                                />
+                                <span>
+                                  {r.particulars}
+                                  <StatusPill tone="neutral" className="ml-2 align-middle">
+                                    Interest
+                                  </StatusPill>
+                                  <span className="mt-1 block text-xs font-normal text-muted-foreground">
+                                    <span className="num">
+                                      {(working.rate * 100).toFixed(2)}%
+                                    </span>{' '}
+                                    a year, charged to each month’s closing balance — average{' '}
+                                    <span className="num">₹{inr(working.averageBalance)}</span> over{' '}
+                                    <span className="num">{working.months.length}</span> months.{' '}
+                                    <span className="font-medium text-primary">
+                                      {open ? 'Hide the months' : 'See the months'}
+                                    </span>
+                                  </span>
+                                </span>
+                              </button>
+                            </>
+                          ) : (
+                            r.particulars
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right align-top">
+                          <Money value={r.employee} size="sm" />
+                        </td>
+                        <td className="px-4 py-3 text-right align-top">
+                          {r.employer ? (
+                            <Money value={r.employer} size="sm" />
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right align-top">
+                          {r.eps ? (
+                            <Money value={r.eps} size="sm" />
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right align-top font-bold">
+                          <Money value={r.balanceAfter} size="sm" />
+                        </td>
+                      </tr>
+
+                      {working && open ? (
+                        <tr id={`working-${r.id}`} className="bg-brand-tint">
+                          <td colSpan={6} className="px-4 pt-0 pb-4">
+                            <InterestWorking year={working} lang={lang} />
+                          </td>
+                        </tr>
                       ) : null}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Money value={r.employee} size="sm" />
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {r.employer ? <Money value={r.employer} size="sm" /> : <span className="text-muted-foreground">—</span>}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {r.eps ? <Money value={r.eps} size="sm" /> : <span className="text-muted-foreground">—</span>}
-                    </td>
-                    <td className="px-4 py-3 text-right font-bold">
-                      <Money value={r.balanceAfter} size="sm" />
-                    </td>
-                  </tr>
-                ))}
+                    </Fragment>
+                  )
+                })}
               </tbody>
               {/* A passbook ends in its own total. It is the balance after the
                   latest row shown, not the account total, so a filtered view never

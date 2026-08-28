@@ -1,7 +1,16 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, BadgeCheck, Download, Pencil, Plus, ShieldCheck } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Download, IdCard, Pencil, Plus, Printer, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { UanCard, printUanCard, type UanCardData } from '@/components/patterns/uan-card'
 import { PageHeader, SectionTitle } from '@/components/patterns/page-header'
 import { StatusPill } from '@/components/patterns/status-pill'
 import { Term } from '@/components/patterns/term'
@@ -344,6 +353,7 @@ function pensionerGroups(me: Person, bank: string, nominee: string): Group[] {
 }
 
 export default function Profile() {
+  const [cardOpen, setCardOpen] = useState(false)
   const persona = useSession((s) => s.persona)
   const kyc = useData((s) => s.kyc)
   const pensioner = useData((s) => s.pensioner)
@@ -370,6 +380,37 @@ export default function Profile() {
   const verified = persona === 'member' ? kyc.filter((k) => k.status === 'verified').length : 0
   const pending = persona === 'member' ? kyc.length - verified : 0
 
+  /**
+   * The card carries only what is already on this page, and it names the one
+   * thing the identifier is anchored to — an employer for a member, the
+   * establishment for an employer, the pension account for a pensioner.
+   */
+  const current = employments.find((e) => e.current && e.personId === me.id)
+  const employer = current ? establishmentByCode(current.estCode).name : undefined
+  const card: UanCardData = {
+    name: me.name,
+    initials: identity.initials,
+    personaLabel: t(`persona.${persona}`),
+    idLabel: persona === 'pensioner' ? 'PPO number' : 'UAN',
+    idValue: persona === 'pensioner' ? pensioner.ppo : fmtUan(me.uan),
+    mobile: me.mobileMasked,
+    dob: fmtDate(me.dob),
+    aadhaar: me.aadhaarMasked,
+    footLabel:
+      persona === 'member' ? 'Current employer' : persona === 'employer' ? 'Establishment' : 'Pension account',
+    footValue:
+      persona === 'member'
+        ? (employer ?? 'Not on record')
+        : persona === 'employer'
+          ? establishments[0].name
+          : `${pensioner.bankName} ending ${pensioner.bankLast4}`,
+  }
+
+  const cardFilename = exportName(
+    [persona === 'pensioner' ? 'epfo-ppo-card' : 'epfo-uan-card', card.idValue],
+    'pdf',
+  ).replace(/\.pdf$/, '')
+
   const exportProfile = () => {
     downloadCsv(exportName(['epfo-profile', me.uan], 'csv'), [
       ['EPFO profile (prototype — every figure below is synthetic)'],
@@ -393,10 +434,16 @@ export default function Profile() {
         title={t('nav.profile')}
         sub="Everything EPFO holds about you, in one place. Nothing here is edited in passing — each value links to the screen that can change it, so a correction is always re-verified."
         action={
-          <Button variant="outline" onClick={exportProfile}>
-            <Download className="size-4" aria-hidden />
-            Download
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setCardOpen(true)}>
+              <IdCard className="size-4" aria-hidden />
+              {persona === 'pensioner' ? 'PPO card' : 'UAN card'}
+            </Button>
+            <Button variant="outline" onClick={exportProfile}>
+              <Download className="size-4" aria-hidden />
+              Download
+            </Button>
+          </div>
         }
       />
 
@@ -462,6 +509,29 @@ export default function Profile() {
           {g.note ? <p className="mt-2.5 text-xs text-muted-foreground">{g.note}</p> : null}
         </section>
       ))}
+
+      {/* Preview first, then print: a card is a thing you look at before you
+          carry it, and the same component is what lands on the page. */}
+      <Dialog open={cardOpen} onOpenChange={setCardOpen}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>{card.idLabel} card</DialogTitle>
+            <DialogDescription>
+              Everything an employer or a bank asks you for, on one page. Downloading opens your
+              browser&rsquo;s print dialog — choose &ldquo;Save as PDF&rdquo; there.
+            </DialogDescription>
+          </DialogHeader>
+
+          <UanCard data={card} />
+
+          <DialogFooter showCloseButton>
+            <Button onClick={() => printUanCard(card, cardFilename)}>
+              <Printer className="size-4" aria-hidden />
+              Download PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <p className="mt-7 text-sm leading-relaxed text-muted-foreground">
         {persona === 'employer'
