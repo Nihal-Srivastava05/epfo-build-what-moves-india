@@ -8,32 +8,110 @@ import {
 import type { Claim, Contribution, KycItem, LedgerRow } from '@/lib/types'
 import { daysBetween, financialYear } from '@/lib/format'
 
+/** One month inside a year's interest working. */
+export interface InterestMonth {
+  month: string
+  /** Contributions credited in the month — already inside `closing`. */
+  added: number
+  /** The balance the month closed on: what this month's interest is charged to. */
+  closing: number
+  /** This month's share of the year's credit. These sum to `InterestYear.interest` exactly. */
+  interest: number
+}
+
+/** The whole working behind one "interest credited" row. */
+export interface InterestYear {
+  fy: string
+  /** The rate declared for the year. One constant today; per-year when EPFO declares them. */
+  rate: number
+  creditedOn: string
+  months: InterestMonth[]
+  /** The twelve closing balances added together — the figure the rate is applied to. */
+  sumOfBalances: number
+  /** A real average over the months that had a balance, for the one-line summary. */
+  averageBalance: number
+  interest: number
+}
+
+/**
+ * Splits a year's credit across its months so the parts add up to the whole.
+ *
+ * Each month's raw share is a fraction of a rupee, and rounding them one by one
+ * leaves a total that disagrees with the credited figure by a rupee or two — on
+ * a screen built to explain that figure, that is the one error worth ruling out.
+ * The largest remainders take the leftover paise instead.
+ */
+function allocateInterest(closings: number[], rate: number, total: number): number[] {
+  const raw = closings.map((b) => (b * rate) / 12)
+  const floors = raw.map(Math.floor)
+  let left = total - floors.reduce((s, n) => s + n, 0)
+  const order = raw
+    .map((v, i) => ({ i, frac: v - Math.floor(v) }))
+    .sort((a, b) => b.frac - a.frac)
+
+  const out = floors.slice()
+  for (const { i } of order) {
+    if (left <= 0) break
+    out[i] += 1
+    left -= 1
+  }
+  return out
+}
+
 /**
  * Builds the passbook the way EPFO actually computes it: interest accrues on the
  * monthly running balance and is credited at the close of each financial year.
  * Doing the arithmetic here means no screen ever asks the user to derive it.
+ *
+ * The ledger rows and the working behind each interest row come out of this one
+ * pass. Computing the explanation separately would let it drift from the figure
+ * it claims to explain, which is the whole complaint about the original row.
  */
-function buildLedgerChronological(contributions: Contribution[]): LedgerRow[] {
+function accumulate(contributions: Contribution[]): {
+  rows: LedgerRow[]
+  years: InterestYear[]
+} {
   const credited = contributions
     .filter((c) => c.status !== 'missing')
     .slice()
     .sort((a, b) => a.month.localeCompare(b.month))
 
   const rows: LedgerRow[] = []
+  const years: InterestYear[] = []
   let balance = 0
-  let fyBalanceMonths = 0
-  let fyMonthCount = 0
+  let fyMonths: { month: string; added: number; closing: number }[] = []
   let currentFy = credited.length ? financialYear(credited[0].month) : ''
 
   const closeFy = (fy: string, lastMonth: string) => {
-    if (!fyMonthCount) return
-    const interest = Math.round((fyBalanceMonths / 12) * INTEREST_RATE)
-    if (interest <= 0) return
+    if (fyMonths.length === 0) return
+    const sumOfBalances = fyMonths.reduce((s, m) => s + m.closing, 0)
+    const interest = Math.round((sumOfBalances / 12) * INTEREST_RATE)
+    if (interest <= 0) {
+      fyMonths = []
+      return
+    }
     balance += interest
     const [y] = lastMonth.split('-').map(Number)
+    const creditedOn = `${y}-03-31`
+
+    const shares = allocateInterest(
+      fyMonths.map((m) => m.closing),
+      INTEREST_RATE,
+      interest,
+    )
+    years.push({
+      fy,
+      rate: INTEREST_RATE,
+      creditedOn,
+      months: fyMonths.map((m, i) => ({ ...m, interest: shares[i] })),
+      sumOfBalances,
+      averageBalance: Math.round(sumOfBalances / fyMonths.length),
+      interest,
+    })
+
     rows.push({
       id: `int-${fy}`,
-      date: `${y}-03-31`,
+      date: creditedOn,
       estCode: '',
       particulars: `Interest credited for ${fy}`,
       employee: interest,
@@ -42,8 +120,7 @@ function buildLedgerChronological(contributions: Contribution[]): LedgerRow[] {
       kind: 'interest',
       balanceAfter: balance,
     })
-    fyBalanceMonths = 0
-    fyMonthCount = 0
+    fyMonths = []
   }
 
   for (const c of credited) {
@@ -52,9 +129,9 @@ function buildLedgerChronological(contributions: Contribution[]): LedgerRow[] {
       closeFy(currentFy, c.month)
       currentFy = fy
     }
-    balance += c.employeeShare + c.employerEpfShare
-    fyBalanceMonths += balance
-    fyMonthCount += 1
+    const added = c.employeeShare + c.employerEpfShare
+    balance += added
+    fyMonths.push({ month: c.month, added, closing: balance })
     const emp = employmentById(c.employmentId)
     rows.push({
       id: c.id,
@@ -70,7 +147,20 @@ function buildLedgerChronological(contributions: Contribution[]): LedgerRow[] {
     })
   }
 
-  return rows
+  return { rows, years }
+}
+
+function buildLedgerChronological(contributions: Contribution[]): LedgerRow[] {
+  return accumulate(contributions).rows
+}
+
+/**
+ * The working behind every credited interest row, keyed by financial year. Only
+ * closed years appear — the year in progress has no declared rate yet, which is
+ * itself the answer to "why does my interest stop last March?".
+ */
+export function interestBreakdown(contributions: Contribution[]): Map<string, InterestYear> {
+  return new Map(accumulate(contributions).years.map((y) => [`int-${y.fy}`, y]))
 }
 
 /**

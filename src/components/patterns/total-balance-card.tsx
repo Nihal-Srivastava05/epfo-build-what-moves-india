@@ -1,7 +1,11 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'motion/react'
 import { ArrowRight } from 'lucide-react'
 import { CountUpMoney } from '@/components/patterns/count-up'
 import { Term } from '@/components/patterns/term'
+import { useMotionOk } from '@/hooks/use-motion-ok'
+import { cn } from '@/lib/utils'
 import { useT } from '@/i18n'
 import {
   employeeShareTotal,
@@ -31,6 +35,13 @@ export function TotalBalanceCard({
 }) {
   const { t, lang } = useT()
   const Heading = headingLevel
+  const motionOk = useMotionOk()
+  /**
+   * Which share the pointer is on. The bar and the figures below it are two
+   * views of one fact, so hovering either end lights up both — the segment
+   * lifts, its siblings recede, and the matching figure is picked out.
+   */
+  const [active, setActive] = useState<number | null>(null)
 
   const balance = totalBalance(contributions)
   const splits = [
@@ -63,33 +74,71 @@ export function TotalBalanceCard({
           parses any digits; the tint on each swatch below repeats on the
           matching segment so the two views read as one fact. */}
       <div
-        className="flex h-2.5 w-full overflow-hidden rounded-full"
-        style={{ gap: 2 }}
+        className="flex w-full items-center"
+        style={{ gap: 2, height: 14 }}
         role="img"
         aria-label={splits.map((s) => `${s.label}: ₹${inr(s.value)}`).join(', ')}
+        onMouseLeave={() => setActive(null)}
       >
-        {splits.map((s) => (
-          <span
+        {splits.map((s, i) => (
+          <div
             key={s.label}
-            className={`${s.tint} first:rounded-l-full last:rounded-r-full`}
+            className="relative h-2.5"
             style={{ width: `${(s.value / splitTotal) * 100}%` }}
-          />
+            onMouseEnter={() => setActive(i)}
+          >
+            {/* A 10px band is too thin to point at, so the target reaches past
+                the mark on both sides without moving anything. */}
+            <span className="absolute inset-x-0 -inset-y-2 z-10" aria-hidden />
+            <motion.span
+              className={cn(
+                'block size-full',
+                s.tint,
+                i === 0 && 'rounded-l-full',
+                i === splits.length - 1 && 'rounded-r-full',
+              )}
+              animate={{
+                scaleY: active === i ? 1.4 : 1,
+                opacity: active === null || active === i ? 1 : 0.4,
+              }}
+              transition={{ duration: motionOk ? 0.18 : 0, ease: 'easeOut' }}
+            />
+          </div>
         ))}
       </div>
 
       {/* Three columns is a desktop luxury: at 360px the figures clip, so on
           a phone the same three facts become three rows. */}
-      <dl className="grid gap-px overflow-hidden rounded-sm bg-hero-foreground/20 sm:grid-cols-3">
-        {splits.map((s) => (
+      <dl
+        className="grid gap-px overflow-hidden rounded-sm bg-hero-foreground/20 sm:grid-cols-3"
+        onMouseLeave={() => setActive(null)}
+      >
+        {splits.map((s, i) => (
           <div
             key={s.label}
             className="flex items-baseline justify-between gap-3 bg-hero px-3.5 py-2.5 sm:block sm:py-3"
+            onMouseEnter={() => setActive(i)}
           >
-            <dt className="flex items-center gap-1.5 text-[0.6875rem] text-hero-foreground/70">
-              <span className={`size-2 shrink-0 rounded-full ${s.tint}`} aria-hidden />
+            {/* Each half grows from the edge it is aligned to, so the text
+                swells in place instead of being pushed out of the cell — the
+                value sits right-aligned on a phone and left-aligned above it. */}
+            <dt
+              className={cn(
+                'flex w-fit origin-left items-center gap-1.5 text-[0.6875rem] text-hero-foreground/70 transition-transform duration-[var(--dur-fast)]',
+                active === i && 'scale-110',
+              )}
+            >
+              <span className={cn('size-2 shrink-0 rounded-full', s.tint)} aria-hidden />
               {s.label}
             </dt>
-            <dd className="num text-[1.0625rem] font-bold sm:mt-0.5">₹{inr(s.value)}</dd>
+            <dd
+              className={cn(
+                'num w-fit origin-right text-[1.0625rem] font-bold transition-transform duration-[var(--dur-fast)] sm:mt-0.5 sm:origin-left',
+                active === i && 'scale-110',
+              )}
+            >
+              ₹{inr(s.value)}
+            </dd>
           </div>
         ))}
       </dl>
