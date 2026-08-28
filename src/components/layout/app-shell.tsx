@@ -5,6 +5,7 @@ import { Bell, Languages, Settings2, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AccountMenu } from '@/components/layout/account-menu'
+import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { BugReport } from '@/components/layout/bug-report'
 import { SiteFooter } from '@/components/layout/site-footer'
 import { Emblem } from '@/components/layout/emblem'
@@ -258,6 +259,9 @@ export function AppShell() {
           className='min-w-0 flex-1 px-4 py-6 pb-28 lg:px-7 lg:pb-10'
         >
           <div className='mx-auto max-w-[68rem]'>
+            {/* Outside Suspense: the trail comes from the path, so it can be
+                drawn while the screen itself is still loading. */}
+            <Breadcrumbs pathname={location.pathname} />
             <Suspense
               fallback={
                 <div className='space-y-4' aria-busy>

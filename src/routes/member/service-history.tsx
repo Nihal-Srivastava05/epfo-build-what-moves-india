@@ -1,7 +1,5 @@
-import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowLeft, ArrowRight, Building2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ArrowRight, Building2 } from 'lucide-react'
 import { PageHeader } from '@/components/patterns/page-header'
 import { Money } from '@/components/patterns/money'
 import { Term } from '@/components/patterns/term'
@@ -34,13 +32,8 @@ export default function ServiceHistory() {
 
   return (
     <div>
-      <Button asChild variant="ghost" size="sm" className="-ml-2 mb-6">
-        <Link to="/member/passbook">
-          <ArrowLeft className="size-4" aria-hidden />
-          {t('nav.passbook')}
-        </Link>
-      </Button>
-
+      {/* No back button: the shell's breadcrumb trail already points at the
+          passbook, in the same spot on every screen. */}
       <PageHeader
         title={t('nav.serviceHistory')}
         sub="Every establishment your UAN has been linked to, newest first. One continuous record, even though each job sat in a different employer’s payroll."

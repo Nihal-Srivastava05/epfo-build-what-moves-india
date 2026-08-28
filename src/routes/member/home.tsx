@@ -19,7 +19,7 @@ import { fmtDate, fmtMonth, fmtMonthLong } from '@/lib/format'
 import type { StringKey } from '@/i18n/strings'
 
 const quickActions: { to: string; titleKey: StringKey; subKey: StringKey }[] = [
-  { to: '/member/claims/new', titleKey: 'member.withdraw', subKey: 'member.withdrawSub' },
+  { to: '/member/claims', titleKey: 'member.withdraw', subKey: 'member.withdrawSub' },
   { to: '/member/passbook', titleKey: 'member.viewPassbook', subKey: 'member.passbookSub' },
   { to: '/member/kyc', titleKey: 'nav.kyc', subKey: 'member.kycSub' },
   { to: '/member/calculators', titleKey: 'nav.calculators', subKey: 'member.calculatorsSub' },

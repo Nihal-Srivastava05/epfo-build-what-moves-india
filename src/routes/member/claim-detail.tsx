@@ -1,5 +1,5 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Download, Landmark, MessageSquareWarning } from 'lucide-react'
+import { Download, Landmark, MessageSquareWarning } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader, SectionTitle } from '@/components/patterns/page-header'
 import { Money } from '@/components/patterns/money'
@@ -58,13 +58,7 @@ export default function ClaimDetail() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Button asChild variant="ghost" size="sm" className="-ml-2 mb-6">
-        <Link to="/member/claims">
-          <ArrowLeft className="size-4" aria-hidden />
-          {t('nav.claims')}
-        </Link>
-      </Button>
-
+      {/* The shell's breadcrumb trail is the way back to Claims. */}
       <PageHeader
         eyebrow={claim.id}
         title={t(reasonLabelKey[claim.reasonKey] ?? 'claim.reason.withdrawal')}

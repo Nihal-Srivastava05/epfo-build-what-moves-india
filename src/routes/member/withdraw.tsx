@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'motion/react'
 import {
   ArrowRight,
   BadgeCheck,
   CheckCircle2,
   Landmark,
-  Lock,
   ShieldAlert,
   Wrench,
 } from 'lucide-react'
@@ -33,6 +32,17 @@ import { toast } from 'sonner'
 
 const DEMO_OTP = '284116'
 
+/**
+ * A share, as text. Never a rounded-down "0%": an amount small enough to round
+ * away is still money leaving the account.
+ */
+function pctText(part: number, whole: number): string {
+  if (whole <= 0) return '—'
+  const pct = (part / whole) * 100
+  if (pct > 0 && pct < 1) return '<1%'
+  return `${Math.round(pct)}%`
+}
+
 export default function Withdraw() {
   const { t, lang } = useT()
   const motionOk = useMotionOk()
@@ -42,17 +52,32 @@ export default function Withdraw() {
   const balance = useMemo(() => totalBalance(contributions), [contributions])
 
   /**
-   * A life-event card on the claims page hands the reason over in the URL, so
-   * arriving from one skips step 1 rather than asking the same question twice.
-   * An unknown or ineligible key is ignored — the flow then opens where it
-   * always did, at the list.
+   * The reason arrives in the URL from a life-event card on the claims page —
+   * this flow no longer asks for one. An unknown or ineligible key leaves the
+   * flow without a reason, which sends it back to those cards.
    */
   const [params] = useSearchParams()
   const handed = reasons.find((r) => r.key === params.get('reason') && r.eligible)
 
-  const [step, setStep] = useState(claimDraft?.step ?? (handed ? 2 : 1))
-  const [reasonKey, setReasonKey] = useState(claimDraft?.reasonKey ?? handed?.key ?? '')
-  const [amount, setAmount] = useState<string>(claimDraft?.amount ? String(claimDraft.amount) : '')
+  /**
+   * A reason handed over in the URL outranks a parked draft, because clicking a
+   * life event is a choice made just now and the draft is whatever was left
+   * behind last time. Without this, picking "medical" on the claims page landed
+   * on the amount step still showing the old reason and its cap.
+   *
+   * A draft for the *same* reason is still resumed in full, amount and all. A
+   * draft for some other reason is set aside: its amount was cleared against a
+   * different cap and would be over the limit here.
+   */
+  const resuming = handed ? claimDraft?.reasonKey === handed.key : Boolean(claimDraft)
+  /** Clamped, because a draft saved before the reason step was removed can
+   *  carry a step number this flow no longer has. */
+  const clampStep = (n: number) => Math.min(Math.max(1, n), WITHDRAW_STEPS.length)
+  const [step, setStep] = useState(resuming ? clampStep(claimDraft?.step ?? 1) : 1)
+  const [reasonKey] = useState(handed?.key ?? claimDraft?.reasonKey ?? '')
+  const [amount, setAmount] = useState<string>(
+    resuming && claimDraft?.amount ? String(claimDraft.amount) : '',
+  )
   const [agreed, setAgreed] = useState(false)
   const [otp, setOtp] = useState('')
   const [otpError, setOtpError] = useState('')
@@ -68,7 +93,7 @@ export default function Withdraw() {
   /** Every field autosaves. A dropped session resumes instead of starting over. */
   useEffect(() => {
     if (filedId) return
-    if (!reasonKey && step === 1) return
+    if (!reasonKey) return
     saveDraft({ reasonKey, amount: amountNum, step, startedAt: claimDraft?.startedAt ?? TODAY })
   }, [reasonKey, amountNum, step, filedId, saveDraft, claimDraft?.startedAt])
 
@@ -120,6 +145,14 @@ export default function Withdraw() {
     )
   }
 
+  /**
+   * There is nothing to ask for without a reason, and no step left that asks
+   * for one. An arrival with no reason and no draft — the "Withdraw money"
+   * shortcut, or a pasted URL — belongs on the life events instead of on a form
+   * it cannot fill in.
+   */
+  if (!reason) return <Navigate to="/member/claims" replace />
+
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader title={t('withdraw.title')} />
@@ -132,79 +165,8 @@ export default function Withdraw() {
         {t(WITHDRAW_STEPS[step - 1].blurbKey)}
       </p>
 
-      {/* Step 1 — name the task, not the form. Choosing a reason picks the form silently. */}
-      {step === 1 ? (
-        <div className="space-y-3">
-          {reasons.map((r, i) => (
-            <motion.button
-              key={r.key}
-              type="button"
-              disabled={!r.eligible}
-              onClick={() => {
-                setReasonKey(r.key)
-                setStep(2)
-              }}
-              initial={motionOk ? { opacity: 0, y: 6 } : false}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: motionOk ? 0.25 : 0, delay: motionOk ? i * 0.04 : 0 }}
-              className={cn(
-                'flex w-full flex-col rounded-lg border-[1.35px] border-border bg-card p-4 text-left transition-colors duration-[var(--dur-fast)] sm:p-[1.125rem]',
-                r.eligible ? 'hover:border-brand' : 'cursor-not-allowed bg-muted',
-              )}
-            >
-              <div className="flex items-start gap-3.5">
-                <span
-                  className={cn(
-                    'mt-0.5 grid size-[1.125rem] shrink-0 place-items-center rounded-full border-2',
-                    r.eligible ? 'border-input' : 'border-transparent text-faint',
-                  )}
-                  aria-hidden
-                >
-                  {r.eligible ? null : <Lock className="size-3.5" />}
-                </span>
-
-                <div className="min-w-0 flex-1">
-                  <p className="text-[0.9375rem] font-semibold tracking-[-0.01em]">
-                    {lang === 'hi' ? r.titleHi : r.title}
-                  </p>
-                  <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-muted-foreground">
-                    {lang === 'hi' ? r.blurbHi : r.blurb}
-                  </p>
-                </div>
-
-                {r.eligible ? (
-                  <span className="shrink-0 text-right">
-                    <span className="block text-[0.6875rem] text-muted-foreground">
-                      {t('withdraw.youCanTake')}
-                    </span>
-                    <Money value={r.cap} size="lg" mark className="block" />
-                  </span>
-                ) : (
-                  <StatusPill tone="neutral" className="shrink-0">
-                    {t('withdraw.notEligible')}
-                  </StatusPill>
-                )}
-              </div>
-
-              {r.eligible ? null : (
-                <p className="mt-2.5 pl-8 text-[0.8125rem] leading-relaxed text-muted-foreground">
-                  {r.blockedBecause}
-                </p>
-              )}
-
-              <p className="mt-2.5 pl-8 text-xs leading-relaxed text-faint">
-                <span className="font-semibold">{t('withdraw.rule')}:</span>{' '}
-                {lang === 'hi' ? r.ruleHi : r.rule}
-                <span className="mx-1.5" aria-hidden>·</span>
-                {t('common.was')} {r.formNumber}
-              </p>
-            </motion.button>
-          ))}
-        </div>
-      ) : null}
-
-      {/* Step 2 — the computed cap above the field, the verified bank shown not re-entered. */}
-      {step === 2 && reason ? (
+      {/* Step 1 — the computed cap above the field, the verified bank shown not re-entered. */}
+      {step === 1 && reason ? (
         <div className="space-y-6">
           <div className="rounded-lg border bg-card p-5">
             <p className="text-sm text-muted-foreground">{lang === 'hi' ? reason.titleHi : reason.title}</p>
@@ -251,11 +213,38 @@ export default function Withdraw() {
                 ))}
               </div>
 
-              {/* The consequence of the number, shown as it is typed. */}
+              {/* The consequence of the number, shown as it is typed. A figure
+                  typed into a box is not felt as a proportion, and the two
+                  proportions that matter are different questions: how much of
+                  this allowance is being spent, and how much of everything. */}
               {amountNum > 0 && !overCap ? (
-                <div className="mt-4 flex flex-wrap items-baseline justify-between gap-2 border-t pt-4">
-                  <span className="text-sm text-muted-foreground">{t('withdraw.leftAfter')}</span>
-                  <Money value={Math.max(0, balance - amountNum)} className="font-medium" />
+                <div className="mt-4 space-y-2 border-t pt-4">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      {t('withdraw.shareOfCap')}
+                    </span>
+                    <span className="num text-sm font-semibold">
+                      {t('withdraw.pctOf', {
+                        pct: pctText(amountNum, reason.cap),
+                        amount: rupees(reason.cap),
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      {t('withdraw.shareOfBalance')}
+                    </span>
+                    <span className="num text-sm font-semibold">
+                      {t('withdraw.pctOf', {
+                        pct: pctText(amountNum, balance),
+                        amount: rupees(balance),
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <span className="text-sm text-muted-foreground">{t('withdraw.leftAfter')}</span>
+                    <Money value={Math.max(0, balance - amountNum)} className="font-medium" />
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -347,13 +336,15 @@ export default function Withdraw() {
           </div>
 
           <StepActions>
-            <Button variant="ghost" size="lg" onClick={() => setStep(1)}>
-              {t('withdraw.back')}
+            {/* First step of the flow now, so back means out of it — to the
+                life events, which is where the reason was chosen. */}
+            <Button asChild variant="ghost" size="lg">
+              <Link to="/member/claims">{t('withdraw.back')}</Link>
             </Button>
             <Button
               size="lg"
               disabled={!amountNum || overCap || blockers.length > 0}
-              onClick={() => setStep(3)}
+              onClick={() => setStep(2)}
             >
               {t('withdraw.continue')}
               <ArrowRight className="size-4" aria-hidden />
@@ -367,14 +358,14 @@ export default function Withdraw() {
         </div>
       ) : null}
 
-      {/* Step 3 — read back, one checkbox, one code. */}
-      {step === 3 && reason ? (
+      {/* Step 2 — read back, one checkbox, one code. */}
+      {step === 2 && reason ? (
         <div className="space-y-6">
           <dl className="divide-y rounded-lg border bg-card">
             {[
-              { k: 'Reason', v: lang === 'hi' ? reason.titleHi : reason.title, editStep: 1 },
-              { k: 'Amount', v: rupees(amountNum), editStep: 2, big: true },
-              { k: 'Paid into', v: bank.value, editStep: 2 },
+              { k: 'Reason', v: lang === 'hi' ? reason.titleHi : reason.title, editTo: '/member/claims' },
+              { k: 'Amount', v: rupees(amountNum), editStep: 1, big: true },
+              { k: 'Paid into', v: bank.value, editStep: 1 },
               { k: 'Form used', v: reason.formNumber },
               { k: 'Documents needed', v: 'None' },
             ].map((row) => (
@@ -393,6 +384,15 @@ export default function Withdraw() {
                     >
                       {t('withdraw.edit')}
                     </button>
+                  ) : row.editTo ? (
+                    /* The reason is not a step any more, so changing it means
+                       going back to the life events to pick another. */
+                    <Link
+                      to={row.editTo}
+                      className="!min-h-0 text-sm font-medium text-info underline underline-offset-4"
+                    >
+                      {t('withdraw.edit')}
+                    </Link>
                   ) : null}
                 </dd>
               </div>
@@ -441,7 +441,7 @@ export default function Withdraw() {
           </div>
 
           <StepActions>
-            <Button variant="ghost" size="lg" onClick={() => setStep(2)}>
+            <Button variant="ghost" size="lg" onClick={() => setStep(1)}>
               {t('withdraw.back')}
             </Button>
             <Button
@@ -466,12 +466,6 @@ export default function Withdraw() {
         </div>
       ) : null}
 
-      {step === 1 ? (
-        <p className="mt-6 text-sm text-muted-foreground">
-          Not sure which applies? Ask the assistant at the bottom of the screen — it reads your own
-          record and will not guess.
-        </p>
-      ) : null}
       <div className="mt-8">
         <Button asChild variant="ghost" size="sm" className="-ml-2">
           <Link to="/member">{t('common.cancel')}</Link>
