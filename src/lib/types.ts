@@ -219,4 +219,11 @@ export interface LedgerRow {
   eps: number
   kind: 'contribution' | 'interest' | 'transfer-in' | 'withdrawal'
   balanceAfter: number
+  /**
+   * Position in the accumulation, which is not the display order: a month is
+   * credited the following month, so March's row carries an April date and
+   * sorts above the interest that was added after it. Anything asking "what did
+   * this period close on" has to follow this, not the dates on screen.
+   */
+  seq: number
 }

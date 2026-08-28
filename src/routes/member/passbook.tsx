@@ -31,7 +31,7 @@ import { TotalBalanceCard } from '@/components/patterns/total-balance-card'
 import { InterestWorking } from '@/components/patterns/interest-working'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
-import { buildLedger, interestBreakdown } from '@/lib/derive'
+import { buildLedger, groupLedgerByFy, interestBreakdown } from '@/lib/derive'
 import { financialYear, fmtDate, fmtMonth, inr } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import {
@@ -54,6 +54,12 @@ export default function Passbook() {
   /** The working behind each interest row, from the same pass that built it. */
   const interestWorking = useMemo(() => interestBreakdown(contributions), [contributions])
   const [openInterest, setOpenInterest] = useState<string | null>(null)
+  /**
+   * Years the reader has opened. Only the newest opens by itself: a career is a
+   * list of years first, and the year you are asked about is almost always the
+   * one that just closed.
+   */
+  const [openYears, setOpenYears] = useState<Set<string> | null>(null)
 
   const years = useMemo(() => {
     const set = new Set(ledger.map((r) => financialYear(r.month ?? r.date.slice(0, 7))))
@@ -74,6 +80,38 @@ export default function Passbook() {
       ),
     [ledger, fy, ests, allEsts],
   )
+
+  const fyGroups = useMemo(() => groupLedgerByFy(rows), [rows])
+  /** Untouched, the newest year stands open; every other year is one click. */
+  const effectiveOpenYears = openYears ?? new Set(fyGroups.length ? [fyGroups[0].fy] : [])
+
+  /**
+   * Seeded from what is actually open rather than from state, because until the
+   * first click the open year is implicit — starting from the raw state would
+   * silently shut the newest year the moment another one was opened.
+   */
+  const toggleYear = (year: string) => {
+    const next = new Set(effectiveOpenYears)
+    if (next.has(year)) next.delete(year)
+    else next.add(year)
+    setOpenYears(next)
+  }
+
+  /**
+   * Narrowing the ledger resets which years are open, so a filter down to one
+   * year always lands on that year's rows rather than on a collapsed heading
+   * left over from the previous slice.
+   */
+  const changeFy = (next: string) => {
+    setFy(next)
+    setOpenYears(null)
+    setOpenInterest(null)
+  }
+  const changeEsts = (next: string[]) => {
+    setEsts(next)
+    setOpenYears(null)
+    setOpenInterest(null)
+  }
 
   /**
    * The table is the record; the charts are the shape of it. Both read the same
@@ -259,7 +297,7 @@ export default function Passbook() {
             </TabsTrigger>
           </TabsList>
 
-          <Select value={fy} onValueChange={setFy}>
+          <Select value={fy} onValueChange={changeFy}>
             <SelectTrigger className="w-44">
               <SelectValue />
             </SelectTrigger>
@@ -276,7 +314,7 @@ export default function Passbook() {
             label="Employers"
             options={estOptions}
             value={ests}
-            onValueChange={setEsts}
+            onValueChange={changeEsts}
             allLabel="All employers"
             summary={(n) => `${n} employers`}
           />
@@ -319,12 +357,68 @@ export default function Passbook() {
                   <th className="px-4 py-3 text-right">Balance</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
-                {rows.map((r) => {
-                  const working = r.kind === 'interest' ? interestWorking.get(r.id) : undefined
-                  const open = openInterest === r.id
-                  return (
-                    <Fragment key={r.id}>
+              {fyGroups.map((g) => {
+                const yearOpen = effectiveOpenYears.has(g.fy)
+                return (
+                  <Fragment key={g.fy}>
+                  <tbody className="border-t">
+                    {/* The year, and what it came to. Closed, this is all a
+                        fifteen-year career shows — fifteen rows instead of
+                        one hundred and eighty. */}
+                    <tr className="bg-muted/60 transition-colors hover:bg-muted">
+                      <td className="px-4 py-2.5 align-middle">
+                        <button
+                          type="button"
+                          onClick={() => toggleYear(g.fy)}
+                          aria-expanded={yearOpen}
+                          aria-controls={`fy-${g.fy}`}
+                          className="flex items-center gap-2 font-bold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                        >
+                          <ChevronDown
+                            className={cn(
+                              'size-4 shrink-0 text-muted-foreground transition-transform duration-[var(--dur-fast)]',
+                              yearOpen && 'rotate-180',
+                            )}
+                            aria-hidden
+                          />
+                          <span className="num">FY {g.fy}</span>
+                        </button>
+                      </td>
+                      <td className="px-4 py-2.5 text-[0.8125rem] text-muted-foreground">
+                        <span className="num">{g.credits}</span>{' '}
+                        {g.credits === 1 ? 'credit' : 'credits'}
+                        {g.interest > 0 ? (
+                          <>
+                            {' · interest '}
+                            <span className="num font-semibold text-foreground">
+                              ₹{inr(g.interest)}
+                            </span>
+                          </>
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <Money value={g.employee} size="sm" className="font-semibold" />
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <Money value={g.employer} size="sm" className="font-semibold" />
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <Money value={g.eps} size="sm" className="font-semibold" />
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <Money value={g.closing} size="sm" className="font-bold" />
+                      </td>
+                    </tr>
+                  </tbody>
+
+                  {yearOpen ? (
+                    <tbody id={`fy-${g.fy}`} className="divide-y">
+                      {g.rows.map((r) => {
+                          const working =
+                            r.kind === 'interest' ? interestWorking.get(r.id) : undefined
+                          const open = openInterest === r.id
+                          return (
+                            <Fragment key={r.id}>
                       <tr
                         className={
                           r.kind === 'interest' ? 'bg-brand-tint' : 'transition-colors hover:bg-muted'
@@ -399,17 +493,21 @@ export default function Passbook() {
                         </td>
                       </tr>
 
-                      {working && open ? (
-                        <tr id={`working-${r.id}`} className="bg-brand-tint">
-                          <td colSpan={6} className="px-4 pt-0 pb-4">
-                            <InterestWorking year={working} lang={lang} />
-                          </td>
-                        </tr>
-                      ) : null}
-                    </Fragment>
-                  )
-                })}
-              </tbody>
+                              {working && open ? (
+                                <tr id={`working-${r.id}`} className="bg-brand-tint">
+                                  <td colSpan={6} className="px-4 pt-0 pb-4">
+                                    <InterestWorking year={working} lang={lang} />
+                                  </td>
+                                </tr>
+                              ) : null}
+                            </Fragment>
+                          )
+                        })}
+                    </tbody>
+                  ) : null}
+                  </Fragment>
+                )
+              })}
               {/* A passbook ends in its own total. It is the balance after the
                   latest row shown, not the account total, so a filtered view never
                   claims more than it displays. */}
@@ -456,7 +554,9 @@ export default function Passbook() {
 
         <p className="mt-3 text-sm text-muted-foreground">
           Showing <span className="num">{rows.length}</span> of{' '}
-          <span className="num">{ledger.length}</span> entries.
+          <span className="num">{ledger.length}</span> entries across{' '}
+          <span className="num">{fyGroups.length}</span>{' '}
+          {fyGroups.length === 1 ? 'financial year' : 'financial years'}.
         </p>
       </Tabs>
     </div>
