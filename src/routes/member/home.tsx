@@ -2,32 +2,25 @@ import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { ArrowRight, Building2, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { CountUpMoney } from '@/components/patterns/count-up'
 import { Money } from '@/components/patterns/money'
 import { ActionCard } from '@/components/patterns/action-card'
 import { ClaimTracker } from '@/components/patterns/claim-tracker'
 import { PanelTitle, SectionTitle } from '@/components/patterns/page-header'
 import { StatusPill } from '@/components/patterns/status-pill'
-import { Term } from '@/components/patterns/term'
+import { TotalBalanceCard } from '@/components/patterns/total-balance-card'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
-import {
-  activeClaim,
-  employeeShareTotal,
-  employerShareTotal,
-  interestTotal,
-  pensionShareTotal,
-  totalBalance,
-} from '@/lib/derive'
+import { activeClaim } from '@/lib/derive'
 import { employments, establishmentByCode, TODAY } from '@/lib/mock/db'
-import { fmtDate, fmtMonth, fmtMonthLong, inr } from '@/lib/format'
+import { fmtDate, fmtMonth, fmtMonthLong } from '@/lib/format'
 import type { StringKey } from '@/i18n/strings'
 
 const quickActions: { to: string; titleKey: StringKey; subKey: StringKey }[] = [
   { to: '/member/claims/new', titleKey: 'member.withdraw', subKey: 'member.withdrawSub' },
   { to: '/member/passbook', titleKey: 'member.viewPassbook', subKey: 'member.passbookSub' },
   { to: '/member/kyc', titleKey: 'nav.kyc', subKey: 'member.kycSub' },
+  { to: '/member/calculators', titleKey: 'nav.calculators', subKey: 'member.calculatorsSub' },
   { to: '/member/help', titleKey: 'nav.help', subKey: 'member.helpSub' },
 ]
 
@@ -36,68 +29,23 @@ export default function MemberHome() {
   const { t, lang } = useT()
   const motionOk = useMotionOk()
 
-  const balance = totalBalance(contributions)
   const claim = activeClaim(claims)
   const missing = contributions.filter((c) => c.status === 'missing')
   const kycIssues = kyc.filter((k) => k.status !== 'verified')
   const nothingPending = missing.length === 0 && kycIssues.length === 0
-
-  const splits = [
-    { label: t('member.yourShare'), value: employeeShareTotal(contributions) },
-    { label: t('member.employerShare'), value: employerShareTotal(contributions) },
-    { label: t('member.interest'), value: interestTotal(contributions) },
-  ]
 
   return (
     <div className="space-y-4">
       {/* Status first, menu second. The balance is the heading of this page,
           so it is marked as one. */}
       <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-        <section
-          aria-labelledby="balance"
-          className="flex flex-col gap-5 rounded-lg bg-hero p-6 text-hero-foreground"
-        >
-          <h1 id="balance" className="text-[0.6875rem] font-semibold uppercase tracking-[0.055em] text-hero-foreground/70">
-            {t('member.balanceLabel')}
-          </h1>
-
-          <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
-            <CountUpMoney value={balance} />
-            <p className="pb-1.5 text-[0.8125rem] text-hero-foreground/70">
-              {t('member.asOf')} {fmtDate(TODAY, lang)}
-            </p>
-          </div>
-
-          {/* Three columns is a desktop luxury: at 360px the figures clip, so on
-              a phone the same three facts become three rows. */}
-          <dl className="grid gap-px overflow-hidden rounded-sm bg-hero-foreground/20 sm:grid-cols-3">
-            {splits.map((s) => (
-              <div
-                key={s.label}
-                className="flex items-baseline justify-between gap-3 bg-hero px-3.5 py-2.5 sm:block sm:py-3"
-              >
-                <dt className="text-[0.6875rem] text-hero-foreground/70">{s.label}</dt>
-                <dd className="num text-[1.0625rem] font-bold sm:mt-0.5">₹{inr(s.value)}</dd>
-              </div>
-            ))}
-          </dl>
-
-          <p className="mt-auto text-[0.8125rem] text-hero-foreground/80">
-            {/* EPS is a different pot from the PF balance, so it is stated apart
-                from the three parts that add up to the figure above. */}
-            <Term id="eps" className="text-hero-foreground decoration-hero-foreground/50 hover:decoration-hero-foreground">
-              {lang === 'hi' ? 'पेंशन (ईपीएस)' : 'Pension (EPS)'}
-            </Term>{' '}
-            <span className="num font-semibold">₹{inr(pensionShareTotal(contributions))}</span>{' '}
-            <span className="text-hero-foreground/60">— {t('member.pensionAside')}</span>
-          </p>
-        </section>
+        <TotalBalanceCard contributions={contributions} headingLevel="h1" />
 
         <section aria-labelledby="doitnow" className="flex flex-col rounded-lg border bg-card p-5">
           <h2 id="doitnow" className="eyebrow mb-3.5">
             {t('member.doItNow')}
           </h2>
-          <div className="grid flex-1 gap-2.5 sm:grid-cols-2 sm:grid-rows-2">
+          <div className="grid flex-1 gap-2.5 sm:grid-cols-2 sm:grid-rows-3">
             {quickActions.map((a) => (
               <Link
                 key={a.to}

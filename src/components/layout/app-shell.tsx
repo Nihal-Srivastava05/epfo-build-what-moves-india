@@ -135,9 +135,11 @@ export function AppShell() {
         ? t('nav.notifications')
         : location.pathname === '/profile'
           ? t('nav.profile')
-          : titleKey
-            ? t(titleKey)
-            : t('app.name')
+          : location.pathname === '/member/calculators'
+            ? t('nav.calculators')
+            : titleKey
+              ? t(titleKey)
+              : t('app.name')
 
   return (
     <div className="flex min-h-dvh">

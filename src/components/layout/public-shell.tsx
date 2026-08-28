@@ -33,6 +33,9 @@ export function PublicShell() {
               <span className="text-sm font-semibold">{lang === 'en' ? 'हिन्दी' : 'EN'}</span>
             </Button>
             <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+              <Link to="/calculators">{t('nav.calculators')}</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
               <Link to="/glossary">{t('nav.glossary')}</Link>
             </Button>
             {onSignIn ? null : (

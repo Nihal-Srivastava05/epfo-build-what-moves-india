@@ -20,6 +20,9 @@ export function SiteFooter() {
           <Link to="/status" className="text-muted-foreground hover:text-foreground">
             {t('landing.lookup')}
           </Link>
+          <Link to="/calculators" className="text-muted-foreground hover:text-foreground">
+            {t('nav.calculators')}
+          </Link>
           <Link to="/about" className="text-muted-foreground hover:text-foreground">
             About this prototype
           </Link>

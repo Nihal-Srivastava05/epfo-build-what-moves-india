@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { CountUpMoney } from '@/components/patterns/count-up'
 import { Money } from '@/components/patterns/money'
 import { StatusPill } from '@/components/patterns/status-pill'
 import { MockBadge } from '@/components/patterns/mock-badge'
@@ -19,21 +18,14 @@ import { BalanceTrend } from '@/components/charts/balance-trend'
 import { ContributionBars } from '@/components/charts/contribution-bars'
 import { EmployerSplit } from '@/components/charts/employer-split'
 import { Term } from '@/components/patterns/term'
+import { TotalBalanceCard } from '@/components/patterns/total-balance-card'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
-import {
-  buildLedger,
-  employeeShareTotal,
-  employerShareTotal,
-  interestTotal,
-  pensionShareTotal,
-  totalBalance,
-} from '@/lib/derive'
-import { financialYear, fmtDate, fmtMonth, inr } from '@/lib/format'
+import { buildLedger } from '@/lib/derive'
+import { financialYear, fmtDate, fmtMonth } from '@/lib/format'
 import {
   EPF_RATE,
   INTEREST_RATE,
-  TODAY,
   employmentById,
   employments,
   establishmentByCode,
@@ -46,9 +38,8 @@ import { downloadCsv, exportName } from '@/lib/export'
 
 export default function Passbook() {
   const contributions = useData((s) => s.contributions)
-  const { t, lang } = useT()
+  const { lang } = useT()
   const ledger = useMemo(() => buildLedger(contributions), [contributions])
-  const balance = totalBalance(contributions)
 
   const years = useMemo(() => {
     const set = new Set(ledger.map((r) => financialYear(r.month ?? r.date.slice(0, 7))))
@@ -99,12 +90,6 @@ export default function Passbook() {
   )
 
   const me = personById('p-priya')
-
-  const splits = [
-    { label: t('member.yourShare'), value: employeeShareTotal(contributions) },
-    { label: t('member.employerShare'), value: employerShareTotal(contributions) },
-    { label: t('member.interest'), value: interestTotal(contributions) },
-  ]
 
   const current = employments.find((e) => e.current && e.personId === me.id)
   const currentEst = current ? establishmentByCode(current.estCode) : undefined
@@ -160,47 +145,7 @@ export default function Passbook() {
           Beside it: who is paying into the account right now, because the first
           question a ledger raises is "whose money is this row?". */}
       <div className="mb-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-        <section
-          aria-labelledby="balance"
-          className="flex flex-col gap-5 rounded-lg bg-hero p-6 text-hero-foreground"
-        >
-          <h2
-            id="balance"
-            className="text-[0.6875rem] font-semibold uppercase tracking-[0.055em] text-hero-foreground/70"
-          >
-            {t('member.balanceLabel')}
-          </h2>
-
-          <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
-            <CountUpMoney value={balance} />
-            <p className="pb-1.5 text-[0.8125rem] text-hero-foreground/70">
-              {t('member.asOf')} {fmtDate(TODAY, lang)}
-            </p>
-          </div>
-
-          <dl className="grid gap-px overflow-hidden rounded-sm bg-hero-foreground/20 sm:grid-cols-3">
-            {splits.map((s) => (
-              <div
-                key={s.label}
-                className="flex items-baseline justify-between gap-3 bg-hero px-3.5 py-2.5 sm:block sm:py-3"
-              >
-                <dt className="text-[0.6875rem] text-hero-foreground/70">{s.label}</dt>
-                <dd className="num text-[1.0625rem] font-bold sm:mt-0.5">₹{inr(s.value)}</dd>
-              </div>
-            ))}
-          </dl>
-
-          <p className="mt-auto text-[0.8125rem] text-hero-foreground/80">
-            <Term
-              id="eps"
-              className="text-hero-foreground decoration-hero-foreground/50 hover:decoration-hero-foreground"
-            >
-              {lang === 'hi' ? 'पेंशन (ईपीएस)' : 'Pension (EPS)'}
-            </Term>{' '}
-            <span className="num font-semibold">₹{inr(pensionShareTotal(contributions))}</span>{' '}
-            <span className="text-hero-foreground/60">— {t('member.pensionAside')}</span>
-          </p>
-        </section>
+        <TotalBalanceCard contributions={contributions} />
 
         {/* Current employment. Every figure is derived from the same record the
             ledger below is built from — nothing here is typed by hand. */}
