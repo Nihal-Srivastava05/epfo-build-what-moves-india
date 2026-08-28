@@ -9,6 +9,12 @@ import {
 import { Button } from '@/components/ui/button'
 import { PageHeader, SectionTitle } from '@/components/patterns/page-header'
 import { MockBadge } from '@/components/patterns/mock-badge'
+import { StatusPill } from '@/components/patterns/status-pill'
+import { GrievanceTracker } from '@/components/patterns/grievance-tracker'
+import { useData } from '@/store/data'
+import { useT } from '@/i18n'
+import { openGrievances, grievanceTone } from '@/lib/grievances'
+import { fmtDate } from '@/lib/format'
 import type { Persona } from '@/lib/types'
 
 const faqs: Record<Persona, { q: string; a: string }[]> = {
@@ -61,19 +67,71 @@ const faqs: Record<Persona, { q: string; a: string }[]> = {
 }
 
 export function HelpPage({ persona }: { persona: Persona }) {
-  return (
-    <div className="space-y-4">
-      <PageHeader title="Help" sub="The short answers first. A person if you need one." />
+  const { grievances } = useData()
+  const { lang } = useT()
+  const personId = persona === 'pensioner' ? 'p-ram' : 'p-priya'
+  const myGrievances = openGrievances(grievances, personId)
 
-      <section aria-labelledby="faq">
+  return (
+    <div className='space-y-4'>
+      <PageHeader
+        title='Help'
+        sub='The short answers first. A person if you need one.'
+      />
+
+      <section aria-labelledby='raise-grievance'>
+        <div className='rounded-lg border bg-card p-5'>
+          <MessageSquareWarning
+            className='mb-3 size-5 text-primary'
+            aria-hidden
+          />
+          <p className='font-medium'>Raise a grievance</p>
+          <p className='mt-1 text-sm text-muted-foreground'>
+            Attached to the claim or month it is about, so nothing is retyped.
+          </p>
+          <Button asChild variant='outline' size='sm' className='mt-3'>
+            <Link to='/grievance/new'>Open a grievance</Link>
+          </Button>
+        </div>
+      </section>
+
+      {myGrievances.length > 0 ? (
+        <section aria-labelledby='grievance-status'>
+          <SectionTitle>
+            <span id='grievance-status'>Track your grievance</span>
+          </SectionTitle>
+          <div className='space-y-3'>
+            {myGrievances.map((g) => (
+              <div key={g.id} className='rounded-lg border bg-card p-5'>
+                <div className='mb-4 flex flex-wrap items-center gap-2.5'>
+                  <p className='font-medium'>{g.subject}</p>
+                  <StatusPill tone={grievanceTone(g)}>{g.id}</StatusPill>
+                  <span className='num text-xs font-normal text-muted-foreground'>
+                    Escalates {fmtDate(g.escalatesOn, lang)}
+                  </span>
+                </div>
+                <GrievanceTracker grievance={g} />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section aria-labelledby='faq'>
         <SectionTitle>
-          <span id="faq">Common questions</span>
+          <span id='faq'>Common questions</span>
         </SectionTitle>
-        <Accordion type="single" collapsible className="rounded-lg border bg-card px-5">
+        <Accordion
+          type='single'
+          collapsible
+          className='rounded-lg border bg-card px-5'
+        >
           {faqs[persona].map((f) => (
             <AccordionItem key={f.q} value={f.q}>
-              <AccordionTrigger className="text-left text-base">{f.q}</AccordionTrigger>
-              <AccordionContent className="text-[0.95rem] leading-relaxed text-muted-foreground">
+              <AccordionTrigger className='text-left text-base'>
+                {f.q}
+              </AccordionTrigger>
+              <AccordionContent className='text-[0.95rem] leading-relaxed text-muted-foreground'>
                 {f.a}
               </AccordionContent>
             </AccordionItem>
@@ -81,38 +139,45 @@ export function HelpPage({ persona }: { persona: Persona }) {
         </Accordion>
       </section>
 
-      <section aria-labelledby="reach">
+      <section aria-labelledby='reach'>
         <SectionTitle>
-          <span id="reach">Reach a person</span>
+          <span id='reach'>Reach a person</span>
         </SectionTitle>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-lg border bg-card p-5">
-            <Phone className="mb-3 size-5 text-primary" aria-hidden />
-            <p className="font-medium">Helpline</p>
-            <p className="ident mt-1 text-sm">1800 118 005</p>
-            <p className="mt-2 text-xs text-muted-foreground">
+        <div className='grid gap-3 sm:grid-cols-3'>
+          <div className='rounded-lg border bg-card p-5'>
+            <Phone className='mb-3 size-5 text-primary' aria-hidden />
+            <p className='font-medium'>Helpline</p>
+            <p className='ident mt-1 text-sm'>1800 118 005</p>
+            <p className='mt-2 text-xs text-muted-foreground'>
               Free, 9am–5:30pm, Monday to Friday
             </p>
-            <MockBadge what="Illustrative. Not a live line in this prototype." className="mt-3" />
+            <MockBadge
+              what='Illustrative. Not a live line in this prototype.'
+              className='mt-3'
+            />
           </div>
-          <div className="rounded-lg border bg-card p-5">
-            <MessageSquareWarning className="mb-3 size-5 text-primary" aria-hidden />
-            <p className="font-medium">Raise a grievance</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Attached to the claim or month it is about, so nothing is retyped.
+          <div className='rounded-lg border bg-card p-5'>
+            <MessageSquareWarning
+              className='mb-3 size-5 text-primary'
+              aria-hidden
+            />
+            <p className='font-medium'>Email</p>
+            <p className='mt-1 text-sm text-muted-foreground'>
+              epfo.grievance@gov.in
             </p>
-            <Button asChild variant="outline" size="sm" className="mt-3">
-              <Link to="/grievance/new">Open a grievance</Link>
-            </Button>
+            <MockBadge
+              what='Illustrative. Not a live line in this prototype.'
+              className='mt-3'
+            />
           </div>
-          <div className="rounded-lg border bg-card p-5">
-            <BookOpen className="mb-3 size-5 text-primary" aria-hidden />
-            <p className="font-medium">What the words mean</p>
-            <p className="mt-1 text-sm text-muted-foreground">
+          <div className='rounded-lg border bg-card p-5'>
+            <BookOpen className='mb-3 size-5 text-primary' aria-hidden />
+            <p className='font-medium'>What the words mean</p>
+            <p className='mt-1 text-sm text-muted-foreground'>
               Every term on this site, in one line each.
             </p>
-            <Button asChild variant="outline" size="sm" className="mt-3">
-              <Link to="/glossary">Open the glossary</Link>
+            <Button asChild variant='outline' size='sm' className='mt-3'>
+              <Link to='/glossary'>Open the glossary</Link>
             </Button>
           </div>
         </div>

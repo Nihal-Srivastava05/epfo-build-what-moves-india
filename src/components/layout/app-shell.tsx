@@ -172,6 +172,7 @@ const STANDALONE_TITLE_KEYS: Record<string, StringKey> = {
   '/profile': 'nav.profile',
   '/member/service-history': 'nav.serviceHistory',
   '/member/calculators': 'nav.calculators',
+  '/member/future-me': 'member.futureMe',
   '/glossary': 'nav.glossary',
   '/calculators': 'nav.calculators',
   '/': 'app.name',

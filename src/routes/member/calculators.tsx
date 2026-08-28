@@ -12,10 +12,8 @@ import {
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { serviceYears, totalBalance } from '@/lib/derive'
-import { employments, personById, TODAY } from '@/lib/mock/db'
+import { employments, personById, RETIREMENT_AGE, TODAY } from '@/lib/mock/db'
 import { daysBetween } from '@/lib/format'
-
-const RETIREMENT_AGE = 58
 
 /**
  * The same four tools as the public page, but every field opens already set

@@ -1,14 +1,15 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
-type Tone = 'ok' | 'wait' | 'stop' | 'info' | 'brand' | 'neutral'
+export type Tone = 'ok' | 'wait' | 'stop' | 'info' | 'brand' | 'neutral'
 
 /**
  * Flat tint, no outline. Status colour lives outside the brand ramp so
  * "pending" never reads as decoration, and the pill never competes with the
- * one filled button on the screen.
+ * one filled button on the screen. Exported so other tinted elements (an
+ * icon badge, say) can share exactly these colours instead of redeclaring them.
  */
-const tones: Record<Tone, string> = {
+export const tones: Record<Tone, string> = {
   ok: 'bg-ok-soft text-ok',
   wait: 'bg-wait-soft text-wait',
   stop: 'bg-stop-soft text-stop',

@@ -55,9 +55,18 @@ interface DataState {
 
   fileReturn: (month: string) => string
   approveClaim: (claimId: string) => void
+  /** Clears a batch of approvals at once — the point of grouping them by kind. */
+  resolveApprovals: (ids: string[]) => void
   settleClaim: (claimId: string) => void
   fixKyc: (key: KycItem['key']) => void
   fileClaim: (input: { reasonKey: string; formNumber: string; amount: number }) => Claim
+  fileDeathClaim: (input: {
+    type: 'pf' | 'pension'
+    deceasedName: string
+    deceasedUan: string
+    relation: string
+    amount: number
+  }) => Claim
   notifyEmployer: (month: string) => void
   submitLifeCertificate: (routeLabel: string) => void
   raiseGrievance: (input: Omit<Grievance, 'id' | 'raisedOn' | 'rung' | 'escalatesOn' | 'status'>) => Grievance
@@ -182,6 +191,28 @@ export const useData = create<DataState>()(
         })
       },
 
+      /** One click for a whole group: a claim in the batch still walks its own
+       * tracker forward, while exit and KYC approvals write straight to the
+       * roster record they were ever going to update one at a time. */
+      resolveApprovals: (ids) => {
+        const targets = get().approvals.filter((a) => ids.includes(a.id))
+        targets.filter((a) => a.claimId).forEach((a) => get().approveClaim(a.claimId!))
+
+        const exitUans = new Set(targets.filter((a) => a.kind === 'exit').map((a) => a.uan))
+        const kycUans = new Set(targets.filter((a) => a.kind === 'kyc').map((a) => a.uan))
+
+        set((s) => ({
+          approvals: s.approvals.filter((a) => !ids.includes(a.id)),
+          roster: s.roster.map((r) =>
+            exitUans.has(r.uan)
+              ? { ...r, exited: TODAY }
+              : kycUans.has(r.uan)
+                ? { ...r, kyc: 'verified' as const }
+                : r,
+          ),
+        }))
+      },
+
       settleClaim: (claimId) => {
         const state = get()
         set({
@@ -275,6 +306,69 @@ export const useData = create<DataState>()(
         return claim
       },
 
+      /**
+       * A death claim has no employer step — EPFO verifies the nominee and
+       * documents directly, rather than an employer attesting a living member.
+       */
+      fileDeathClaim: ({ type, deceasedName, deceasedUan, relation, amount }) => {
+        const state = get()
+        const id = `CLM-2026-${Math.floor(1000 + Math.random() * 8999)}`
+        const bank = state.kyc.find((k) => k.key === 'bank')
+        const isPension = type === 'pension'
+        const claim: Claim = {
+          id,
+          personId: 'p-priya',
+          kind: isPension ? 'pension' : 'withdraw-final',
+          reasonKey: isPension ? 'nominee-pension' : 'death',
+          formNumber: isPension ? '10D' : '20',
+          amount,
+          filedOn: TODAY,
+          expectedBy: addDays(TODAY, isPension ? 20 : 10),
+          bankLast4: bank?.value.match(/\*{4}(\d{4})/)?.[1] ?? '4471',
+          estCode: 'MHBAN0045123000',
+          stages: [
+            { key: 'filed', label: 'Filed', labelHi: 'दायर किया गया', state: 'done', on: TODAY },
+            {
+              key: 'verify',
+              label: 'Nominee & document verification',
+              labelHi: 'नॉमिनी और दस्तावेज़ जाँच',
+              state: 'current',
+              holder: 'epfo',
+              on: TODAY,
+            },
+            {
+              key: 'epfo',
+              label: isPension ? 'Pension sanction' : 'EPFO approval',
+              labelHi: isPension ? 'पेंशन स्वीकृति' : 'ईपीएफ़ओ अनुमोदन',
+              state: 'todo',
+              holder: 'epfo',
+            },
+            {
+              key: 'credited',
+              label: isPension ? 'First pension credited' : 'Credited to your bank',
+              labelHi: isPension ? 'पहली पेंशन जमा' : 'आपके बैंक में जमा',
+              state: 'todo',
+              holder: 'bank',
+            },
+          ],
+        }
+        set({
+          claims: [claim, ...state.claims],
+          claimDraft: null,
+          notifications: notify(state, {
+            personId: 'p-priya',
+            channel: 'sms',
+            title: `Claim ${id} received`,
+            body: isPension
+              ? `Your family pension claim for ${deceasedName} (UAN ${deceasedUan}, ${relation}) was received today. EPFO is verifying the nominee details.`
+              : `Your death claim for ${deceasedName}'s (UAN ${deceasedUan}) PF balance (${rupees(amount)}) was received today. EPFO is verifying the documents.`,
+            aboutType: 'claim',
+            aboutId: id,
+          }),
+        })
+        return claim
+      },
+
       /** The nudge travels along the relation. The member is never the messenger. */
       notifyEmployer: (month) => {
         const state = get()
@@ -328,7 +422,7 @@ export const useData = create<DataState>()(
 
       resetDemo: () => set({ ...seed() }),
     }),
-    { name: 'epfo-data', version: 3 },
+    { name: 'epfo-data', version: 4 },
   ),
 )
 
