@@ -11,9 +11,21 @@ import {
   epfGrowthProjection,
   epsPensionEstimate,
 } from '@/lib/calculators'
-import { EPS_WAGE_CEILING } from '@/lib/mock/db'
-import { compactInr } from '@/lib/format'
+import { EPS_WAGE_CEILING, TODAY } from '@/lib/mock/db'
+import { compactInr, fmtMonth } from '@/lib/format'
+import { useT } from '@/i18n'
 import type { StringKey } from '@/i18n/strings'
+
+/**
+ * When the Nth projected year finishes.
+ *
+ * The projection is a rolling twelve months from today, not a financial year,
+ * so year N lands on the same month N years out rather than on a 31 March. A
+ * date that implied an FY close would misdate every row by up to a year.
+ */
+function yearEndMonth(n: number): string {
+  return `${Number(TODAY.slice(0, 4)) + n}-${TODAY.slice(5, 7)}`
+}
 
 /** The four tabs both the public and the signed-in calculator pages share. */
 export const calculatorTabs: { value: string; labelKey: StringKey; icon: typeof Calculator }[] = [
@@ -155,6 +167,7 @@ export function GrowthCalculator({
   defaultIncrement?: number
   defaultYears?: number
 } = {}) {
+  const { lang } = useT()
   const [balance, setBalance] = useState(defaultBalance)
   const [wage, setWage] = useState(defaultWage)
   const [increment, setIncrement] = useState(defaultIncrement)
@@ -224,8 +237,13 @@ export function GrowthCalculator({
                 {milestones.map((y) => {
                   const row = projection.years[y - 1]
                   return (
-                    <li key={y} className="flex items-baseline justify-between">
-                      <span className="text-muted-foreground">Year {y}</span>
+                    <li key={y} className="flex items-baseline justify-between gap-3">
+                      <span className="text-muted-foreground">
+                        Year {y}{' '}
+                        <span className="num text-faint">
+                          · by {fmtMonth(yearEndMonth(y), lang)}
+                        </span>
+                      </span>
                       <span className="num font-medium">{compactInr(row.balance)}</span>
                     </li>
                   )

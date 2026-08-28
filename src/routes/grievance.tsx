@@ -6,11 +6,19 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PageHeader } from '@/components/patterns/page-header'
 import { StatusPill } from '@/components/patterns/status-pill'
+import { GrievanceTracker } from '@/components/patterns/grievance-tracker'
 import { useData } from '@/store/data'
 import { useSession } from '@/store/session'
 import { useT } from '@/i18n'
 import { fmtDate } from '@/lib/format'
 import type { Grievance as GrievanceType } from '@/lib/types'
+
+/**
+ * Chosen when the complaint is about none of the objects we could find. It is
+ * not an id, so nothing matches it when the attachment is looked up — which is
+ * exactly the intent: raise it with no object attached.
+ */
+const OTHER = 'other'
 
 /**
  * A grievance is a state on an existing object, not a separate website.
@@ -32,7 +40,7 @@ export default function Grievance() {
     missing ? { type: 'contribution' as const, id: missing.id, label: `Missing month ${missing.month}` } : null,
   ].filter(Boolean) as { type: 'claim' | 'contribution'; id: string; label: string }[]
 
-  const [about, setAbout] = useState(attachments[0]?.id ?? '')
+  const [about, setAbout] = useState(attachments[0]?.id ?? OTHER)
 
   if (raised) {
     return (
@@ -42,23 +50,27 @@ export default function Grievance() {
           <h1 className="text-[1.5rem] font-extrabold tracking-[-0.03em]">Grievance raised</h1>
           <p className="ident mt-2 text-lg">{raised.id}</p>
         </div>
-        {/* The ladder, with the date it climbs on its own. */}
+        {/* The ladder as a tracker, not a list: the same three rungs the member
+            home draws, from the same GRIEVANCE_RUNGS, so a grievance looks like
+            one object wherever it is seen. The prose underneath carries what the
+            rungs cannot — the clock, and what CPGRAMS is. */}
         <div className="mt-6 rounded-lg border bg-card p-5">
-          <p className="eyebrow mb-3">What happens next</p>
-          <ol className="space-y-3 text-sm">
-            <li className="flex items-start gap-3">
-              <StatusPill tone="wait">Now</StatusPill>
-              <span>Your regional EPFO office has 15 working days.</span>
+          <p className="eyebrow mb-4">What happens next</p>
+          <GrievanceTracker grievance={raised} />
+          <ul className="mt-5 space-y-2 border-t pt-4 text-sm leading-relaxed text-muted-foreground">
+            <li>
+              Your PF office has <span className="font-medium text-foreground">15 working days</span>{' '}
+              to answer.
             </li>
-            <li className="flex items-start gap-3">
-              <StatusPill tone="neutral">{fmtDate(raised.escalatesOn, lang)}</StatusPill>
-              <span>If unresolved, it moves to the zonal office by itself. You do not have to chase it.</span>
+            <li>
+              If it is still open on{' '}
+              <span className="num font-medium text-foreground">
+                {fmtDate(raised.escalatesOn, lang)}
+              </span>
+              , it climbs to the regional office by itself. You do not have to chase it.
             </li>
-            <li className="flex items-start gap-3">
-              <StatusPill tone="neutral">After that</StatusPill>
-              <span>It escalates to CPGRAMS, the central government grievance system.</span>
-            </li>
-          </ol>
+            <li>After that it reaches CPGRAMS, the central government grievance system.</li>
+          </ul>
         </div>
         <Button asChild size="lg" className="mt-6 w-full">
           <Link to={`/${persona}`}>Back to home</Link>
@@ -111,6 +123,22 @@ export default function Grievance() {
                   <StatusPill tone="info">Attached automatically</StatusPill>
                 </label>
               ))}
+
+              {/* Not everything worth complaining about is one of the objects we
+                  can find. Without this the list quietly forced the grievance
+                  onto whichever record happened to be open. */}
+              <label className="flex cursor-pointer items-center gap-3 rounded-lg border p-3.5 text-sm">
+                <input
+                  type="radio"
+                  name="about"
+                  value={OTHER}
+                  checked={about === OTHER}
+                  onChange={() => setAbout(OTHER)}
+                  className="size-4 accent-[var(--primary)]"
+                />
+                <span className="flex-1">Something else</span>
+                <span className="text-xs text-muted-foreground">Nothing attached</span>
+              </label>
             </div>
           </div>
         ) : null}
@@ -137,9 +165,12 @@ export default function Grievance() {
           />
         </div>
 
+        {/* Nothing is claimed that is not true: with no object selected there is
+            no claim reference to send along. */}
         <p className="rounded-lg border border-dashed p-4 text-sm leading-relaxed text-muted-foreground">
-          Your UAN, employer, claim reference and KYC status are attached for you. You do not need to
-          repeat any of it.
+          {about === OTHER
+            ? 'Your UAN, employer and KYC status are attached for you. You do not need to repeat any of it.'
+            : 'Your UAN, employer, claim reference and KYC status are attached for you. You do not need to repeat any of it.'}
         </p>
 
         <Button type="submit" size="lg" className="w-full sm:w-auto">

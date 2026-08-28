@@ -7,6 +7,7 @@ import {
   HandCoins,
   House,
   Lock,
+  MessageSquareWarning,
   RotateCcw,
   Stethoscope,
   Wallet,
@@ -76,9 +77,12 @@ export default function Claims() {
             const share = shareOfBalance(e.cap)
             const body = (
               <>
-                {/* The tag says what picking this card does. It used to be said
-                    by the "Take money out of your PF" panel above the grid; with
-                    that gone, nothing on the card named the action. */}
+                {/* The tag names what picking this card does — said by the
+                    "Take money out of your PF" panel until that was removed.
+                    It surfaces on hover and on keyboard focus, and it fades
+                    rather than mounting, so it holds its own space and the card
+                    does not reflow under the pointer. Faded is still readable to
+                    a screen reader, so nothing is hidden from one. */}
                 <span className="mb-3 flex items-start justify-between gap-2">
                   <span
                     className={cn(
@@ -89,7 +93,10 @@ export default function Claims() {
                   >
                     {e.eligible ? <Icon className="size-5" /> : <Lock className="size-4" />}
                   </span>
-                  <StatusPill tone={e.eligible ? 'brand' : 'neutral'} className="mt-0.5">
+                  <StatusPill
+                    tone={e.eligible ? 'brand' : 'neutral'}
+                    className="mt-0.5 opacity-0 transition-opacity duration-[var(--dur-fast)] group-hover:opacity-100 group-focus-visible:opacity-100"
+                  >
                     {t('claims.withdrawTag')}
                   </StatusPill>
                 </span>
@@ -157,12 +164,12 @@ export default function Claims() {
                 {e.eligible ? (
                   <Link
                     to={`/member/claims/new?reason=${e.key}`}
-                    className="flex w-full flex-col rounded-lg border bg-card p-4 transition-colors duration-[var(--dur-fast)] hover:border-brand hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                    className="group flex w-full flex-col rounded-lg border bg-card p-4 transition-colors duration-[var(--dur-fast)] hover:border-brand hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   >
                     {body}
                   </Link>
                 ) : (
-                  <div className="flex w-full flex-col rounded-lg border border-dashed bg-muted/40 p-4">
+                  <div className="group flex w-full flex-col rounded-lg border border-dashed bg-muted/40 p-4">
                     {body}
                   </div>
                 )}
@@ -228,13 +235,25 @@ export default function Claims() {
                     </div>
                     <ClaimTracker claim={c} />
                   </div>
-                  <Link
-                    to={`/member/claims/${c.id}`}
-                    className="flex items-center justify-between gap-2 border-t bg-muted px-5 py-3.5 text-sm font-medium transition-colors hover:bg-muted"
-                  >
-                    {t('claims.viewDetail')}
-                    <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
-                  </Link>
+                  {/* Two ways out of an open claim: look at it, or say something
+                      is wrong with it. The grievance link carries the reference
+                      so nobody retypes a claim ID into a complaint form. */}
+                  <div className="flex flex-wrap items-center justify-between gap-x-2 border-t bg-muted text-sm font-medium">
+                    <Link
+                      to={`/member/claims/${c.id}`}
+                      className="flex flex-1 items-center justify-between gap-2 px-5 py-3.5 transition-colors hover:text-primary"
+                    >
+                      {t('claims.viewDetail')}
+                      <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
+                    </Link>
+                    <Link
+                      to={`/grievance/new?subject=${encodeURIComponent(`Query about claim ${c.id}`)}`}
+                      className="flex items-center gap-2 px-5 py-3.5 text-muted-foreground transition-colors hover:text-primary"
+                    >
+                      <MessageSquareWarning className="size-4" aria-hidden />
+                      {t('claims.raiseShort')}
+                    </Link>
+                  </div>
                 </div>
             ))}
           </div>
