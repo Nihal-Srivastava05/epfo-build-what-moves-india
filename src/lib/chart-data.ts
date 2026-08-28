@@ -1,6 +1,6 @@
-import { establishmentByCode } from '@/lib/mock/db'
+import { TODAY, employments, establishmentByCode } from '@/lib/mock/db'
 import type { LedgerRow } from '@/lib/types'
-import { financialYear, fmtMonth } from '@/lib/format'
+import { daysBetween, financialYear, fmtMonth } from '@/lib/format'
 
 /**
  * The passbook's own rows, rearranged for plotting. Nothing here re-derives a
@@ -155,4 +155,66 @@ export function employerTotals(rows: LedgerRow[]): EmployerTotal[] {
     byCode.set(r.estCode, t)
   }
   return Array.from(byCode.values()).sort((a, b) => b.total - a.total)
+}
+
+export interface ServiceSpan {
+  memberId: string
+  estCode: string
+  name: string
+  from: string
+  /** The last day of service, or TODAY while the job is still running. */
+  to: string
+  current: boolean
+  /** Offset and length as fractions of the whole record, for plotting. */
+  offset: number
+  length: number
+}
+
+/**
+ * One span per member ID, laid out on a single time axis that runs from the
+ * first day of service to today. Positions are fractions rather than pixels so
+ * the plot is resolution-independent, and every span is measured against the
+ * same total — which is the only reason the lengths can be compared by eye.
+ */
+export function serviceSpans(personId: string): ServiceSpan[] {
+  const mine = employments
+    .filter((e) => e.personId === personId)
+    .slice()
+    .sort((a, b) => a.joined.localeCompare(b.joined))
+  if (mine.length === 0) return []
+
+  const start = mine[0].joined
+  const total = Math.max(1, daysBetween(start, TODAY))
+
+  return mine.map((e) => {
+    const to = e.exited ?? TODAY
+    return {
+      memberId: e.memberId,
+      estCode: e.estCode,
+      name: establishmentByCode(e.estCode).name,
+      from: e.joined,
+      to,
+      current: e.current,
+      offset: daysBetween(start, e.joined) / total,
+      length: Math.max(0, daysBetween(e.joined, to)) / total,
+    }
+  })
+}
+
+/** The calendar years the axis has to label, first day of service to today. */
+export function serviceYearTicks(spans: ServiceSpan[]): { year: number; offset: number }[] {
+  if (spans.length === 0) return []
+  const start = spans[0].from
+  const total = Math.max(1, daysBetween(start, TODAY))
+  const firstYear = Number(start.slice(0, 4))
+  const lastYear = Number(TODAY.slice(0, 4))
+
+  const ticks: { year: number; offset: number }[] = []
+  for (let y = firstYear; y <= lastYear; y += 1) {
+    const offset = daysBetween(start, `${y}-01-01`) / total
+    // The first year's boundary sits before the record begins; skip it rather
+    // than pin a tick to 0 that means a different date than the axis start.
+    if (offset >= 0 && offset <= 1) ticks.push({ year: y, offset })
+  }
+  return ticks
 }

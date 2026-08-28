@@ -104,6 +104,16 @@ export function fmtUan(uan: string) {
 }
 
 /**
+ * "MH/BAN/0045123/000/0000142" — a PF account number in the five parts it is
+ * actually made of: region, office, establishment, extension, member serial.
+ * Twenty-two unbroken characters is a string nobody can read back over a phone.
+ */
+export function fmtMemberId(memberId: string) {
+  const m = memberId.match(/^([A-Z]{2})([A-Z]{3})(\d{7})(\d{3})(\d{7})$/)
+  return m ? `${m[1]}/${m[2]}/${m[3]}/${m[4]}/${m[5]}` : memberId
+}
+
+/**
  * Every date in this app is a local calendar day, so it has to be read back out
  * in local time. toISOString() would convert to UTC first, which lands on the
  * previous day everywhere east of Greenwich — IST included — and silently

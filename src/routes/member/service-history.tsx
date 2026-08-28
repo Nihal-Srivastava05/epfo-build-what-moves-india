@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowLeft, Building2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/patterns/page-header'
 import { Money } from '@/components/patterns/money'
 import { Term } from '@/components/patterns/term'
+import { ServiceSpans } from '@/components/charts/service-spans'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
-import { fmtDate, fmtMonth, fmtTenure } from '@/lib/format'
+import { fmtDate, fmtMemberId, fmtMonth, fmtTenure } from '@/lib/format'
 import { serviceYears } from '@/lib/derive'
 import { TODAY, employments, establishmentByCode, personById } from '@/lib/mock/db'
 import { cn } from '@/lib/utils'
@@ -51,7 +52,7 @@ export default function ServiceHistory() {
           monthly return against your UAN.
         </p>
       ) : (
-        <>
+        <div className="space-y-4">
           {/* The one number a service record exists to answer, and the threshold
               it is measured against — a total nobody should have to add up from
               the rows below. */}
@@ -60,7 +61,7 @@ export default function ServiceHistory() {
               Total membership
             </h2>
             <p className="mt-1.5 flex flex-wrap items-baseline gap-x-2">
-              <span className="num text-2xl font-bold tracking-[-0.02em]">
+              <span className="figure text-2xl">
                 {years} {years === 1 ? 'year' : 'years'}
               </span>
               {firstJoined ? (
@@ -103,19 +104,37 @@ export default function ServiceHistory() {
             </p>
           </section>
 
-          {/* A rail with the line behind it, not inside the list: an <ol> may
-              only contain <li>, and the line is decoration either way. */}
-          <div className="relative mt-6">
-            <div className="absolute top-1 bottom-1 left-[15px] w-px bg-border" aria-hidden />
+          <ServiceSpans personId={me.id} lang={lang} />
+
+          {/* The record itself. The dates lead — a service history is read for
+              "when, and for how long", so the period is the largest thing on
+              every row and the employer answers the follow-up question. */}
+          <section aria-label="Service record" className="relative pt-1">
+            <div
+              className="absolute top-3 bottom-3 left-[calc(2.75rem+0.75rem+11px)] w-px bg-border sm:left-[calc(3.5rem+1rem+11px)]"
+              aria-hidden
+            />
 
             <ol>
               {history.map((emp, i) => {
                 const est = establishmentByCode(emp.estCode)
+                const endYear = emp.current ? 'now' : emp.exited!.slice(0, 4)
                 return (
-                  <li key={emp.id} className="relative flex gap-4 pb-8 last:pb-0">
+                  <li key={emp.id} className="relative flex gap-3 pb-4 last:pb-0 sm:gap-4">
+                    {/* The scanning anchor: years, right-aligned against the spine. */}
+                    <div className="w-11 shrink-0 pt-2.5 text-right sm:w-14">
+                      <p className="num text-sm leading-tight font-bold sm:text-[0.9375rem]">
+                        {emp.joined.slice(0, 4)}
+                      </p>
+                      <p className="text-xs leading-tight text-faint">–</p>
+                      <p className="num text-sm leading-tight font-bold sm:text-[0.9375rem]">
+                        {endYear}
+                      </p>
+                    </div>
+
                     <motion.span
                       className={cn(
-                        'relative z-10 mt-0.5 grid size-8 shrink-0 place-items-center rounded-full border-2 bg-card',
+                        'relative z-10 mt-2 grid size-[22px] shrink-0 place-items-center rounded-full border-2 bg-card',
                         emp.current ? 'border-ok bg-ok-soft' : 'border-border',
                       )}
                       initial={motionOk ? { scale: 0.6, opacity: 0 } : false}
@@ -123,61 +142,65 @@ export default function ServiceHistory() {
                       transition={{ duration: 0.3, delay: motionOk ? i * 0.06 : 0, ease: 'easeOut' }}
                     >
                       <Building2
-                        className={cn('size-4', emp.current ? 'text-ok' : 'text-muted-foreground')}
+                        className={cn(
+                          'size-3',
+                          emp.current ? 'text-ok' : 'text-muted-foreground',
+                        )}
                         aria-hidden
                       />
                     </motion.span>
 
                     <div className="min-w-0 flex-1 rounded-lg border bg-card p-4">
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="font-semibold tracking-[-0.01em]">{est.name}</p>
-                          <p className="mt-0.5 text-xs text-muted-foreground">{est.city}</p>
-                        </div>
-                        {emp.current ? (
-                          <span className="shrink-0 rounded-full bg-ok-soft px-2.5 py-0.5 text-[0.6875rem] font-semibold text-ok">
-                            Current
-                          </span>
-                        ) : null}
+                      {/* Dates first, and largest. */}
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                        <p className="num flex items-center gap-1.5 text-[0.9375rem] font-bold tracking-[-0.01em] sm:text-base">
+                          <time dateTime={emp.joined}>{fmtDate(emp.joined, lang)}</time>
+                          <ArrowRight className="size-3.5 shrink-0 text-faint" aria-hidden />
+                          {emp.current ? (
+                            <span>Present</span>
+                          ) : (
+                            <time dateTime={emp.exited}>{fmtDate(emp.exited!, lang)}</time>
+                          )}
+                        </p>
+                        <p className="num rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold">
+                          {fmtTenure(emp.joined, emp.exited ?? TODAY, lang)}
+                        </p>
                       </div>
 
-                      <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t pt-3 text-[0.8125rem] sm:grid-cols-4">
-                        <div>
-                          <dt className="text-xs text-muted-foreground">Joined</dt>
-                          <dd className="num font-medium">{fmtDate(emp.joined, lang)}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs text-muted-foreground">
-                            {emp.current ? 'Still there' : 'Left'}
-                          </dt>
-                          <dd className="num font-medium">
-                            {emp.current ? 'Present' : fmtDate(emp.exited!, lang)}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs text-muted-foreground">Tenure</dt>
-                          <dd className="num font-medium">
-                            {fmtTenure(emp.joined, emp.exited ?? TODAY, lang)}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs text-muted-foreground">Monthly EPF wage</dt>
-                          <dd>
-                            <Money value={emp.monthlyWage} size="sm" className="font-semibold" />
-                          </dd>
-                        </div>
-                      </dl>
+                      <div className="mt-3 border-t pt-3">
+                        <p className="font-semibold tracking-[-0.01em]">
+                          {est.name}
+                          {emp.current ? (
+                            <span className="ml-2 rounded-full bg-ok-soft px-2 py-0.5 align-middle text-[0.6875rem] font-semibold text-ok">
+                              Current
+                            </span>
+                          ) : null}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{est.city}</p>
 
-                      <p className="ident mt-2.5 text-xs text-muted-foreground">
-                        Establishment code {est.code}
-                      </p>
+                        {/* Stacked on a phone: "Member ID" plus a 26-character
+                            account number is wider than the card. */}
+                        <dl className="mt-2.5 space-y-2 text-xs sm:flex sm:flex-wrap sm:gap-x-5 sm:gap-y-1 sm:space-y-0">
+                          <div className="min-w-0 sm:flex sm:items-baseline sm:gap-1.5">
+                            <dt className="text-muted-foreground">Member ID</dt>
+                            <dd className="ident break-all">{fmtMemberId(emp.memberId)}</dd>
+                          </div>
+                          <div className="sm:flex sm:items-baseline sm:gap-1.5">
+                            <dt className="text-muted-foreground">EPF wage</dt>
+                            <dd>
+                              <Money value={emp.monthlyWage} size="sm" className="font-semibold" />
+                              <span className="text-muted-foreground"> / month</span>
+                            </dd>
+                          </div>
+                        </dl>
+                      </div>
                     </div>
                   </li>
                 )
               })}
             </ol>
-          </div>
-        </>
+          </section>
+        </div>
       )}
     </div>
   )

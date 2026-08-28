@@ -42,6 +42,12 @@ export interface Employment {
   id: string
   personId: string
   estCode: string
+  /**
+   * The PF account number this employer opened for you: establishment code plus
+   * a member serial. Every employer issues its own, which is exactly what the
+   * UAN exists to tie together — see the `uan` glossary entry.
+   */
+  memberId: string
   joined: string
   exited?: string
   /** Monthly EPF wage. Contributions are computed from this, never stored twice. */
