@@ -19,6 +19,7 @@ import { GrievanceTracker } from '@/components/patterns/grievance-tracker'
 import { PanelTitle, SectionTitle } from '@/components/patterns/page-header'
 import { StatusPill } from '@/components/patterns/status-pill'
 import { TotalBalanceCard } from '@/components/patterns/total-balance-card'
+import { GovNotices } from '@/components/patterns/gov-notices'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
@@ -169,6 +170,11 @@ export default function MemberHome() {
           </div>
         )}
       </section>
+
+      {/* Below the reader's own blockers, never above them: a general circular
+          does not outrank a bank detail that is about to bounce a payment. It
+          is a sibling in the same space-y-4 stack, so nothing else shifts. */}
+      <GovNotices />
 
       {/* Where is it and when does it land — on the first screen. */}
       {claim ? (

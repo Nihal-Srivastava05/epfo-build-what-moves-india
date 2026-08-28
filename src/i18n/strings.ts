@@ -73,6 +73,9 @@ export const en = {
   'landing.task.calc': 'Work out your numbers',
   'landing.task.calcSub': 'EPF, pension and insurance — the same formulas EPFO uses.',
 
+  'notices.title': 'Important notices',
+  'notices.issued': 'Issued',
+  'notices.all': 'These are the notices EPFO has published. Nothing here is about your own account.',
   'landing.uanTitle': 'UAN services',
   'landing.uan.activate': 'Activate UAN',
   'landing.uan.track': 'Track Application Status',
@@ -322,6 +325,9 @@ export const hi: Partial<Record<StringKey, string>> = {
   'landing.task.calc': 'अपने आँकड़े निकालें',
   'landing.task.calcSub': 'ईपीएफ़, पेंशन और बीमा — वही फ़ॉर्मूले जो ईपीएफ़ओ इस्तेमाल करता है।',
 
+  'notices.title': 'ज़रूरी सूचनाएँ',
+  'notices.issued': 'जारी',
+  'notices.all': 'ये ईपीएफ़ओ द्वारा प्रकाशित सूचनाएँ हैं। इनमें से कुछ भी आपके खाते के बारे में नहीं है।',
   'landing.uanTitle': 'यूएएन सेवाएँ',
   'landing.uan.activate': 'यूएएन सक्रिय करें',
   'landing.uan.track': 'आवेदन की स्थिति देखें',

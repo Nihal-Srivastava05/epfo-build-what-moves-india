@@ -192,6 +192,26 @@ export interface AppNotification {
   aboutId?: string
 }
 
+/**
+ * A public EPFO notice. Not a notification: this is the same list for everyone,
+ * signed in or not, so it carries no personId and lives beside the reference
+ * data rather than in a person's record.
+ */
+export interface GovNotice {
+  id: string
+  /** The circular or notice number, as EPFO prints it. */
+  ref: string
+  title: string
+  titleHi: string
+  issuedOn: string
+  /**
+   * Where in this app the notice leads. Must be reachable signed out as well as
+   * signed in, because this list is drawn on the public front page too — a
+   * member-only path would bounce a visitor to the door with nothing to show.
+   */
+  to?: string
+}
+
 export type GrievanceRung = 'office' | 'regional' | 'cpgrams'
 
 export interface Grievance {

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   ContributionCalculator,
@@ -17,13 +17,25 @@ import { useT } from '@/i18n'
  */
 export default function Calculators() {
   const { t } = useT()
+  /**
+   * The tab lives in the URL, the same way the signed-in calculators page does
+   * it, so a link can point at one calculator — a notice about the pension
+   * ceiling should open the pension tab, not the default one.
+   */
+  const [params, setParams] = useSearchParams()
+  const known = calculatorTabs.map((c) => c.value)
+  const tab = known.includes(params.get('tab') ?? '') ? params.get('tab')! : 'contribution'
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
       <h1 className="text-[1.75rem] font-extrabold tracking-[-0.03em]">{t('calc.title')}</h1>
       <p className="mt-3 max-w-prose leading-relaxed text-muted-foreground">{t('calc.sub')}</p>
 
-      <Tabs defaultValue="contribution" className="mt-8">
+      <Tabs
+        value={tab}
+        onValueChange={(v) => setParams({ tab: v }, { replace: true })}
+        className="mt-8"
+      >
         <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
           <TabsList className="w-full min-w-max gap-1 sm:w-full">
             {calculatorTabs.map((tab) => (

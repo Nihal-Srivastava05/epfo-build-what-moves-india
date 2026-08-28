@@ -8,6 +8,7 @@ import {
   Search,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { GovNotices } from '@/components/patterns/gov-notices'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
 import { useSession } from '@/store/session'
@@ -192,6 +193,14 @@ export default function Landing() {
           <p className='mt-4 text-xs leading-relaxed text-muted-foreground'>
             {t('signin.oneAccount')}
           </p>
+        </div>
+      </section>
+
+      {/* Its own band between the hero and the service links, using the same
+          border-t rhythm as every other band, so nothing above or below moves. */}
+      <section className='border-t bg-background'>
+        <div className='mx-auto max-w-[68rem] px-4 py-12 sm:px-6 lg:py-14'>
+          <GovNotices />
         </div>
       </section>
 

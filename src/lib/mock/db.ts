@@ -5,6 +5,7 @@ import type {
   Contribution,
   Employment,
   Establishment,
+  GovNotice,
   KycItem,
   AppNotification,
   PensionPayment,
@@ -300,6 +301,39 @@ export const pensioner: Pensioner = {
   familyPensionNominee: 'Sushila Verma (spouse)',
   scheme: 'Employees’ Pension Scheme 1995',
 }
+
+/**
+ * Public notices, newest first. Every one of these points at something this app
+ * actually models — the rate the passbook credits, the ceiling the pension
+ * calculator caps at — so a notice can never quote a figure the rest of the
+ * site disagrees with. Destinations are all reachable without signing in.
+ */
+export const govNotices: GovNotice[] = [
+  {
+    id: 'gn-rate-2025-26',
+    ref: 'Circular No. INV-11/2/2026-INV',
+    title: `Interest rate for 2025-26 declared at ${(INTEREST_RATE * 100).toFixed(2)}%`,
+    titleHi: `2025-26 के लिए ब्याज दर ${(INTEREST_RATE * 100).toFixed(2)}% घोषित`,
+    issuedOn: '2026-07-15',
+    to: '/calculators?tab=growth',
+  },
+  {
+    id: 'gn-enomination',
+    ref: 'Notice No. WSU/2026/e-Nom/14',
+    title: 'e-Nomination is required before any final settlement is paid',
+    titleHi: 'अंतिम भुगतान से पहले ई-नामांकन ज़रूरी है',
+    issuedOn: '2026-06-02',
+    to: '/glossary/nominee',
+  },
+  {
+    id: 'gn-eps-ceiling',
+    ref: 'Circular No. Pension-I/2026/Ceiling',
+    title: `Pension wage ceiling stays at ₹${EPS_WAGE_CEILING.toLocaleString('en-IN')} for 2026-27`,
+    titleHi: `2026-27 के लिए पेंशन वेतन सीमा ₹${EPS_WAGE_CEILING.toLocaleString('en-IN')} पर अपरिवर्तित`,
+    issuedOn: '2026-04-10',
+    to: '/calculators?tab=pension',
+  },
+]
 
 export const pensionPayments: PensionPayment[] = [
   { id: 'pp-2026-08', month: '2026-08', amount: 8450, creditedOn: '2026-08-01', mode: 'NEFT', reference: 'CPPS8842190' },
