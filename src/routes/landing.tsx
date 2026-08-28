@@ -29,6 +29,7 @@ const tasks: { titleKey: StringKey; subKey: StringKey; was: string; to: string }
   { titleKey: 'landing.task.kyc', subKey: 'landing.task.kycSub', was: 'Manage KYC', to: '/signin/member' },
   { titleKey: 'landing.task.return', subKey: 'landing.task.returnSub', was: 'ECR upload', to: '/signin/employer' },
   { titleKey: 'landing.task.life', subKey: 'landing.task.lifeSub', was: 'Jeevan Pramaan', to: '/signin/pensioner' },
+  { titleKey: 'landing.task.calc', subKey: 'landing.task.calcSub', was: 'EPF calculator sites', to: '/calculators' },
 ]
 
 export default function Landing() {

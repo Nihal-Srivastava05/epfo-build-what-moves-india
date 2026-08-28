@@ -12,6 +12,7 @@ import Landing from '@/routes/landing'
 
 const SignIn = lazy(() => import('@/routes/signin'))
 const StatusLookup = lazy(() => import('@/routes/status-lookup'))
+const Calculators = lazy(() => import('@/routes/calculators'))
 const Glossary = lazy(() => import('@/routes/glossary'))
 const GlossaryTerm = lazy(() => import('@/routes/glossary-term'))
 const About = lazy(() => import('@/routes/about'))
@@ -29,6 +30,7 @@ const MemberClaimDetail = lazy(() => import('@/routes/member/claim-detail'))
 const MemberKyc = lazy(() => import('@/routes/member/kyc'))
 const MemberGap = lazy(() => import('@/routes/member/gap'))
 const MemberHelp = lazy(() => import('@/routes/member/help'))
+const MemberCalculators = lazy(() => import('@/routes/member/calculators'))
 
 const EmployerDashboard = lazy(() => import('@/routes/employer/dashboard'))
 const EmployerReturn = lazy(() => import('@/routes/employer/monthly-return'))
@@ -61,6 +63,7 @@ export default function App() {
             <Route index element={<Landing />} />
             <Route path="signin/:persona" element={<SignIn />} />
             <Route path="status" element={<StatusLookup />} />
+            <Route path="calculators" element={<Calculators />} />
             <Route path="glossary" element={<Glossary />} />
             <Route path="glossary/:termId" element={<GlossaryTerm />} />
             <Route path="about" element={<About />} />
@@ -82,6 +85,7 @@ export default function App() {
             <Route path="member/kyc" element={<MemberKyc />} />
             <Route path="member/gap/:month" element={<MemberGap />} />
             <Route path="member/help" element={<MemberHelp />} />
+            <Route path="member/calculators" element={<MemberCalculators />} />
 
             <Route path="employer" element={<EmployerDashboard />} />
             <Route path="employer/return" element={<EmployerReturn />} />
