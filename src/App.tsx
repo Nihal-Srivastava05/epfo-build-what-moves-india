@@ -8,6 +8,8 @@ import { AppShell } from '@/components/layout/app-shell'
 import { RequireSignIn } from '@/components/layout/require-sign-in'
 import { AssistantDock } from '@/components/assistant/assistant-dock'
 import { ScrollToTop } from '@/components/layout/scroll-to-top'
+import { useSession } from '@/store/session'
+import { personaMeta } from '@/lib/nav'
 import Landing from '@/routes/landing'
 
 const SignIn = lazy(() => import('@/routes/signin'))
@@ -45,6 +47,33 @@ const PensionerLifeCert = lazy(() => import('@/routes/pensioner/life-certificate
 const PensionerDetails = lazy(() => import('@/routes/pensioner/details'))
 const PensionerHelp = lazy(() => import('@/routes/pensioner/help'))
 
+/**
+ * Reference pages (glossary, calculators, status lookup, about) are reachable
+ * whether or not you've signed in. A signed-in visitor still needs their own
+ * nav rail and account menu here — dropping them into the public marketing
+ * shell hides all of that and reads as having been signed out, even though
+ * `signedIn` never changed.
+ */
+function ReferenceShell() {
+  const signedIn = useSession((s) => s.signedIn)
+  return signedIn ? <AppShell /> : <PublicShell />
+}
+
+/**
+ * The logo in the nav rail links here, so a signed-in visitor can land on "/"
+ * without ever signing out. The guest landing page has no way to show that —
+ * it always looks logged out — so anything from here that later checks
+ * `signedIn` (like the reference pages above) would suddenly look like it
+ * "logged them back in". Send signed-in visitors straight to their own home
+ * instead of showing them the guest landing at all.
+ */
+function LandingOrHome() {
+  const signedIn = useSession((s) => s.signedIn)
+  const persona = useSession((s) => s.persona)
+  if (signedIn) return <Navigate to={personaMeta[persona].home} replace />
+  return <Landing />
+}
+
 export default function App() {
   return (
     <HashRouter>
@@ -60,8 +89,11 @@ export default function App() {
 
         <Routes>
           <Route element={<PublicShell />}>
-            <Route index element={<Landing />} />
+            <Route index element={<LandingOrHome />} />
             <Route path="signin/:persona" element={<SignIn />} />
+          </Route>
+
+          <Route element={<ReferenceShell />}>
             <Route path="status" element={<StatusLookup />} />
             <Route path="calculators" element={<Calculators />} />
             <Route path="glossary" element={<Glossary />} />

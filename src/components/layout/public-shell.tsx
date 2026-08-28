@@ -4,6 +4,7 @@ import { Languages } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Emblem } from '@/components/layout/emblem'
 import { SiteFooter } from '@/components/layout/site-footer'
+import { BugReport } from '@/components/layout/bug-report'
 import { useSession } from '@/store/session'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
@@ -28,6 +29,7 @@ export function PublicShell() {
           </span>
 
           <div className="ml-auto flex items-center gap-1">
+            <BugReport />
             <Button variant="ghost" size="sm" onClick={toggleLang} className="gap-1.5 px-2.5">
               <Languages className="size-4" aria-hidden />
               <span className="text-sm font-semibold">{lang === 'en' ? 'हिन्दी' : 'EN'}</span>
