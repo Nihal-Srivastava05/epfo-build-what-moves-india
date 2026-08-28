@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 import { Money } from '@/components/patterns/money'
 import { StatusPill } from '@/components/patterns/status-pill'
@@ -46,6 +47,32 @@ import {
 } from '@/lib/mock/db'
 import type { Grain } from '@/lib/chart-data'
 import { downloadCsv, exportName } from '@/lib/export'
+
+/**
+ * A ledger row names the employer; the establishment code is what EPFO, the
+ * employer and every grievance form actually key on. Hovering the name gives
+ * the code without spending a column on it, since it only matters when you are
+ * about to quote it to somebody.
+ */
+function EmployerName({ name, estCode }: { name: string; estCode: string }) {
+  const est = establishmentByCode(estCode)
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          tabIndex={0}
+          className="cursor-help underline decoration-border decoration-dotted underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        >
+          {name}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-64">
+        <span className="ident block font-semibold">{est.code}</span>
+        <span className="mt-0.5 block text-background/75">{est.city}</span>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
 
 export default function Passbook() {
   const contributions = useData((s) => s.contributions)
@@ -467,6 +494,8 @@ export default function Passbook() {
                                 </span>
                               </button>
                             </>
+                          ) : r.estCode ? (
+                            <EmployerName name={r.particulars} estCode={r.estCode} />
                           ) : (
                             r.particulars
                           )}

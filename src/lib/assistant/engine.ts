@@ -116,7 +116,7 @@ export function answer(question: string, persona: Persona, signedIn: boolean): A
   if (/claim|where is my money|status|दावा|कहाँ/.test(q) && persona === 'member') {
     const claim = activeClaim(store.claims)
     if (!claim) {
-      return { text: 'You have no claim in progress right now.', facts, allowRephrase: false, link: { to: '/member/claims/new', label: 'Start a withdrawal' } }
+      return { text: 'You have no claim in progress right now.', facts, allowRephrase: false, link: { to: '/member/claims', label: 'Start a withdrawal' } }
     }
     const stage = claim.stages.find((s) => s.state === 'current')
     return {
@@ -133,7 +133,7 @@ export function answer(question: string, persona: Persona, signedIn: boolean): A
       text: `You can withdraw for ${reasons.length} reasons today. The largest is ${reasons.sort((a, b) => b.cap - a.cap)[0].title.toLowerCase()}, up to ${rupees(reasons[0].cap)}.`,
       facts,
       allowRephrase: false,
-      link: { to: '/member/claims/new', label: 'See all reasons and limits' },
+      link: { to: '/member/claims', label: 'See all reasons and limits' },
     }
   }
 

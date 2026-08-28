@@ -12,8 +12,12 @@ export const reasonLabelKey: Record<string, StringKey> = {
 }
 
 /** The three steps, named the same way wherever they are described. */
+/**
+ * Two steps, because the reason is not one of them: it is chosen by picking a
+ * life event on the claims page, which is where a withdrawal actually starts.
+ * Asking again inside the flow was the same question twice.
+ */
 export const WITHDRAW_STEPS: { titleKey: StringKey; blurbKey: StringKey }[] = [
-  { titleKey: 'withdraw.step1', blurbKey: 'withdraw.step1.blurb' },
   { titleKey: 'withdraw.step2', blurbKey: 'withdraw.step2.blurb' },
   { titleKey: 'withdraw.step3', blurbKey: 'withdraw.step3.blurb' },
 ]

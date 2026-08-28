@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import {
-  ArrowRight,
   ChevronRight,
   DoorOpen,
   GraduationCap,
@@ -20,9 +19,9 @@ import { StatusPill } from '@/components/patterns/status-pill'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
-import { WITHDRAW_STEPS, reasonLabelKey } from '@/lib/claims'
-import { withdrawalReasons } from '@/lib/derive'
-import { fmtDate } from '@/lib/format'
+import { reasonLabelKey } from '@/lib/claims'
+import { totalBalance, withdrawalReasons } from '@/lib/derive'
+import { fmtDate, inr } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 /**
@@ -45,6 +44,18 @@ export default function Claims() {
   const open = claims.filter((c) => !c.settledOn)
   const past = claims.filter((c) => c.settledOn)
   const events = withdrawalReasons(contributions)
+  /**
+   * The denominator is the provident fund balance, which is what every cap is
+   * worked out against. Pension (EPS) is a separate pot and is not withdrawable
+   * here, so folding it in would quietly shrink every share on this page.
+   */
+  const balance = totalBalance(contributions)
+  /** "<1" rather than a rounded-down 0, which would read as nothing at all. */
+  const shareOfBalance = (cap: number) => {
+    if (balance <= 0) return null
+    const pct = (cap / balance) * 100
+    return { pct, label: pct < 1 ? '<1' : String(Math.round(pct)) }
+  }
 
   return (
     <div className="space-y-4">
@@ -62,16 +73,25 @@ export default function Claims() {
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {events.map((e, i) => {
             const Icon = eventIcon[e.key] ?? Wallet
+            const share = shareOfBalance(e.cap)
             const body = (
               <>
-                <span
-                  className={cn(
-                    'mb-3 grid size-10 place-items-center rounded-md',
-                    e.eligible ? 'bg-brand-tint text-primary' : 'bg-muted text-muted-foreground',
-                  )}
-                  aria-hidden
-                >
-                  {e.eligible ? <Icon className="size-5" /> : <Lock className="size-4" />}
+                {/* The tag says what picking this card does. It used to be said
+                    by the "Take money out of your PF" panel above the grid; with
+                    that gone, nothing on the card named the action. */}
+                <span className="mb-3 flex items-start justify-between gap-2">
+                  <span
+                    className={cn(
+                      'grid size-10 shrink-0 place-items-center rounded-md',
+                      e.eligible ? 'bg-brand-tint text-primary' : 'bg-muted text-muted-foreground',
+                    )}
+                    aria-hidden
+                  >
+                    {e.eligible ? <Icon className="size-5" /> : <Lock className="size-4" />}
+                  </span>
+                  <StatusPill tone={e.eligible ? 'brand' : 'neutral'} className="mt-0.5">
+                    {t('claims.withdrawTag')}
+                  </StatusPill>
                 </span>
                 <span className="block text-[0.9375rem] font-semibold tracking-[-0.01em]">
                   {lang === 'hi' ? e.titleHi : e.title}
@@ -85,7 +105,36 @@ export default function Claims() {
                     <span className="block text-[0.6875rem] text-muted-foreground">
                       {t('withdraw.youCanTake')}
                     </span>
-                    <Money value={e.cap} size="lg" mark className="mt-0.5 block" />
+                    <span className="mt-0.5 flex flex-wrap items-baseline justify-between gap-x-2">
+                      <Money value={e.cap} size="lg" mark />
+                      {share ? (
+                        <span className="num text-[0.9375rem] font-bold text-primary">
+                          {share.label}%
+                        </span>
+                      ) : null}
+                    </span>
+
+                    {/* How big a bite this takes out of the whole. A cap in
+                        rupees says nothing about that on its own — "₹3,12,000"
+                        reads as a lot or a little depending on what is behind
+                        it, and the bar answers that before the digits are read. */}
+                    {share ? (
+                      <>
+                        <span
+                          className="mt-2 block h-1.5 w-full overflow-hidden rounded-full bg-muted"
+                          role="img"
+                          aria-label={`₹${inr(e.cap)} is ${share.label}% of your ₹${inr(balance)} balance`}
+                        >
+                          <span
+                            className="block h-full rounded-full bg-brand"
+                            style={{ width: `${Math.min(100, share.pct)}%` }}
+                          />
+                        </span>
+                        <span className="mt-1.5 block text-[0.6875rem] leading-relaxed text-muted-foreground">
+                          of your <span className="num">₹{inr(balance)}</span> balance
+                        </span>
+                      </>
+                    ) : null}
                   </span>
                 ) : (
                   <span className="mt-auto block pt-3.5">
@@ -121,46 +170,6 @@ export default function Claims() {
             )
           })}
         </ul>
-      </section>
-
-      {/* The three steps are shown before you commit to them, so the shape of
-          the task is known up front rather than discovered one screen at a time. */}
-      <section className="overflow-hidden rounded-lg border bg-card" aria-labelledby="start">
-        <div className="border-b bg-muted p-5 sm:p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-background">
-                <Wallet className="size-5 text-primary" aria-hidden />
-              </span>
-              <div>
-                <h2 id="start" className="text-[0.9375rem] font-semibold tracking-[-0.01em]">
-                  {t('claims.startTitle')}
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">{t('claims.startSub')}</p>
-              </div>
-            </div>
-            <Button asChild size="lg">
-              <Link to="/member/claims/new">
-                {t('claims.start')}
-                <ArrowRight className="size-4" aria-hidden />
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        <ol className="grid gap-px bg-border sm:grid-cols-3">
-          {WITHDRAW_STEPS.map((step, i) => (
-            <li key={step.titleKey} className="bg-card p-5">
-              <span className="num mb-2 flex size-6 items-center justify-center rounded-full border text-xs font-semibold text-muted-foreground">
-                {i + 1}
-              </span>
-              <p className="font-medium">{t(step.titleKey)}</p>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                {t(step.blurbKey)}
-              </p>
-            </li>
-          ))}
-        </ol>
       </section>
 
       {/* Nothing typed is ever lost to a dropped session. */}
