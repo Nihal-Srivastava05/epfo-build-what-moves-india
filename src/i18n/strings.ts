@@ -68,6 +68,14 @@ export const en = {
   'landing.task.calc': 'Work out your numbers',
   'landing.task.calcSub': 'EPF, pension and insurance — the same formulas EPFO uses.',
 
+  'landing.uanTitle': 'UAN services',
+  'landing.uan.activate': 'Activate UAN',
+  'landing.uan.track': 'Track Application Status',
+  'landing.uan.know': 'Know your UAN',
+  'landing.uan.direct': 'Direct UAN',
+  'landing.uan.existing': 'UAN for existing PF',
+  'landing.uan.death': 'Death Claim',
+
   'calc.title': 'Calculators',
   'calc.sub': 'The same formulas behind your passbook, run forward instead of back — so you can see a number before it shows up on a statement. No sign-in needed.',
   'calc.tab.contribution': 'Monthly contribution',
@@ -279,6 +287,14 @@ export const hi: Partial<Record<StringKey, string>> = {
   'landing.task.lifeSub': 'तीन तरीके, जिनमें एक बिना स्मार्टफ़ोन के।',
   'landing.task.calc': 'अपने आँकड़े निकालें',
   'landing.task.calcSub': 'ईपीएफ़, पेंशन और बीमा — वही फ़ॉर्मूले जो ईपीएफ़ओ इस्तेमाल करता है।',
+
+  'landing.uanTitle': 'यूएएन सेवाएँ',
+  'landing.uan.activate': 'यूएएन सक्रिय करें',
+  'landing.uan.track': 'आवेदन की स्थिति देखें',
+  'landing.uan.know': 'अपना यूएएन जानें',
+  'landing.uan.direct': 'डायरेक्ट यूएएन',
+  'landing.uan.existing': 'मौजूदा पीएफ़ के लिए यूएएन',
+  'landing.uan.death': 'मृत्यु दावा',
 
   'calc.title': 'कैलकुलेटर',
   'calc.sub': 'आपकी पासबुक के पीछे वही फ़ॉर्मूले, आगे की दिशा में चलाए गए — ताकि स्टेटमेंट में आने से पहले ही आँकड़ा दिख जाए। साइन इन की ज़रूरत नहीं।',
