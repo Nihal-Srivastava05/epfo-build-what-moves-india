@@ -19,7 +19,7 @@ const mocked = [
   'OTPs. The code is fixed at 284116 and printed on screen. No SMS is sent.',
   'Payments. No challan is paid and no money moves.',
   'The life-certificate face scan. No camera is opened; the result is simulated.',
-  'PDF exports and receipt downloads.',
+  'The figures inside every export. The passbook, challan and claim downloads are real CSV files that open in a spreadsheet — but a genuine one would carry a verification code, and the numbers in these are invented.',
   'All government integrations — UIDAI, NPCI, bank IFSC directories, CPPS, Jeevan Pramaan.',
 ]
 

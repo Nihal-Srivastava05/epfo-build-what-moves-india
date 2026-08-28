@@ -11,7 +11,8 @@ import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { reasonLabelKey, whatHappensNext } from '@/lib/claims'
 import { fmtDate } from '@/lib/format'
-import { establishmentByCode } from '@/lib/mock/db'
+import { establishmentByCode, personById } from '@/lib/mock/db'
+import { downloadCsv, exportName } from '@/lib/export'
 
 const formTermId: Record<string, string> = {
   'Form 19': 'form-19',
@@ -28,6 +29,31 @@ export default function ClaimDetail() {
   if (!claim) return <Navigate to="/member/claims" replace />
 
   const next = whatHappensNext(claim)
+
+  /**
+   * The acknowledgement carries the stage history, not just the header — the
+   * whole point of the tracker is that "who held this, and when" is on record.
+   */
+  const exportAcknowledgement = () => {
+    const me = personById('p-priya')
+    downloadCsv(exportName(['epfo-claim', claim.id], 'csv'), [
+      ['EPFO claim acknowledgement (prototype — every figure below is synthetic)'],
+      ['Reference', claim.id],
+      ['Member', me.name],
+      ['UAN', me.uan],
+      ['Reason', t(reasonLabelKey[claim.reasonKey] ?? 'claim.reason.withdrawal')],
+      ['Form', claim.formNumber],
+      ['Amount (INR)', claim.amount],
+      ['Filed on', claim.filedOn],
+      ['Expected by', claim.expectedBy ?? ''],
+      ['Settled on', claim.settledOn ?? ''],
+      ['Paid into', `Bank account ending ${claim.bankLast4}`],
+      ['Employer', establishmentByCode(claim.estCode).name],
+      [],
+      ['Stage', 'State', 'Date', 'Waiting on'],
+      ...claim.stages.map((st) => [st.label, st.state, st.on ?? '', st.holder ?? '']),
+    ])
+  }
   const est = establishmentByCode(claim.estCode)
 
   return (
@@ -133,11 +159,11 @@ export default function ClaimDetail() {
       </section>
 
       <div className="mt-4 flex items-center gap-2">
-        <Button variant="ghost" size="sm">
+        <Button variant="outline" size="sm" onClick={exportAcknowledgement}>
           <Download className="size-4" aria-hidden />
-          Acknowledgement
+          Acknowledgement (CSV)
         </Button>
-        <MockBadge what="Download is not wired up. A real acknowledgement would carry a verification code." />
+        <MockBadge what="The download is real. The claim it describes is synthetic, and a genuine acknowledgement would carry a verification code." />
       </div>
     </div>
   )

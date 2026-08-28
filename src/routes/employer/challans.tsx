@@ -7,10 +7,34 @@ import { MockBadge } from '@/components/patterns/mock-badge'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { fmtDate, fmtMonthLong } from '@/lib/format'
+import { establishments } from '@/lib/mock/db'
+import { downloadCsv, exportName } from '@/lib/export'
+import type { Challan } from '@/lib/types'
 
 export default function Challans() {
   const challans = useData((s) => s.challans)
   const { lang } = useT()
+  const est = establishments[0]
+
+  /** The receipt a person would actually quote to a bank, as a real file. */
+  const exportReceipt = (c: Challan) => {
+    downloadCsv(exportName(['epfo-challan', c.trrn], 'csv'), [
+      ['EPFO challan receipt (prototype — every figure below is synthetic)'],
+      ['TRRN', c.trrn],
+      ['Establishment', est.name],
+      ['Establishment code', c.estCode],
+      ['Wage month', fmtMonthLong(c.month)],
+      ['Paid on', c.paidOn],
+      ['Employees', c.employees],
+      [],
+      ['Head', 'Amount (INR)'],
+      ['EPF', c.epf],
+      ['EPS', c.eps],
+      ['EDLI', c.edli],
+      ['Admin charges', c.admin],
+      ['Total', c.total],
+    ])
+  }
 
   return (
     <div>
@@ -48,11 +72,11 @@ export default function Challans() {
               ))}
             </dl>
             <div className="mt-4 flex items-center gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => exportReceipt(c)}>
                 <Download className="size-4" aria-hidden />
-                Receipt
+                Receipt (CSV)
               </Button>
-              <MockBadge what="Download is not wired up. A real receipt would carry a verification code." />
+              <MockBadge what="The download is real. The challan it describes is synthetic, and a genuine receipt would carry a verification code." />
             </div>
           </li>
         ))}

@@ -17,7 +17,8 @@ import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { buildLedger, totalBalance } from '@/lib/derive'
 import { financialYear, fmtDate, fmtMonth } from '@/lib/format'
-import { INTEREST_RATE, establishments } from '@/lib/mock/db'
+import { INTEREST_RATE, establishmentByCode, establishments, personById } from '@/lib/mock/db'
+import { downloadCsv, exportName } from '@/lib/export'
 
 export default function Passbook() {
   const contributions = useData((s) => s.contributions)
@@ -39,6 +40,48 @@ export default function Passbook() {
   )
 
   const missing = contributions.filter((c) => c.status === 'missing')
+  const me = personById('p-priya')
+
+  /**
+   * Exports exactly what is on screen, filters included — a file that disagrees
+   * with the table above it is worse than no file. Amounts go out as plain
+   * integers so a spreadsheet can add them up; the rendered ₹ grouping is a
+   * display concern and does not belong in a data column.
+   */
+  const exportCsv = () => {
+    const closing = rows.length ? rows[0].balanceAfter : 0
+    const scope = fy === 'all' ? 'all years' : `FY ${fy}`
+    const employer = est === 'all' ? 'all employers' : establishmentByCode(est).name
+
+    downloadCsv(exportName(['epfo-passbook', me.uan, fy === 'all' ? 'all' : fy], 'csv'), [
+      ['EPFO passbook (prototype — every figure below is synthetic)'],
+      ['Member', me.name],
+      ['UAN', me.uan],
+      ['Scope', `${scope}, ${employer}`],
+      ['Generated', new Date().toISOString()],
+      [],
+      ['Date', 'Particulars', 'Establishment', 'Your share', 'Employer share', 'Pension (EPS)', 'Balance'],
+      ...rows.map((r) => [
+        r.date,
+        r.particulars,
+        r.estCode,
+        r.employee,
+        r.employer,
+        r.eps,
+        r.balanceAfter,
+      ]),
+      [],
+      [
+        '',
+        fy === 'all' && est === 'all' ? 'Closing balance' : 'Balance after the latest row shown',
+        '',
+        '',
+        '',
+        '',
+        closing,
+      ],
+    ])
+  }
 
   return (
     <div>
@@ -53,11 +96,11 @@ export default function Passbook() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
             <Download className="size-4" aria-hidden />
-            Export PDF
+            Export CSV
           </Button>
-          <MockBadge what="Export is not wired up. A real export would carry a verification code." />
+          <MockBadge what="The download is real and opens in any spreadsheet. The figures inside it are synthetic, like everything else here." />
         </div>
       </div>
 
