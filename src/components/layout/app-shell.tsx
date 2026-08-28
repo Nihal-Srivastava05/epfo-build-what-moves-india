@@ -11,10 +11,34 @@ import { Emblem } from '@/components/layout/emblem'
 import { useSession } from '@/store/session'
 import { useData } from '@/store/data'
 import { navByPersona, navTitleKey } from '@/lib/nav'
+import { preflight } from '@/lib/derive'
 import { useT } from '@/i18n'
 import type { StringKey } from '@/i18n/strings'
 import { useMotionOk } from '@/hooks/use-motion-ok'
 import { cn } from '@/lib/utils'
+
+/**
+ * Destinations that are carrying unfinished work. KYC is the only one so far:
+ * if anything in the pre-submit check is still open, a claim cannot be paid —
+ * and the dot sits on the screen that *fixes* it, not on the one it blocks.
+ */
+function useNavAlerts(): Set<string> {
+  const persona = useSession((s) => s.persona)
+  const kyc = useData((s) => s.kyc)
+  const alerts = new Set<string>()
+  if (persona === 'member' && preflight(kyc).length > 0) alerts.add('/member/kyc')
+  return alerts
+}
+
+/** Amber, not red: nothing has gone wrong yet — a step is simply not done. */
+function AlertDot({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn('absolute size-2 rounded-full bg-wait ring-2 ring-sidebar', className)}
+      aria-hidden
+    />
+  )
+}
 
 /**
  * A permanent icon rail rather than a text sidebar. Five destinations is few
@@ -23,6 +47,7 @@ import { cn } from '@/lib/utils'
  */
 function NavRail() {
   const persona = useSession((s) => s.persona)
+  const alerts = useNavAlerts()
   const { t } = useT()
   return (
     <nav
@@ -51,9 +76,15 @@ function NavRail() {
             )
           }
         >
-          <item.icon className='size-5 shrink-0' aria-hidden />
-          <span className='text-center text-[0.625rem] leading-tight font-semibold'>
+          <span className="relative">
+            <item.icon className="size-5 shrink-0" aria-hidden />
+            {alerts.has(item.to) ? <AlertDot className="-top-0.5 -right-1" /> : null}
+          </span>
+          <span className="text-center text-[0.625rem] leading-tight font-semibold">
             {t(item.shortKey ?? item.labelKey)}
+            {alerts.has(item.to) ? (
+              <span className="sr-only"> — {t('nav.alert')}</span>
+            ) : null}
           </span>
         </NavLink>
       ))}
@@ -83,6 +114,7 @@ function NavRail() {
 /** Mobile: the five destinations sit under the thumb, not behind a hamburger. */
 function BottomNav() {
   const persona = useSession((s) => s.persona)
+  const alerts = useNavAlerts()
   const { t } = useT()
   const items = navByPersona[persona]
   return (
@@ -106,12 +138,17 @@ function BottomNav() {
             >
               {({ isActive }) => (
                 <>
-                  <item.icon
-                    className={cn('size-5', isActive && 'text-primary')}
-                    aria-hidden
-                  />
-                  <span className='text-center'>
+                  <span className="relative">
+                    <item.icon className={cn('size-5', isActive && 'text-primary')} aria-hidden />
+                    {alerts.has(item.to) ? (
+                      <AlertDot className="-top-0.5 -right-1 ring-card" />
+                    ) : null}
+                  </span>
+                  <span className="text-center">
                     {t(item.shortKey ?? item.labelKey)}
+                    {alerts.has(item.to) ? (
+                      <span className="sr-only"> — {t('nav.alert')}</span>
+                    ) : null}
                   </span>
                 </>
               )}
