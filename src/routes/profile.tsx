@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { BadgeCheck, Download, Pencil, Plus, ShieldCheck } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Download, Pencil, Plus, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader, SectionTitle } from '@/components/patterns/page-header'
 import { StatusPill } from '@/components/patterns/status-pill'
@@ -242,6 +242,13 @@ function memberGroups(kyc: KycItem[], me: Person): Group[] {
           label: 'EPF member since',
           value: firstJoined ? fmtMonth(firstJoined.slice(0, 7)) : undefined,
           hint: `${serviceYears()} years of membership across ${employments.filter((e) => e.personId === me.id).length} employers`,
+          // The one screen that holds every past employer, gap and wage — this
+          // row states the total, that screen shows the working behind it.
+          action: {
+            label: 'View service history',
+            to: '/member/service-history',
+            icon: ArrowRight,
+          },
         },
       ],
     },

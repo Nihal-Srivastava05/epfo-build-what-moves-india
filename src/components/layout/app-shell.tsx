@@ -11,6 +11,7 @@ import { useSession } from '@/store/session'
 import { useData } from '@/store/data'
 import { navByPersona, navTitleKey } from '@/lib/nav'
 import { useT } from '@/i18n'
+import type { StringKey } from '@/i18n/strings'
 import { useMotionOk } from '@/hooks/use-motion-ok'
 import { cn } from '@/lib/utils'
 
@@ -116,6 +117,18 @@ function BottomNav() {
   )
 }
 
+/**
+ * Screens reachable from the account menu or a link rather than the nav rail.
+ * They still have to name themselves in the top bar, and navTitleKey only
+ * knows about the rail.
+ */
+const STANDALONE_TITLE_KEYS: Record<string, StringKey> = {
+  '/settings': 'nav.settings',
+  '/notifications': 'nav.notifications',
+  '/profile': 'nav.profile',
+  '/member/service-history': 'nav.serviceHistory',
+}
+
 export function AppShell() {
   const location = useLocation()
   const motionOk = useMotionOk()
@@ -128,16 +141,7 @@ export function AppShell() {
   ).length
 
   const titleKey = navTitleKey(persona, location.pathname)
-  const title =
-    location.pathname === '/settings'
-      ? t('nav.settings')
-      : location.pathname === '/notifications'
-        ? t('nav.notifications')
-        : location.pathname === '/profile'
-          ? t('nav.profile')
-          : titleKey
-            ? t(titleKey)
-            : t('app.name')
+  const title = t(STANDALONE_TITLE_KEYS[location.pathname] ?? titleKey ?? 'app.name')
 
   return (
     <div className="flex min-h-dvh">

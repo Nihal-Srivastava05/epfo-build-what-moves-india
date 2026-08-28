@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Building2, ChartColumn, Download, Info, Table2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ArrowRight, Building2, ChartColumn, Download, Info, Table2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -254,6 +255,14 @@ export default function Passbook() {
                 match land as one row a month in the ledger below. Anything wrong with these details
                 is corrected by your employer, not by EPFO.
               </p>
+
+              <Link
+                to="/member/service-history"
+                className="mt-3 inline-flex items-center gap-1 text-[0.8125rem] font-semibold text-primary hover:underline"
+              >
+                View service history
+                <ArrowRight className="size-3.5" aria-hidden />
+              </Link>
             </>
           ) : (
             <p className="text-[0.8125rem] leading-relaxed text-muted-foreground">
