@@ -5,6 +5,7 @@ import { Bell, Languages, Settings2, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AccountMenu } from '@/components/layout/account-menu'
+import { BugReport } from '@/components/layout/bug-report'
 import { SiteFooter } from '@/components/layout/site-footer'
 import { Emblem } from '@/components/layout/emblem'
 import { useSession } from '@/store/session'
@@ -133,6 +134,8 @@ const STANDALONE_TITLE_KEYS: Record<string, StringKey> = {
   '/profile': 'nav.profile',
   '/member/service-history': 'nav.serviceHistory',
   '/member/calculators': 'nav.calculators',
+  '/glossary': 'nav.glossary',
+  '/calculators': 'nav.calculators',
   '/': 'app.name',
 }
 
@@ -172,6 +175,7 @@ export function AppShell() {
           </div>
 
           <div className='ml-auto flex items-center gap-0.5'>
+            <BugReport />
             <Button
               variant='ghost'
               size='sm'
