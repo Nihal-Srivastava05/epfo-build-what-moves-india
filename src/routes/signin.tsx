@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowLeft, ArrowRight, KeyRound, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Copy, KeyRound, ShieldCheck } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,6 +30,7 @@ export default function SignIn() {
   const [id, setId] = useState(identity[persona].value)
   const [otp, setOtp] = useState('')
   const [error, setError] = useState('')
+  const [copied, setCopied] = useState(false)
   const signIn = useSession((s) => s.signIn)
   const navigate = useNavigate()
   const { t } = useT()
@@ -46,6 +48,17 @@ export default function SignIn() {
     }
     signIn(persona)
     navigate(personaMeta[persona].home, { replace: true })
+  }
+
+  const copyOtp = async () => {
+    try {
+      await navigator.clipboard.writeText(DEMO_OTP)
+      setCopied(true)
+      toast.success('Code copied.')
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      toast.error('Could not copy the code.')
+    }
   }
 
   return (
@@ -165,7 +178,18 @@ export default function SignIn() {
             <KeyRound className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
             <div className="min-w-0 flex-1">
               <p className="text-[0.8125rem] text-muted-foreground">{t('signin.mockOtp')}</p>
-              <p className="ident mt-1.5 text-lg font-bold tracking-[0.2em]">{DEMO_OTP}</p>
+              <div className="mt-1.5 flex items-center gap-2">
+                <p className="ident text-lg font-bold tracking-[0.2em]">{DEMO_OTP}</p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={copyOtp}
+                  aria-label="Copy code"
+                >
+                  {copied ? <Check className="size-3.5" aria-hidden /> : <Copy className="size-3.5" aria-hidden />}
+                </Button>
+              </div>
             </div>
             <MockBadge what="No SMS is sent. This code is fixed so reviewers can sign in." />
           </div>

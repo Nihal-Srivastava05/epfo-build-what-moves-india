@@ -1,4 +1,4 @@
-import { ChevronDown, LogOut, Settings2, UserRound } from 'lucide-react'
+import { ChevronDown, History, LogOut, Settings2, UserRound } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import {
   DropdownMenu,
@@ -55,6 +55,14 @@ export function AccountMenu({ className }: { className?: string }) {
             {t('nav.profile')}
           </Link>
         </DropdownMenuItem>
+        {persona === 'member' ? (
+          <DropdownMenuItem asChild className="gap-2.5 py-2.5">
+            <Link to="/member/service-history">
+              <History className="size-4 text-muted-foreground" aria-hidden />
+              {t('nav.serviceHistory')}
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem asChild className="gap-2.5 py-2.5">
           <Link to="/settings">
             <Settings2 className="size-4 text-muted-foreground" aria-hidden />

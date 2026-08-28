@@ -23,6 +23,7 @@ const Grievance = lazy(() => import('@/routes/grievance'))
 
 const MemberHome = lazy(() => import('@/routes/member/home'))
 const MemberPassbook = lazy(() => import('@/routes/member/passbook'))
+const MemberServiceHistory = lazy(() => import('@/routes/member/service-history'))
 const MemberClaims = lazy(() => import('@/routes/member/claims'))
 const MemberWithdraw = lazy(() => import('@/routes/member/withdraw'))
 const MemberClaimDetail = lazy(() => import('@/routes/member/claim-detail'))
@@ -77,6 +78,7 @@ export default function App() {
           >
             <Route path="member" element={<MemberHome />} />
             <Route path="member/passbook" element={<MemberPassbook />} />
+            <Route path="member/service-history" element={<MemberServiceHistory />} />
             <Route path="member/claims" element={<MemberClaims />} />
             <Route path="member/claims/new" element={<MemberWithdraw />} />
             <Route path="member/claims/:claimId" element={<MemberClaimDetail />} />

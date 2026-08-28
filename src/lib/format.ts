@@ -72,14 +72,53 @@ export function fmtDuration(sinceIso: string, lang: 'en' | 'hi' = 'en') {
   return days === 1 ? '1 day' : `${days} days`
 }
 
+/**
+ * "2 yr 9 mo" — one stint of service, in the units a service record is read in.
+ *
+ * Both endpoints count, because EPFO reckons service by days worked and the
+ * last day is one of them: 1 Jul 2019 to 31 Mar 2022 is 2 years 9 months, not
+ * 2 years 8 months and 30 days. Getting this wrong understates every closed
+ * stint by a month, which is the kind of error that decides a pension.
+ */
+export function fmtTenure(fromIso: string, toIso: string, lang: 'en' | 'hi' = 'en') {
+  const from = new Date(`${fromIso.slice(0, 10)}T00:00:00`)
+  const to = new Date(`${toIso.slice(0, 10)}T00:00:00`)
+  to.setDate(to.getDate() + 1)
+  let months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth())
+  if (to.getDate() < from.getDate()) months -= 1
+  months = Math.max(0, months)
+
+  const years = Math.floor(months / 12)
+  const rest = months % 12
+  const parts =
+    lang === 'hi'
+      ? [years ? `${years} वर्ष` : '', rest ? `${rest} माह` : '']
+      : [years ? `${years} yr` : '', rest ? `${rest} mo` : '']
+  const joined = parts.filter(Boolean).join(' ')
+  if (joined) return joined
+  return lang === 'hi' ? '1 माह से कम' : 'Less than a month'
+}
+
 export function fmtUan(uan: string) {
   return uan.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3')
+}
+
+/**
+ * Every date in this app is a local calendar day, so it has to be read back out
+ * in local time. toISOString() would convert to UTC first, which lands on the
+ * previous day everywhere east of Greenwich — IST included — and silently
+ * returned a date one day early for the whole audience this is built for.
+ */
+function isoDay(d: Date) {
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${month}-${day}`
 }
 
 export function addDays(iso: string, days: number) {
   const d = new Date(`${iso.slice(0, 10)}T00:00:00`)
   d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
+  return isoDay(d)
 }
 
 export function financialYear(month: string) {
