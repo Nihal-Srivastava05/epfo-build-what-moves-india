@@ -119,6 +119,7 @@ function accumulate(contributions: Contribution[]): {
       eps: 0,
       kind: 'interest',
       balanceAfter: balance,
+      seq: rows.length,
     })
     fyMonths = []
   }
@@ -144,6 +145,7 @@ function accumulate(contributions: Contribution[]): {
       eps: c.epsShare,
       kind: 'contribution',
       balanceAfter: balance,
+      seq: rows.length,
     })
   }
 
@@ -161,6 +163,68 @@ function buildLedgerChronological(contributions: Contribution[]): LedgerRow[] {
  */
 export function interestBreakdown(contributions: Contribution[]): Map<string, InterestYear> {
   return new Map(accumulate(contributions).years.map((y) => [`int-${y.fy}`, y]))
+}
+
+/** A financial year of the ledger, with the year's own totals. */
+export interface FyGroup {
+  fy: string
+  /** Display order, newest first — the same order the flat ledger used. */
+  rows: LedgerRow[]
+  /** Contributions only. Interest is its own line, not part of "your share". */
+  employee: number
+  employer: number
+  eps: number
+  interest: number
+  credits: number
+  /** What the year closed on, taken from the last row in accumulation order. */
+  closing: number
+}
+
+/**
+ * Folds the ledger into financial years so a long career is a list of years
+ * rather than one unbroken scroll.
+ *
+ * A row belongs to the year it was earned in, not the year it was paid in: a
+ * March wage is credited in April, and filing it under the next year would move
+ * a month of someone's service across a year boundary.
+ */
+export function groupLedgerByFy(rows: LedgerRow[]): FyGroup[] {
+  const byFy = new Map<string, FyGroup>()
+
+  for (const r of rows) {
+    const fy = financialYear(r.month ?? r.date.slice(0, 7))
+    const g =
+      byFy.get(fy) ??
+      ({
+        fy,
+        rows: [],
+        employee: 0,
+        employer: 0,
+        eps: 0,
+        interest: 0,
+        credits: 0,
+        closing: 0,
+      } satisfies FyGroup)
+
+    g.rows.push(r)
+    if (r.kind === 'interest') {
+      g.interest += r.employee
+    } else {
+      g.employee += r.employee
+      g.employer += r.employer
+      g.eps += r.eps
+      g.credits += 1
+    }
+    byFy.set(fy, g)
+  }
+
+  for (const g of byFy.values()) {
+    // Highest seq, not rows[0]: the interest added at the close of the year
+    // carries a March date and sorts below the April-credited March wage.
+    g.closing = g.rows.reduce((last, r) => (r.seq > last.seq ? r : last), g.rows[0]).balanceAfter
+  }
+
+  return Array.from(byFy.values()).sort((a, b) => b.fy.localeCompare(a.fy))
 }
 
 /**
