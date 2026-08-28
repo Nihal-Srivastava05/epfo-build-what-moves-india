@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Money } from '@/components/patterns/money'
 import { ActionCard } from '@/components/patterns/action-card'
 import { ClaimTracker } from '@/components/patterns/claim-tracker'
+import { GrievanceTracker } from '@/components/patterns/grievance-tracker'
 import { PanelTitle, SectionTitle } from '@/components/patterns/page-header'
 import { StatusPill } from '@/components/patterns/status-pill'
 import { TotalBalanceCard } from '@/components/patterns/total-balance-card'
@@ -12,6 +13,7 @@ import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
 import { activeClaim } from '@/lib/derive'
+import { activeGrievance, grievanceTone } from '@/lib/grievances'
 import { employments, establishmentByCode, TODAY } from '@/lib/mock/db'
 import { fmtDate, fmtMonth, fmtMonthLong } from '@/lib/format'
 import type { StringKey } from '@/i18n/strings'
@@ -21,15 +23,17 @@ const quickActions: { to: string; titleKey: StringKey; subKey: StringKey }[] = [
   { to: '/member/passbook', titleKey: 'member.viewPassbook', subKey: 'member.passbookSub' },
   { to: '/member/kyc', titleKey: 'nav.kyc', subKey: 'member.kycSub' },
   { to: '/member/calculators', titleKey: 'nav.calculators', subKey: 'member.calculatorsSub' },
+  { to: '/member/future-me', titleKey: 'member.futureMe', subKey: 'member.futureMeSub' },
   { to: '/member/help', titleKey: 'nav.help', subKey: 'member.helpSub' },
 ]
 
 export default function MemberHome() {
-  const { contributions, claims, kyc, employerNotified } = useData()
+  const { contributions, claims, kyc, employerNotified, grievances } = useData()
   const { t, lang } = useT()
   const motionOk = useMotionOk()
 
   const claim = activeClaim(claims)
+  const grievance = activeGrievance(grievances, 'p-priya')
   const missing = contributions.filter((c) => c.status === 'missing')
   const kycIssues = kyc.filter((k) => k.status !== 'verified')
   const nothingPending = missing.length === 0 && kycIssues.length === 0
@@ -168,6 +172,33 @@ export default function MemberHome() {
             </span>
           </PanelTitle>
           <ClaimTracker claim={claim} />
+        </section>
+      ) : null}
+
+      {/* Same idea as the claim tracker above — where a grievance sits and
+          what moves it forward, without having to chase it by phone. */}
+      {grievance ? (
+        <section aria-labelledby="grievance" className="rounded-lg border bg-card p-5">
+          <PanelTitle
+            className="mb-4"
+            action={
+              <Button asChild variant="ghost" size="sm" className="-mr-2">
+                <Link to="/member/help">
+                  {t('nav.help')}
+                  <ArrowRight className="size-3.5" aria-hidden />
+                </Link>
+              </Button>
+            }
+          >
+            <span id="grievance" className="flex flex-wrap items-center gap-2.5">
+              Your grievance
+              <StatusPill tone={grievanceTone(grievance)}>{grievance.subject}</StatusPill>
+              <span className="num text-xs font-normal text-muted-foreground">
+                Escalates {fmtDate(grievance.escalatesOn, lang)}
+              </span>
+            </span>
+          </PanelTitle>
+          <GrievanceTracker grievance={grievance} />
         </section>
       ) : null}
 

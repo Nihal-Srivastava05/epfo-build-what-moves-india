@@ -96,7 +96,7 @@ const uanLinks: { titleKey: StringKey; to: string }[] = [
   { titleKey: 'landing.uan.know', to: '/signin/member' },
   { titleKey: 'landing.uan.direct', to: '/signin/member' },
   { titleKey: 'landing.uan.existing', to: '/signin/member' },
-  { titleKey: 'landing.uan.death', to: '/signin/member' },
+  { titleKey: 'landing.uan.death', to: '/death-claim' },
 ]
 
 export default function Landing() {

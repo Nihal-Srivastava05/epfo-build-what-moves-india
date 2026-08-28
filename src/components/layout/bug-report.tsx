@@ -11,12 +11,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-const REPO = 'Nihal-Srivastava05/epfo-build-what-moves-india'
-
 /**
- * Static prototype, no backend to receive a report — so "file a bug" means
- * getting a screenshot onto the clipboard and a pre-filled GitHub issue open
- * in one motion, since the New Issue form has nowhere to take an attached file.
+ * Static prototype, no backend to receive a report — so "file a bug" is
+ * mocked entirely client-side rather than opening a real GitHub issue.
  */
 export function BugReport() {
   const [open, setOpen] = useState(false)
@@ -45,37 +42,8 @@ export function BugReport() {
     }
   }
 
-  const fileIssue = async () => {
-    if (screenshot) {
-      try {
-        await navigator.clipboard.write([
-          new ClipboardItem({ [screenshot.blob.type]: screenshot.blob }),
-        ])
-        toast.success('Screenshot copied — paste it into the issue with Cmd/Ctrl+V.')
-      } catch {
-        toast.info("Couldn't copy the screenshot automatically. Attach it manually if you'd like.")
-      }
-    }
-
-    const body = [
-      description.trim() || '_Describe what happened…_',
-      '',
-      '---',
-      `Page: \`${window.location.href}\``,
-      `Screen: ${window.innerWidth}×${window.innerHeight}`,
-      `User agent: ${navigator.userAgent}`,
-      screenshot ? '' : '',
-      screenshot ? '_Screenshot copied to clipboard — paste above._' : '',
-    ]
-      .join('\n')
-      .trim()
-
-    const url = `https://github.com/${REPO}/issues/new?${new URLSearchParams({
-      title: 'Bug: ',
-      body,
-      labels: 'bug',
-    })}`
-    window.open(url, '_blank', 'noopener,noreferrer')
+  const fileIssue = () => {
+    toast.success('Report filed. No real issue was created — this is a mocked prototype flow.')
 
     setOpen(false)
     setDescription('')
@@ -109,7 +77,8 @@ export function BugReport() {
         <DialogHeader>
           <DialogTitle>Report a bug</DialogTitle>
           <DialogDescription>
-            Grabs a screenshot of the current screen and opens a pre-filled GitHub issue.
+            Grabs a screenshot of the current screen and files a report. This is a prototype — no real
+            issue is created.
           </DialogDescription>
         </DialogHeader>
 
@@ -142,7 +111,7 @@ export function BugReport() {
             Cancel
           </Button>
           <Button onClick={fileIssue} disabled={capturing}>
-            Copy screenshot &amp; file issue
+            File report
           </Button>
         </DialogFooter>
       </DialogContent>

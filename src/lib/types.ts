@@ -153,7 +153,7 @@ export interface Challan {
   employees: number
 }
 
-export type ApprovalKind = 'claim' | 'kyc' | 'transfer' | 'exit'
+export type ApprovalKind = 'claim' | 'kyc' | 'transfer' | 'exit' | 'mismatch'
 
 export interface Approval {
   id: string

@@ -64,10 +64,14 @@ export function epfGrowthProjection(opts: {
   years: number
   startAge?: number
   interestRate?: number
+  /** Months, counted from month 1 of year 1, where the credit simply does not
+   * happen — the running balance sits still instead of growing that month. */
+  missedMonths?: number
 }): GrowthProjection {
   const rate = opts.interestRate ?? INTEREST_RATE
   let balance = Math.max(0, opts.currentBalance)
   let wage = Math.max(0, opts.monthlyWage)
+  let missedLeft = opts.missedMonths ?? 0
   const rows: GrowthYear[] = []
   let totalContributed = 0
   let totalInterest = 0
@@ -76,20 +80,26 @@ export function epfGrowthProjection(opts: {
     const { employee, employerEpf } = splitContribution(wage)
     const monthly = employee + employerEpf
     let sumOfMonths = 0
+    let yearContributed = 0
     for (let m = 0; m < 12; m++) {
-      balance += monthly
+      if (missedLeft > 0) {
+        missedLeft--
+      } else {
+        balance += monthly
+        yearContributed += monthly
+      }
       sumOfMonths += balance
     }
     const interest = Math.round((sumOfMonths / 12) * rate)
     balance += interest
-    totalContributed += monthly * 12
+    totalContributed += yearContributed
     totalInterest += interest
 
     rows.push({
       year: y,
       age: opts.startAge ? opts.startAge + y : undefined,
       wage: Math.round(wage),
-      contribution: monthly * 12,
+      contribution: yearContributed,
       interest,
       balance,
     })

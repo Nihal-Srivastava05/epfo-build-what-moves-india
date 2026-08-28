@@ -76,6 +76,25 @@ export const en = {
   'landing.uan.existing': 'UAN for existing PF',
   'landing.uan.death': 'Death Claim',
 
+  'deathClaim.eyebrow': 'When a member has died',
+  'deathClaim.title': 'Two different benefits, filed separately',
+  'deathClaim.sub':
+    'A death claim is not one thing. There is a one-time PF payout, and a separate monthly pension — they use different forms and can both apply at once.',
+  'deathClaim.pf.title': 'PF Death Claim',
+  'deathClaim.pf.body':
+    'A one-time payment of the deceased member’s full Provident Fund balance, paid to the registered nominee, or split among legal heirs if none was registered.',
+  'deathClaim.pension.title': 'Nominee / Family Pension Claim',
+  'deathClaim.pension.body':
+    'A monthly pension under the Employees’ Pension Scheme, paid to the spouse and children (or another eligible nominee) for as long as they qualify. This continues even after the PF balance above is paid out.',
+  'deathClaim.start': 'Start this claim',
+  'deathClaim.step1': 'Whose death, and who you are',
+  'deathClaim.step1.blurb': 'Tell us about the deceased member and your relationship to them.',
+  'deathClaim.step2': 'Documents & payment',
+  'deathClaim.step2.blurb': 'Confirm the documents you have and where the money should go.',
+  'deathClaim.step3': 'Review & confirm',
+  'deathClaim.step3.blurb': 'Check everything below, then confirm with the code.',
+  'deathClaim.filed': 'Claim filed',
+
   'calc.title': 'Calculators',
   'calc.sub': 'The same formulas behind your passbook, run forward instead of back — so you can see a number before it shows up on a statement. No sign-in needed.',
   'calc.tab.contribution': 'Monthly contribution',
@@ -113,6 +132,8 @@ export const en = {
   'member.passbookSub': 'Every month, every employer',
   'member.kycSub': 'Fix it before a claim fails',
   'member.calculatorsSub': 'Your numbers, projected forward',
+  'member.futureMe': 'Future Me',
+  'member.futureMeSub': 'Where your PF is headed, and what could change it',
   'member.helpSub': 'Raise a grievance, track the reply',
   'member.seeCalculators': 'See what this could become',
   'member.yourShare': 'Your share',
@@ -142,6 +163,8 @@ export const en = {
   'claim.reason.withdrawal': 'Withdrawal',
   'claim.reason.leftJob': 'Left the job',
   'claim.reason.jobChange': 'Transfer on job change',
+  'claim.reason.death': 'Death claim (PF)',
+  'claim.reason.nomineePension': 'Nominee / family pension',
 
   'claims.lifeEvents': 'Life events',
   'claims.lifeEventsSub':
@@ -296,6 +319,25 @@ export const hi: Partial<Record<StringKey, string>> = {
   'landing.uan.existing': 'मौजूदा पीएफ़ के लिए यूएएन',
   'landing.uan.death': 'मृत्यु दावा',
 
+  'deathClaim.eyebrow': 'सदस्य की मृत्यु होने पर',
+  'deathClaim.title': 'दो अलग-अलग लाभ, अलग-अलग दायर किए जाते हैं',
+  'deathClaim.sub':
+    'मृत्यु दावा एक चीज़ नहीं है। एक बार में मिलने वाला पीएफ़ भुगतान है, और एक अलग मासिक पेंशन — दोनों अलग फ़ॉर्म पर हैं और एक साथ भी लागू हो सकते हैं।',
+  'deathClaim.pf.title': 'पीएफ़ मृत्यु दावा',
+  'deathClaim.pf.body':
+    'दिवंगत सदस्य की पूरी भविष्य निधि राशि का एकमुश्त भुगतान, पंजीकृत नामांकित व्यक्ति को, या नामांकन न होने पर कानूनी वारिसों में बाँटकर।',
+  'deathClaim.pension.title': 'नॉमिनी / पारिवारिक पेंशन दावा',
+  'deathClaim.pension.body':
+    'कर्मचारी पेंशन योजना के तहत मासिक पेंशन, पति/पत्नी और बच्चों (या किसी अन्य पात्र नामांकित व्यक्ति) को, जब तक वे पात्र रहें। ऊपर की पीएफ़ राशि मिलने के बाद भी यह जारी रहती है।',
+  'deathClaim.start': 'यह दावा शुरू करें',
+  'deathClaim.step1': 'किसकी मृत्यु, और आप कौन हैं',
+  'deathClaim.step1.blurb': 'दिवंगत सदस्य और उनसे अपने रिश्ते के बारे में बताएँ।',
+  'deathClaim.step2': 'दस्तावेज़ और भुगतान',
+  'deathClaim.step2.blurb': 'बताएँ कि आपके पास कौन-से दस्तावेज़ हैं और पैसा कहाँ जाना चाहिए।',
+  'deathClaim.step3': 'समीक्षा और पुष्टि',
+  'deathClaim.step3.blurb': 'नीचे सब कुछ जाँचें, फिर कोड से पुष्टि करें।',
+  'deathClaim.filed': 'दावा दायर हुआ',
+
   'calc.title': 'कैलकुलेटर',
   'calc.sub': 'आपकी पासबुक के पीछे वही फ़ॉर्मूले, आगे की दिशा में चलाए गए — ताकि स्टेटमेंट में आने से पहले ही आँकड़ा दिख जाए। साइन इन की ज़रूरत नहीं।',
   'calc.tab.contribution': 'मासिक अंशदान',
@@ -362,6 +404,8 @@ export const hi: Partial<Record<StringKey, string>> = {
   'claim.reason.withdrawal': 'निकासी',
   'claim.reason.leftJob': 'नौकरी छोड़ दी',
   'claim.reason.jobChange': 'नौकरी बदलने पर स्थानांतरण',
+  'claim.reason.death': 'मृत्यु दावा (पीएफ़)',
+  'claim.reason.nomineePension': 'नॉमिनी / पारिवारिक पेंशन',
 
   'claims.lifeEvents': 'जीवन की घटनाएँ',
   'claims.lifeEventsSub':

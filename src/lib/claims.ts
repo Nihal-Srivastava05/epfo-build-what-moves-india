@@ -9,6 +9,8 @@ export const reasonLabelKey: Record<string, StringKey> = {
   education: 'claim.reason.education',
   'left-job': 'claim.reason.leftJob',
   'job-change': 'claim.reason.jobChange',
+  death: 'claim.reason.death',
+  'nominee-pension': 'claim.reason.nomineePension',
 }
 
 /** The three steps, named the same way wherever they are described. */

@@ -14,6 +14,8 @@ import Landing from '@/routes/landing'
 
 const SignIn = lazy(() => import('@/routes/signin'))
 const StatusLookup = lazy(() => import('@/routes/status-lookup'))
+const DeathClaim = lazy(() => import('@/routes/death-claim'))
+const DeathClaimFile = lazy(() => import('@/routes/death-claim-file'))
 const Calculators = lazy(() => import('@/routes/calculators'))
 const Glossary = lazy(() => import('@/routes/glossary'))
 const GlossaryTerm = lazy(() => import('@/routes/glossary-term'))
@@ -24,6 +26,7 @@ const Notifications = lazy(() => import('@/routes/notifications'))
 const Grievance = lazy(() => import('@/routes/grievance'))
 
 const MemberHome = lazy(() => import('@/routes/member/home'))
+const MemberFutureMe = lazy(() => import('@/routes/member/future-me'))
 const MemberPassbook = lazy(() => import('@/routes/member/passbook'))
 const MemberServiceHistory = lazy(() => import('@/routes/member/service-history'))
 const MemberClaims = lazy(() => import('@/routes/member/claims'))
@@ -95,6 +98,8 @@ export default function App() {
 
           <Route element={<ReferenceShell />}>
             <Route path="status" element={<StatusLookup />} />
+            <Route path="death-claim" element={<DeathClaim />} />
+            <Route path="death-claim/file" element={<DeathClaimFile />} />
             <Route path="calculators" element={<Calculators />} />
             <Route path="glossary" element={<Glossary />} />
             <Route path="glossary/:termId" element={<GlossaryTerm />} />
@@ -109,6 +114,7 @@ export default function App() {
             }
           >
             <Route path="member" element={<MemberHome />} />
+            <Route path="member/future-me" element={<MemberFutureMe />} />
             <Route path="member/passbook" element={<MemberPassbook />} />
             <Route path="member/service-history" element={<MemberServiceHistory />} />
             <Route path="member/claims" element={<MemberClaims />} />

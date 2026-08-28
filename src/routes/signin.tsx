@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { ArrowLeft, ArrowRight, Check, Copy, KeyRound, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
@@ -33,6 +33,8 @@ export default function SignIn() {
   const [copied, setCopied] = useState(false)
   const signIn = useSession((s) => s.signIn)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirect = searchParams.get('redirect')
   const { t } = useT()
   const motionOk = useMotionOk()
   const Icon = personaMeta[persona].icon
@@ -47,7 +49,8 @@ export default function SignIn() {
       return
     }
     signIn(persona)
-    navigate(personaMeta[persona].home, { replace: true })
+    const safeRedirect = redirect && redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : null
+    navigate(safeRedirect ?? personaMeta[persona].home, { replace: true })
   }
 
   const copyOtp = async () => {

@@ -26,6 +26,8 @@ export const EPS_WAGE_CEILING = 15000
 export const EDLI_RATE = 0.005
 export const ADMIN_RATE = 0.005
 export const INTEREST_RATE = 0.0825
+/** The age EPS pays a pension from, and the age every projection here runs to. */
+export const RETIREMENT_AGE = 58
 
 export const people: Person[] = [
   {
@@ -345,8 +347,80 @@ export const approvals: Approval[] = [
     kind: 'exit',
     personName: 'Ravi Kumar',
     uan: '100502993410',
-    detail: 'Mark exit date — left on 20 Aug 2026',
+    detail: 'Left on 20 Aug 2026 — confirm the date so his PF account can be settled',
     waitingSince: '2026-08-27',
+  },
+  {
+    id: 'ap-5',
+    estCode: 'MHBAN0045123000',
+    kind: 'exit',
+    personName: 'Deepak Rao',
+    uan: '101077529341',
+    detail: 'Left on 12 Aug 2026 — confirm the date so his PF account can be settled',
+    waitingSince: '2026-08-14',
+  },
+  {
+    id: 'ap-6',
+    estCode: 'MHBAN0045123000',
+    kind: 'exit',
+    personName: 'Meera Iyer',
+    uan: '101188647203',
+    detail: 'Left on 18 Aug 2026 — confirm the date so her PF account can be settled',
+    waitingSince: '2026-08-19',
+  },
+  {
+    id: 'ap-7',
+    estCode: 'MHBAN0045123000',
+    kind: 'exit',
+    personName: 'Suresh Pillai',
+    uan: '101299035618',
+    detail: 'Left on 22 Aug 2026 — confirm the date so his PF account can be settled',
+    waitingSince: '2026-08-23',
+  },
+  {
+    id: 'ap-8',
+    estCode: 'MHBAN0045123000',
+    kind: 'exit',
+    personName: 'Kavita Menon',
+    uan: '101300182947',
+    detail: 'Left on 25 Aug 2026 — confirm the date so her PF account can be settled',
+    waitingSince: '2026-08-26',
+  },
+  {
+    id: 'ap-9',
+    estCode: 'MHBAN0045123000',
+    kind: 'kyc',
+    personName: 'Neha Kapoor',
+    uan: '101411738295',
+    detail: 'Aadhaar name mismatch — approve the corrected KYC',
+    waitingSince: '2026-08-21',
+  },
+  {
+    id: 'ap-10',
+    estCode: 'MHBAN0045123000',
+    kind: 'kyc',
+    personName: 'Rahul Verma',
+    uan: '101522846170',
+    detail: 'Mobile number change — approve the corrected KYC',
+    waitingSince: '2026-08-24',
+  },
+  {
+    id: 'ap-11',
+    estCode: 'MHBAN0045123000',
+    kind: 'mismatch',
+    personName: 'Sneha Patil',
+    uan: '100633471028',
+    detail: 'Filed wage ₹54,000 differs from the payroll record of ₹57,000 — confirm which is correct',
+    waitingSince: '2026-08-22',
+  },
+  {
+    id: 'ap-12',
+    estCode: 'MHBAN0045123000',
+    kind: 'mismatch',
+    personName: 'Anita Deshmukh',
+    uan: '100855630182',
+    detail: 'Filed wage ₹58,500 differs from the payroll record of ₹61,000 — confirm which is correct',
+    waitingSince: '2026-08-25',
   },
 ]
 
@@ -354,11 +428,17 @@ export const roster: RosterEntry[] = [
   { uan: '100234567890', name: 'Priya Sharma', joined: '2024-04-01', monthlyWage: 52000, kyc: 'attention' },
   { uan: '100388120945', name: 'Arjun Nair', joined: '2026-07-14', monthlyWage: 38000, kyc: 'pending' },
   { uan: '100411203877', name: 'Fatima Sheikh', joined: '2023-01-09', monthlyWage: 46000, kyc: 'attention' },
-  { uan: '100502993410', name: 'Ravi Kumar', joined: '2021-08-02', monthlyWage: 33000, kyc: 'verified', exited: '2026-08-20' },
+  { uan: '100502993410', name: 'Ravi Kumar', joined: '2021-08-02', monthlyWage: 33000, kyc: 'verified' },
   { uan: '100633471028', name: 'Sneha Patil', joined: '2022-11-21', monthlyWage: 57000, kyc: 'verified' },
   { uan: '100744019265', name: 'Imran Qureshi', joined: '2025-02-17', monthlyWage: 29500, kyc: 'verified' },
   { uan: '100855630182', name: 'Anita Deshmukh', joined: '2020-06-15', monthlyWage: 61000, kyc: 'verified' },
   { uan: '100966284517', name: 'Vikram Joshi', joined: '2024-09-02', monthlyWage: 44000, kyc: 'verified' },
+  { uan: '101077529341', name: 'Deepak Rao', joined: '2019-03-11', monthlyWage: 39000, kyc: 'verified' },
+  { uan: '101188647203', name: 'Meera Iyer', joined: '2021-10-05', monthlyWage: 41500, kyc: 'verified' },
+  { uan: '101299035618', name: 'Suresh Pillai', joined: '2018-07-19', monthlyWage: 36000, kyc: 'verified' },
+  { uan: '101300182947', name: 'Kavita Menon', joined: '2020-01-27', monthlyWage: 48000, kyc: 'verified' },
+  { uan: '101411738295', name: 'Neha Kapoor', joined: '2022-05-30', monthlyWage: 43500, kyc: 'attention' },
+  { uan: '101522846170', name: 'Rahul Verma', joined: '2023-09-14', monthlyWage: 37000, kyc: 'attention' },
 ]
 
 /**
