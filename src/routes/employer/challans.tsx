@@ -17,7 +17,7 @@ export default function Challans() {
       <PageHeader title="Challans" sub="Every payment, with the receipt number you would quote to a bank." />
       <ul className="space-y-3">
         {challans.map((c) => (
-          <li key={c.trrn} className="rounded-xl border bg-card p-5">
+          <li key={c.trrn} className="rounded-lg border bg-card p-5">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="font-semibold">{fmtMonthLong(c.month)}</p>

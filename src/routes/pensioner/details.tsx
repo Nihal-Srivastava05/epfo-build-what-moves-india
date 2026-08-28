@@ -29,7 +29,7 @@ export default function Details() {
         title="My details"
         sub="What EPFO holds about you. Everything marked verified has been checked against a source."
       />
-      <dl className="divide-y rounded-xl border bg-card">
+      <dl className="divide-y rounded-lg border bg-card">
         {rows.map((r, i) => (
           <div key={i} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
             <dt className="text-sm text-muted-foreground">{r.label}</dt>

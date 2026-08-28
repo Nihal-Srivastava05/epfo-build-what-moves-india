@@ -1,20 +1,35 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowRight, ArrowUpRight, Building2, CheckCircle2, Wallet } from 'lucide-react'
+import { ArrowRight, Building2, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CountUpMoney } from '@/components/patterns/count-up'
 import { Money } from '@/components/patterns/money'
 import { ActionCard } from '@/components/patterns/action-card'
 import { ClaimTracker } from '@/components/patterns/claim-tracker'
-import { SectionTitle } from '@/components/patterns/page-header'
+import { PanelTitle, SectionTitle } from '@/components/patterns/page-header'
 import { StatusPill } from '@/components/patterns/status-pill'
 import { Term } from '@/components/patterns/term'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
-import { activeClaim, totalBalance } from '@/lib/derive'
+import {
+  activeClaim,
+  employeeShareTotal,
+  employerShareTotal,
+  interestTotal,
+  pensionShareTotal,
+  totalBalance,
+} from '@/lib/derive'
 import { employments, establishmentByCode, personById, TODAY } from '@/lib/mock/db'
-import { fmtDate, fmtMonth, fmtMonthLong, fmtUan } from '@/lib/format'
+import { fmtDate, fmtMonth, fmtMonthLong, fmtUan, inr } from '@/lib/format'
+import type { StringKey } from '@/i18n/strings'
+
+const quickActions: { to: string; titleKey: StringKey; subKey: StringKey }[] = [
+  { to: '/member/claims/new', titleKey: 'member.withdraw', subKey: 'member.withdrawSub' },
+  { to: '/member/passbook', titleKey: 'member.viewPassbook', subKey: 'member.passbookSub' },
+  { to: '/member/kyc', titleKey: 'nav.kyc', subKey: 'member.kycSub' },
+  { to: '/member/help', titleKey: 'nav.help', subKey: 'member.helpSub' },
+]
 
 export default function MemberHome() {
   const { contributions, claims, kyc, employerNotified } = useData()
@@ -28,38 +43,82 @@ export default function MemberHome() {
   const kycIssues = kyc.filter((k) => k.status !== 'verified')
   const nothingPending = missing.length === 0 && kycIssues.length === 0
 
+  const splits = [
+    { label: t('member.yourShare'), value: employeeShareTotal(contributions) },
+    { label: t('member.employerShare'), value: employerShareTotal(contributions) },
+    { label: t('member.interest'), value: interestTotal(contributions) },
+  ]
+
   return (
-    <div className="space-y-10">
-      {/* Status first, menu second. */}
-      <section aria-labelledby="balance">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            {/* The balance is the heading of this page, so it is marked as one. */}
-            <h1 id="balance" className="eyebrow mb-2">
-              {t('member.balanceLabel')}
-            </h1>
+    <div className="space-y-4">
+      {/* Status first, menu second. The balance is the heading of this page,
+          so it is marked as one. */}
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <section
+          aria-labelledby="balance"
+          className="flex flex-col gap-5 rounded-lg bg-hero p-6 text-hero-foreground"
+        >
+          <h1 id="balance" className="text-[0.6875rem] font-semibold uppercase tracking-[0.055em] text-hero-foreground/70">
+            {t('member.balanceLabel')}
+          </h1>
+
+          <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
             <CountUpMoney value={balance} />
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="pb-1.5 text-[0.8125rem] text-hero-foreground/70">
               {t('member.asOf')} {fmtDate(TODAY, lang)}
-              <span className="mx-2 text-border" aria-hidden>·</span>
-              {me.name}
-              <span className="mx-2 text-border" aria-hidden>·</span>
-              <Term id="uan">UAN</Term> <span className="ident">{fmtUan(me.uan)}</span>
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button asChild size="lg">
-              <Link to="/member/claims/new">
-                <Wallet className="size-4" aria-hidden />
-                {t('member.withdraw')}
+
+          {/* Three columns is a desktop luxury: at 360px the figures clip, so on
+              a phone the same three facts become three rows. */}
+          <dl className="grid gap-px overflow-hidden rounded-sm bg-hero-foreground/20 sm:grid-cols-3">
+            {splits.map((s) => (
+              <div
+                key={s.label}
+                className="flex items-baseline justify-between gap-3 bg-hero px-3.5 py-2.5 sm:block sm:py-3"
+              >
+                <dt className="text-[0.6875rem] text-hero-foreground/70">{s.label}</dt>
+                <dd className="num text-[1.0625rem] font-bold sm:mt-0.5">₹{inr(s.value)}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <p className="text-[0.8125rem] text-hero-foreground/80">
+            {/* EPS is a different pot from the PF balance, so it is stated apart
+                from the three parts that add up to the figure above. */}
+            <Term id="eps" className="text-hero-foreground decoration-hero-foreground/50 hover:decoration-hero-foreground">
+              {lang === 'hi' ? 'पेंशन (ईपीएस)' : 'Pension (EPS)'}
+            </Term>{' '}
+            <span className="num font-semibold">₹{inr(pensionShareTotal(contributions))}</span>{' '}
+            <span className="text-hero-foreground/60">— {t('member.pensionAside')}</span>
+          </p>
+
+          <p className="num mt-auto text-xs text-hero-foreground/60">
+            {me.name} · <Term id="uan" className="text-hero-foreground/80 decoration-hero-foreground/40">UAN</Term>{' '}
+            {fmtUan(me.uan)}
+          </p>
+        </section>
+
+        <section aria-labelledby="doitnow" className="flex flex-col rounded-lg border bg-card p-5">
+          <h2 id="doitnow" className="eyebrow mb-3.5">
+            {t('member.doItNow')}
+          </h2>
+          <div className="grid flex-1 gap-2.5 sm:grid-cols-2 sm:grid-rows-2">
+            {quickActions.map((a) => (
+              <Link
+                key={a.to}
+                to={a.to}
+                className="flex flex-col justify-center gap-1 rounded-md border p-3.5 transition-colors duration-[var(--dur-fast)] hover:border-brand hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              >
+                <span className="text-[0.8125rem] font-semibold">{t(a.titleKey)}</span>
+                <span className="text-[0.6875rem] leading-snug text-muted-foreground">
+                  {t(a.subKey)}
+                </span>
               </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link to="/member/passbook">{t('member.viewPassbook')}</Link>
-            </Button>
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* Needs your attention — every card carries its own fix. */}
       <section aria-labelledby="needs">
@@ -71,7 +130,7 @@ export default function MemberHome() {
           <div className="flex items-start gap-3 rounded-lg border border-ok-line bg-ok-soft p-4">
             <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
             <div>
-              <p className="font-medium">{t('member.nothingNeeded')}</p>
+              <p className="font-semibold">{t('member.nothingNeeded')}</p>
               <p className="mt-1 text-sm text-muted-foreground">{t('member.nothingNeededSub')}</p>
             </div>
           </div>
@@ -93,14 +152,20 @@ export default function MemberHome() {
                     title={`${t('gap.title')} — ${fmtMonth(c.month, lang)}`}
                     detail={
                       <>
-                        <span className="font-medium text-foreground">{est.name}</span> {t('gap.body')}{' '}
-                        {fmtMonthLong(c.month)}. {t('gap.due')} {fmtDate(c.holderSince ?? TODAY, lang)}.
+                        <span className="font-semibold text-foreground">{est.name}</span>{' '}
+                        {t('gap.body')} {fmtMonthLong(c.month)}. {t('gap.due')}{' '}
+                        {fmtDate(c.holderSince ?? TODAY, lang)}.
                       </>
                     }
                     meta={
-                      <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
                         <StatusPill tone="stop">
-                          {t('gap.amountMissing')} <Money value={c.employeeShare + c.employerEpfShare} size="sm" className="ml-1" />
+                          {t('gap.amountMissing')}{' '}
+                          <Money
+                            value={c.employeeShare + c.employerEpfShare}
+                            size="sm"
+                            className="ml-1 font-bold"
+                          />
                         </StatusPill>
                         {notified ? <StatusPill tone="ok">{t('gap.notified')}</StatusPill> : null}
                       </div>
@@ -135,10 +200,11 @@ export default function MemberHome() {
 
       {/* Where is it and when does it land — on the first screen. */}
       {claim ? (
-        <section aria-labelledby="claim">
-          <SectionTitle
+        <section aria-labelledby="claim" className="rounded-lg border bg-card p-5">
+          <PanelTitle
+            className="mb-4"
             action={
-              <Button asChild variant="ghost" size="sm" className="h-8">
+              <Button asChild variant="ghost" size="sm" className="-mr-2">
                 <Link to="/member/claims">
                   {t('common.viewAll')}
                   <ArrowRight className="size-3.5" aria-hidden />
@@ -146,36 +212,39 @@ export default function MemberHome() {
               </Button>
             }
           >
-            <span id="claim">{t('member.yourClaim')}</span>
-          </SectionTitle>
-          <div className="rounded-xl border bg-card p-5">
-            <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <Money value={claim.amount} size="xl" mark />
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {claim.reasonKey === 'medical' ? t('claim.reason.medical') : t('claim.reason.withdrawal')}
-                  <span className="mx-2 text-border" aria-hidden>·</span>
-                  <span className="ident">{claim.id}</span>
-                </p>
-              </div>
+            <span id="claim" className="flex flex-wrap items-center gap-2.5">
+              {t('member.yourClaim')}
+              <StatusPill tone="brand">
+                {claim.reasonKey === 'medical' ? t('claim.reason.medical') : t('claim.reason.withdrawal')}
+                <Money value={claim.amount} size="sm" className="font-bold" />
+              </StatusPill>
               {claim.expectedBy ? (
-                <div className="text-right">
-                  <p className="eyebrow mb-1">{t('member.expectedBy')}</p>
-                  <p className="num font-semibold">{fmtDate(claim.expectedBy, lang)}</p>
-                </div>
+                <span className="num text-xs font-normal text-muted-foreground">
+                  {t('member.expectedBy')} {fmtDate(claim.expectedBy, lang)}
+                </span>
               ) : null}
-            </div>
-            <ClaimTracker claim={claim} />
-          </div>
+            </span>
+          </PanelTitle>
+          <ClaimTracker claim={claim} />
         </section>
       ) : null}
 
       {/* One UAN, one continuous money story across every employer. */}
-      <section aria-labelledby="employers">
-        <SectionTitle>
+      <section aria-labelledby="employers" className="rounded-lg border bg-card">
+        <PanelTitle
+          className="border-b px-5 py-3.5"
+          action={
+            <Button asChild variant="ghost" size="sm" className="-mr-2">
+              <Link to="/member/passbook">
+                {t('member.viewPassbook')}
+                <ArrowRight className="size-3.5" aria-hidden />
+              </Link>
+            </Button>
+          }
+        >
           <span id="employers">{t('member.employers')}</span>
-        </SectionTitle>
-        <ul className="divide-y rounded-xl border bg-card">
+        </PanelTitle>
+        <ul className="divide-y">
           {employments
             .slice()
             .reverse()
@@ -184,13 +253,13 @@ export default function MemberHome() {
               const rows = contributions.filter((c) => c.employmentId === emp.id && c.status !== 'missing')
               const total = rows.reduce((s, c) => s + c.employeeShare + c.employerEpfShare, 0)
               return (
-                <li key={emp.id} className="flex items-center gap-4 p-4">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                <li key={emp.id} className="flex items-center gap-3.5 px-5 py-3.5">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-sm bg-muted">
                     <Building2 className="size-4 text-muted-foreground" aria-hidden />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium">{est.name}</p>
-                    <p className="num mt-0.5 text-sm text-muted-foreground">
+                    <p className="truncate text-sm font-semibold">{est.name}</p>
+                    <p className="num mt-0.5 text-xs text-muted-foreground">
                       {fmtMonth(emp.joined.slice(0, 7), lang)} –{' '}
                       {emp.exited ? fmtMonth(emp.exited.slice(0, 7), lang) : lang === 'hi' ? 'अब तक' : 'now'}
                       <span className="mx-1.5 text-border" aria-hidden>·</span>
@@ -198,21 +267,15 @@ export default function MemberHome() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <Money value={total} className="font-medium" />
+                    <Money value={total} className="font-bold" />
                     {emp.current ? (
-                      <p className="mt-0.5 text-xs text-ok">Current</p>
+                      <p className="mt-0.5 text-[0.6875rem] font-semibold text-ok">Current</p>
                     ) : null}
                   </div>
                 </li>
               )
             })}
         </ul>
-        <Button asChild variant="ghost" size="sm" className="mt-2 -ml-2">
-          <Link to="/member/passbook">
-            {t('member.viewPassbook')}
-            <ArrowUpRight className="size-3.5" aria-hidden />
-          </Link>
-        </Button>
       </section>
     </div>
   )

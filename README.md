@@ -64,7 +64,28 @@ refresh never 404s on a static host. To host it elsewhere, set `DEPLOY_BASE` at 
 Vite 8 · React 19 · TypeScript · Tailwind v4 · shadcn/ui · zustand · motion. No backend; state
 persists to localStorage, and `Settings → Reset the demo` puts every account back to its start.
 
-A few decisions worth naming:
+### The design language
+
+One saturated blue carries every affordance; the neutrals are cool and near-achromatic; status
+colour is quarantined in its own ramp so "pending" never reads as decoration. The whole token set
+lives in [`src/index.css`](src/index.css) and everything downstream reads from it.
+
+- **A permanent icon rail, and a bar that names the screen and the person.** Five destinations is
+  few enough that an icon with its own caption beats a list, and it gives the working area back the
+  200px a text sidebar would have taken. The bar owns the page's `h1`, so a page header below it is
+  the *task* inside that section, not a second title.
+- **Cards carry a hairline, not a shadow.** Shadow is spent on exactly one thing: the filled blue
+  button that commits something. One per screen.
+- **Every panel is titled with an eyebrow, not a heading.** Keeping the type ramp flat inside a page
+  means the only large text on screen is the number, or the question, the page is actually about.
+- **The saturated hero surface is its own token pair.** `--brand` lightens in dark mode and white on
+  a light blue fails contrast, so the balance card reads from `--hero` / `--hero-foreground`, which
+  stay a deep blue with light text in both themes.
+- **The 44px tap floor is scoped to coarse pointers.** Applied everywhere it silently overrode the
+  entire control-size scale; on a touch screen, which is the only place it was protecting anyone, it
+  still holds.
+
+A few other decisions worth naming:
 
 - **`<ActionCard>` requires a `fix` prop.** A warning that cannot state what resolves it will not
   compile. "No dead ends" is enforced by the type system rather than by discipline.

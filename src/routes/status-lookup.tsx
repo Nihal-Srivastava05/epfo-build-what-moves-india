@@ -47,7 +47,7 @@ export default function StatusLookup() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
-      <h1 className="text-3xl font-semibold tracking-tight">{t('landing.lookup')}</h1>
+      <h1 className="text-[1.75rem] font-extrabold tracking-[-0.03em]">{t('landing.lookup')}</h1>
       <p className="mt-3 leading-relaxed text-muted-foreground">
         {t('landing.lookupSub')} No sign-in, no CAPTCHA. The reference number is enough.
       </p>
@@ -114,7 +114,7 @@ export default function StatusLookup() {
           className="mt-8"
         >
           {result === 'claim' ? (
-            <div className="rounded-xl border bg-card p-5">
+            <div className="rounded-lg border bg-card p-5">
               <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className="ident text-sm text-muted-foreground">{claim.id}</p>
@@ -132,7 +132,7 @@ export default function StatusLookup() {
           ) : null}
 
           {result === 'challan' ? (
-            <div className="rounded-xl border bg-card p-5">
+            <div className="rounded-lg border bg-card p-5">
               <p className="ident text-sm text-muted-foreground">{challan.trrn}</p>
               <p className="mt-1 font-semibold">{fmtMonthLong(challan.month)}</p>
               <Money value={challan.total} size="xl" className="mt-2 block" />
@@ -146,7 +146,7 @@ export default function StatusLookup() {
           ) : null}
 
           {result === 'pension' ? (
-            <div className="rounded-xl border bg-card p-5">
+            <div className="rounded-lg border bg-card p-5">
               <p className="eyebrow mb-1">Last credit</p>
               <Money value={payment.amount} size="xl" />
               <p className="num mt-2 text-sm text-muted-foreground">
@@ -160,7 +160,7 @@ export default function StatusLookup() {
           ) : null}
 
           {result === 'none' ? (
-            <div className="rounded-xl border border-wait-line bg-wait-soft p-5">
+            <div className="rounded-lg border border-wait-line bg-wait-soft p-5">
               <p className="font-medium">We could not find that reference</p>
               <p className="mt-1 text-sm leading-relaxed">
                 Check the number against your SMS or receipt. In this prototype only the demo references

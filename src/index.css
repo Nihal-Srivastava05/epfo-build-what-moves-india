@@ -5,170 +5,212 @@
 
 /* ---------------------------------------------------------------------------
    EPFO unified — design tokens
-   Navy carries structure. Gold is a marker, never a fill, so contrast holds.
-   Status colours live in their own ramp so "pending" never reads as decoration.
+
+   The ramp is a Spring-style product system: one saturated blue carries every
+   affordance, the neutrals are cool and near-achromatic, and status colour is
+   quarantined in its own scale so "pending" never reads as decoration.
+   Nothing here is decorative — a colour is either an affordance or a state.
    --------------------------------------------------------------------------- */
 
 :root {
-  --radius: 0.75rem;
+  /* Radii — 4 / 10 / 14 / 16, matched to the control heights below. */
+  --radius: 0.875rem;
 
-  /* Ground & ink — warm paper, after the passbook */
-  --background: #fbfaf8;
-  --foreground: #16202e;
+  /* Ground & ink */
+  --background: #f5f6f9;      /* the page sits a step below its cards */
+  --foreground: #323439;      /* headings and body, never pure black */
   --card: #ffffff;
-  --card-foreground: #16202e;
+  --card-foreground: #323439;
   --popover: #ffffff;
-  --popover-foreground: #16202e;
-  --muted: #f2efe9;
-  --muted-foreground: #5b6675;
-  --border: #e7e3dc;
-  --input: #ded9d0;
-  --ring: #143059;
+  --popover-foreground: #323439;
+  --muted: #f5f6f9;
+  --muted-foreground: #72757a;
+  --faint: #9e9fa4;           /* tertiary: disabled, timestamps, "was:" lines */
+  --border: #dddfe5;
+  --input: #dddfe5;
+  --ring: #022685;
 
-  /* Brand */
-  --brand: #10233f;
-  --brand-soft: #1c3a63;
-  --primary: #143059;
+  /* Brand — one blue, three weights */
+  --brand: #0040dd;
+  --brand-strong: #022685;
+  --brand-tint: #e6ecfc;      /* 10% of brand over white, flattened */
+  --brand-line: #b8c9f5;
+  --primary: #0040dd;
   --primary-foreground: #ffffff;
-  --secondary: #f2efe9;
-  --secondary-foreground: #16202e;
-  --accent: #f2efe9;
-  --accent-foreground: #16202e;
-
-  /* Gold — eyebrow rules, emphasis edges, amount markers */
-  --gold: #b7862b;
-  --gold-soft: #f6efdf;
-  --gold-line: #e3cf9e;
+  /* The one saturated surface in the app: the figure a screen exists to show.
+     It is its own pair rather than `brand` + white, because the brand lightens
+     in dark mode and white on a light blue does not pass contrast. */
+  --hero: #0040dd;
+  --hero-foreground: #ffffff;
+  --secondary: #f5f6f9;
+  --secondary-foreground: #323439;
+  --accent: #f5f6f9;
+  --accent-foreground: #323439;
 
   /* Status — deliberately outside the brand ramp */
-  --ok: #1b7a4b;
-  --ok-soft: #e8f4ed;
-  --ok-line: #b9dfc9;
-  --wait: #a66a00;
-  --wait-soft: #fdf1de;
-  --wait-line: #f0d7a8;
-  --stop: #b3261e;
-  --stop-soft: #fdecea;
-  --stop-line: #f3c4bf;
-  --info: #1f5fa9;
-  --info-soft: #e9f1fb;
-  --info-line: #c0d8f2;
+  --ok: #12872c;
+  --ok-soft: #e8f6ec;
+  --ok-line: #b6e2c1;
+  --wait: #cc5200;
+  --wait-soft: #fff0e6;
+  --wait-line: #ffd0ad;
+  --stop: #bb1515;
+  --stop-soft: #fdebeb;
+  --stop-line: #f5c2c2;
+  --info: #0770c0;
+  --info-soft: #e8f2fa;
+  --info-line: #b6d6ee;
 
-  --destructive: #b3261e;
+  /* On-device assistant — the only warm colour in the system, and it means
+     exactly one thing: a machine wrote this sentence, not the record. */
+  --ai: #e54800;
+  --ai-soft: #fff1e7;
+  --ai-line: #ffc79e;
+
+  --destructive: #bb1515;
   --destructive-foreground: #ffffff;
 
   --sidebar: #ffffff;
-  --sidebar-foreground: #16202e;
-  --sidebar-primary: #143059;
+  --sidebar-foreground: #323439;
+  --sidebar-primary: #0040dd;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f2efe9;
-  --sidebar-accent-foreground: #16202e;
-  --sidebar-border: #e7e3dc;
-  --sidebar-ring: #143059;
+  --sidebar-accent: #f5f6f9;
+  --sidebar-accent-foreground: #323439;
+  --sidebar-border: #dddfe5;
+  --sidebar-ring: #022685;
+
+  /* Elevation. Cards carry a border, not a shadow; shadow marks the one
+     control on a screen that commits something. */
+  --shadow-key: 0 2px 4px 0 rgb(0 64 221 / 0.24);
+  --shadow-pop: 0 10px 20px -5px rgb(16 20 30 / 0.14);
+
+  /* Motion — golden-ratio durations, borrowed from Spring. */
+  --ease-in-fast: cubic-bezier(0.382, 0, 0.786, 1);
+  --ease-out-slow: cubic-bezier(0.3, 0, 0.75, 0.65);
+  --dur-fast: 0.1618s;
+  --dur-slow: 0.382s;
 }
 
 :root:not([data-theme="light"]) {
   @media (prefers-color-scheme: dark) {
-    --background: #0c1524;
-    --foreground: #e9edf3;
-    --card: #121d2f;
-    --card-foreground: #e9edf3;
-    --popover: #121d2f;
-    --popover-foreground: #e9edf3;
-    --muted: #1a2740;
-    --muted-foreground: #9aa8bd;
-    --border: #22314c;
-    --input: #2b3c59;
-    --ring: #7ea8dd;
+    --background: #0e1117;
+    --foreground: #e7e9ee;
+    --card: #171a21;
+    --card-foreground: #e7e9ee;
+    --popover: #171a21;
+    --popover-foreground: #e7e9ee;
+    --muted: #1c2029;
+    --muted-foreground: #9ba2ae;
+    --faint: #6f7683;
+    --border: #2a2f3a;
+    --input: #363c49;
+    --ring: #7ea0ff;
 
-    --brand: #e9edf3;
-    --primary: #cfe0f5;
-    --primary-foreground: #0c1524;
-    --secondary: #1a2740;
-    --secondary-foreground: #e9edf3;
-    --accent: #1a2740;
-    --accent-foreground: #e9edf3;
+    --brand: #5b8cff;
+    --brand-strong: #8bacff;
+    --brand-tint: #141c33;
+    --brand-line: #29396b;
+    --primary: #5b8cff;
+    --primary-foreground: #06101f;
+    --hero: #16265e;
+    --hero-foreground: #eef2ff;
+    --secondary: #1c2029;
+    --secondary-foreground: #e7e9ee;
+    --accent: #1c2029;
+    --accent-foreground: #e7e9ee;
 
-    --gold: #e2b75c;
-    --gold-soft: #2a2214;
-    --gold-line: #56421f;
+    --ok: #58cc7c;
+    --ok-soft: #10241a;
+    --ok-line: #1f4630;
+    --wait: #ff9a4d;
+    --wait-soft: #271a10;
+    --wait-line: #4d341c;
+    --stop: #ff8177;
+    --stop-soft: #2a1516;
+    --stop-line: #55262a;
+    --info: #6cb2ec;
+    --info-soft: #101f2c;
+    --info-line: #23415c;
 
-    --ok: #63c68e;
-    --ok-soft: #12281d;
-    --ok-line: #224a33;
-    --wait: #e0a94a;
-    --wait-soft: #2b2113;
-    --wait-line: #52401d;
-    --stop: #f08a80;
-    --stop-soft: #2e1614;
-    --stop-line: #5b2723;
-    --info: #7eb0ea;
-    --info-soft: #12203a;
-    --info-line: #24406b;
+    --ai: #ff9a4d;
+    --ai-soft: #271a10;
+    --ai-line: #4d341c;
 
-    --destructive: #f08a80;
-    --destructive-foreground: #0c1524;
+    --destructive: #ff8177;
+    --destructive-foreground: #06101f;
 
-    --sidebar: #121d2f;
-    --sidebar-foreground: #e9edf3;
-    --sidebar-primary: #cfe0f5;
-    --sidebar-primary-foreground: #0c1524;
-    --sidebar-accent: #1a2740;
-    --sidebar-accent-foreground: #e9edf3;
-    --sidebar-border: #22314c;
-    --sidebar-ring: #7ea8dd;
+    --sidebar: #171a21;
+    --sidebar-foreground: #e7e9ee;
+    --sidebar-primary: #5b8cff;
+    --sidebar-primary-foreground: #06101f;
+    --sidebar-accent: #1c2029;
+    --sidebar-accent-foreground: #e7e9ee;
+    --sidebar-border: #2a2f3a;
+    --sidebar-ring: #7ea0ff;
+
+    --shadow-key: 0 2px 4px 0 rgb(0 0 0 / 0.5);
+    --shadow-pop: 0 10px 20px -5px rgb(0 0 0 / 0.6);
   }
 }
 
 :root[data-theme="dark"] {
-  --background: #0c1524;
-  --foreground: #e9edf3;
-  --card: #121d2f;
-  --card-foreground: #e9edf3;
-  --popover: #121d2f;
-  --popover-foreground: #e9edf3;
-  --muted: #1a2740;
-  --muted-foreground: #9aa8bd;
-  --border: #22314c;
-  --input: #2b3c59;
-  --ring: #7ea8dd;
+  --background: #0e1117;
+  --foreground: #e7e9ee;
+  --card: #171a21;
+  --card-foreground: #e7e9ee;
+  --popover: #171a21;
+  --popover-foreground: #e7e9ee;
+  --muted: #1c2029;
+  --muted-foreground: #9ba2ae;
+  --faint: #6f7683;
+  --border: #2a2f3a;
+  --input: #363c49;
+  --ring: #7ea0ff;
 
-  --brand: #e9edf3;
-  --primary: #cfe0f5;
-  --primary-foreground: #0c1524;
-  --secondary: #1a2740;
-  --secondary-foreground: #e9edf3;
-  --accent: #1a2740;
-  --accent-foreground: #e9edf3;
+  --brand: #5b8cff;
+  --brand-strong: #8bacff;
+  --brand-tint: #141c33;
+  --brand-line: #29396b;
+  --primary: #5b8cff;
+  --primary-foreground: #06101f;
+  --hero: #16265e;
+  --hero-foreground: #eef2ff;
+  --secondary: #1c2029;
+  --secondary-foreground: #e7e9ee;
+  --accent: #1c2029;
+  --accent-foreground: #e7e9ee;
 
-  --gold: #e2b75c;
-  --gold-soft: #2a2214;
-  --gold-line: #56421f;
+  --ok: #58cc7c;
+  --ok-soft: #10241a;
+  --ok-line: #1f4630;
+  --wait: #ff9a4d;
+  --wait-soft: #271a10;
+  --wait-line: #4d341c;
+  --stop: #ff8177;
+  --stop-soft: #2a1516;
+  --stop-line: #55262a;
+  --info: #6cb2ec;
+  --info-soft: #101f2c;
+  --info-line: #23415c;
 
-  --ok: #63c68e;
-  --ok-soft: #12281d;
-  --ok-line: #224a33;
-  --wait: #e0a94a;
-  --wait-soft: #2b2113;
-  --wait-line: #52401d;
-  --stop: #f08a80;
-  --stop-soft: #2e1614;
-  --stop-line: #5b2723;
-  --info: #7eb0ea;
-  --info-soft: #12203a;
-  --info-line: #24406b;
+  --ai: #ff9a4d;
+  --ai-soft: #271a10;
+  --ai-line: #4d341c;
 
-  --destructive: #f08a80;
-  --destructive-foreground: #0c1524;
+  --destructive: #ff8177;
+  --destructive-foreground: #06101f;
 
-  --sidebar: #121d2f;
-  --sidebar-foreground: #e9edf3;
-  --sidebar-primary: #cfe0f5;
-  --sidebar-primary-foreground: #0c1524;
-  --sidebar-accent: #1a2740;
-  --sidebar-accent-foreground: #e9edf3;
-  --sidebar-border: #22314c;
-  --sidebar-ring: #7ea8dd;
+  --sidebar: #171a21;
+  --sidebar-foreground: #e7e9ee;
+  --sidebar-primary: #5b8cff;
+  --sidebar-primary-foreground: #06101f;
+  --sidebar-accent: #1c2029;
+  --sidebar-accent-foreground: #e7e9ee;
+  --sidebar-border: #2a2f3a;
+  --sidebar-ring: #7ea0ff;
+
+  --shadow-key: 0 2px 4px 0 rgb(0 0 0 / 0.5);
+  --shadow-pop: 0 10px 20px -5px rgb(0 0 0 / 0.6);
 }
 
 @theme inline {
@@ -183,6 +225,8 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-hero: var(--hero);
+  --color-hero-foreground: var(--hero-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -196,9 +240,10 @@
   --color-ring: var(--ring);
 
   --color-brand: var(--brand);
-  --color-gold: var(--gold);
-  --color-gold-soft: var(--gold-soft);
-  --color-gold-line: var(--gold-line);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-tint: var(--brand-tint);
+  --color-brand-line: var(--brand-line);
+  --color-faint: var(--faint);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
   --color-ok-line: var(--ok-line);
@@ -211,6 +256,9 @@
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
   --color-info-line: var(--info-line);
+  --color-ai: var(--ai);
+  --color-ai-soft: var(--ai-soft);
+  --color-ai-line: var(--ai-line);
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -221,10 +269,18 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Four radii, each tied to a control size: chips, fields, buttons, cards. */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+
+  --shadow-key: var(--shadow-key);
+  --shadow-pop: var(--shadow-pop);
+
+  --ease-in-fast: var(--ease-in-fast);
+  --ease-out-slow: var(--ease-out-slow);
 }
 
 @layer base {
@@ -250,11 +306,15 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Tap targets never below the thumb minimum. */
-  button,
-  [role="button"],
-  a[data-tap] {
-    min-height: 44px;
+  /* Tap targets never below the thumb minimum — but a floor that applies
+     everywhere overrides the whole control scale, so it is scoped to coarse
+     pointers, which is the only place it was ever protecting anyone. */
+  @media (pointer: coarse) {
+    button,
+    [role="button"],
+    a[data-tap] {
+      min-height: 44px;
+    }
   }
 
   :focus-visible {
@@ -262,7 +322,7 @@
   }
 
   ::selection {
-    background: var(--gold-soft);
+    background: var(--brand-tint);
     color: var(--foreground);
   }
 }
@@ -280,13 +340,29 @@
     letter-spacing: 0.01em;
   }
 
-  /* Eyebrow: the one place uppercase is allowed. */
+  /* Eyebrow: the one place uppercase is allowed. Every card and section in the
+     app is titled with one, which is most of what makes the grid read as a
+     system rather than as a pile of headings. */
   .eyebrow {
-    @apply text-[0.6875rem] font-semibold uppercase tracking-[0.09em] text-muted-foreground;
+    @apply text-[0.6875rem] font-semibold uppercase tracking-[0.055em] text-muted-foreground;
   }
 
-  .rule-gold {
-    box-shadow: inset 3px 0 0 var(--gold);
+  /* Display figures: balances, metrics, the number a screen exists to show. */
+  .figure {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+
+  /* A surface that reads as a panel: white, hairline, card radius. */
+  .panel {
+    @apply rounded-lg border bg-card;
+  }
+
+  .rule-brand {
+    box-shadow: inset 3px 0 0 var(--brand);
   }
 }
 

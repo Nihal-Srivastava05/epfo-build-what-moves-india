@@ -62,14 +62,14 @@ const faqs: Record<Persona, { q: string; a: string }[]> = {
 
 export function HelpPage({ persona }: { persona: Persona }) {
   return (
-    <div className="space-y-10">
+    <div className="space-y-4">
       <PageHeader title="Help" sub="The short answers first. A person if you need one." />
 
       <section aria-labelledby="faq">
         <SectionTitle>
           <span id="faq">Common questions</span>
         </SectionTitle>
-        <Accordion type="single" collapsible className="rounded-xl border bg-card px-5">
+        <Accordion type="single" collapsible className="rounded-lg border bg-card px-5">
           {faqs[persona].map((f) => (
             <AccordionItem key={f.q} value={f.q}>
               <AccordionTrigger className="text-left text-base">{f.q}</AccordionTrigger>
@@ -86,8 +86,8 @@ export function HelpPage({ persona }: { persona: Persona }) {
           <span id="reach">Reach a person</span>
         </SectionTitle>
         <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border bg-card p-5">
-            <Phone className="mb-3 size-5 text-gold" aria-hidden />
+          <div className="rounded-lg border bg-card p-5">
+            <Phone className="mb-3 size-5 text-primary" aria-hidden />
             <p className="font-medium">Helpline</p>
             <p className="ident mt-1 text-sm">1800 118 005</p>
             <p className="mt-2 text-xs text-muted-foreground">
@@ -95,8 +95,8 @@ export function HelpPage({ persona }: { persona: Persona }) {
             </p>
             <MockBadge what="Illustrative. Not a live line in this prototype." className="mt-3" />
           </div>
-          <div className="rounded-xl border bg-card p-5">
-            <MessageSquareWarning className="mb-3 size-5 text-gold" aria-hidden />
+          <div className="rounded-lg border bg-card p-5">
+            <MessageSquareWarning className="mb-3 size-5 text-primary" aria-hidden />
             <p className="font-medium">Raise a grievance</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Attached to the claim or month it is about, so nothing is retyped.
@@ -105,8 +105,8 @@ export function HelpPage({ persona }: { persona: Persona }) {
               <Link to="/grievance/new">Open a grievance</Link>
             </Button>
           </div>
-          <div className="rounded-xl border bg-card p-5">
-            <BookOpen className="mb-3 size-5 text-gold" aria-hidden />
+          <div className="rounded-lg border bg-card p-5">
+            <BookOpen className="mb-3 size-5 text-primary" aria-hidden />
             <p className="font-medium">What the words mean</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Every term on this site, in one line each.

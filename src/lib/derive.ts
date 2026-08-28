@@ -99,6 +99,25 @@ export function employeeShareTotal(contributions: Contribution[]) {
     .reduce((sum, c) => sum + c.employeeShare, 0)
 }
 
+export function employerShareTotal(contributions: Contribution[]) {
+  return contributions
+    .filter((c) => c.status !== 'missing')
+    .reduce((sum, c) => sum + c.employerEpfShare, 0)
+}
+
+/**
+ * Whatever the running balance holds over and above the two contribution
+ * streams is accrued interest. Deriving it this way rather than re-summing the
+ * interest rows means the three parts always add back to the total on screen.
+ */
+export function interestTotal(contributions: Contribution[]) {
+  return (
+    totalBalance(contributions) -
+    employeeShareTotal(contributions) -
+    employerShareTotal(contributions)
+  )
+}
+
 export function pensionShareTotal(contributions: Contribution[]) {
   return contributions.filter((c) => c.status !== 'missing').reduce((sum, c) => sum + c.epsShare, 0)
 }

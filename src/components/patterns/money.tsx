@@ -3,7 +3,9 @@ import { inr } from '@/lib/format'
 
 /**
  * Every amount in the app renders through here: Indian digit grouping, tabular
- * figures so columns line up, and gold reserved for the figure that matters.
+ * figures so columns line up, and the brand blue reserved for the one figure a
+ * screen exists to show. Display sizes get a tighter track and heavier weight —
+ * a balance should read as a number, not as a sentence.
  */
 export function Money({
   value,
@@ -21,15 +23,15 @@ export function Money({
   sign?: '+' | '-'
 }) {
   const sizes = {
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-xl font-semibold',
-    xl: 'text-3xl font-semibold tracking-tight',
-    hero: 'text-[2.75rem] leading-[1.05] font-semibold tracking-tight sm:text-5xl',
+    sm: 'num text-[0.8125rem]',
+    md: 'num text-sm font-medium',
+    lg: 'num text-lg font-bold',
+    xl: 'figure text-[1.75rem]',
+    hero: 'figure text-[2.5rem] sm:text-[2.875rem]',
   }
   return (
     <span
-      className={cn('num whitespace-nowrap', sizes[size], mark && 'text-gold', className)}
+      className={cn('whitespace-nowrap', sizes[size], mark && 'text-primary', className)}
       aria-label={`${sign === '-' ? 'minus ' : ''}${inr(value, { paise })} rupees`}
     >
       {sign}₹{inr(value, { paise })}

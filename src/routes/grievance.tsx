@@ -37,13 +37,13 @@ export default function Grievance() {
   if (raised) {
     return (
       <div className="mx-auto max-w-xl">
-        <div className="rounded-xl border border-ok-line bg-ok-soft p-6 text-center">
+        <div className="rounded-lg border border-ok-line bg-ok-soft p-6 text-center">
           <CheckCircle2 className="mx-auto mb-4 size-12 text-ok" aria-hidden />
-          <h1 className="text-2xl font-semibold tracking-tight">Grievance raised</h1>
+          <h1 className="text-[1.5rem] font-extrabold tracking-[-0.03em]">Grievance raised</h1>
           <p className="ident mt-2 text-lg">{raised.id}</p>
         </div>
         {/* The ladder, with the date it climbs on its own. */}
-        <div className="mt-6 rounded-xl border bg-card p-5">
+        <div className="mt-6 rounded-lg border bg-card p-5">
           <p className="eyebrow mb-3">What happens next</p>
           <ol className="space-y-3 text-sm">
             <li className="flex items-start gap-3">

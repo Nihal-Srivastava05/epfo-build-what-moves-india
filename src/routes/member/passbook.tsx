@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { PageHeader } from '@/components/patterns/page-header'
+
 import { Money } from '@/components/patterns/money'
 import { StatusPill } from '@/components/patterns/status-pill'
 import { MockBadge } from '@/components/patterns/mock-badge'
@@ -42,27 +42,23 @@ export default function Passbook() {
 
   return (
     <div>
-      <PageHeader
-        title="Passbook"
-        sub="Every rupee, per employer, per year — searchable in the browser rather than locked in a PDF."
-        action={
-          <div className="flex items-center gap-2">
-            <Button variant="outline">
-              <Download className="size-4" aria-hidden />
-              Export PDF
-            </Button>
-            <MockBadge what="Export is not wired up. A real export would carry a verification code." />
-          </div>
-        }
-      />
-
-      <div className="mb-6 rounded-xl border bg-card p-5">
-        <p className="eyebrow mb-2">Closing balance</p>
-        <Money value={balance} size="xl" />
-        <p className="mt-2 text-sm text-muted-foreground">
-          Interest is credited once a year at {(INTEREST_RATE * 100).toFixed(2)}%, calculated on your
-          monthly running balance.
-        </p>
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-4 rounded-lg border bg-card p-5">
+        <div>
+          <p className="eyebrow mb-2">Closing balance</p>
+          <Money value={balance} size="xl" />
+          <p className="mt-2 max-w-prose text-[0.8125rem] leading-relaxed text-muted-foreground">
+            Every rupee, per employer, per year — searchable here rather than locked in a PDF.
+            Interest is credited once a year at {(INTEREST_RATE * 100).toFixed(2)}%, calculated on
+            your monthly running balance.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline">
+            <Download className="size-4" aria-hidden />
+            Export PDF
+          </Button>
+          <MockBadge what="Export is not wired up. A real export would carry a verification code." />
+        </div>
       </div>
 
       <div className="mb-4 flex flex-wrap gap-3">
@@ -94,8 +90,8 @@ export default function Passbook() {
       </div>
 
       {missing.length > 0 ? (
-        <p className="mb-4 flex items-start gap-2 rounded-lg border border-stop-line bg-stop-soft p-3 text-sm">
-          <Info className="mt-0.5 size-4 shrink-0 text-stop" aria-hidden />
+        <p className="mb-4 flex items-start gap-2.5 rounded-sm bg-stop-soft p-3.5 text-[0.8125rem] leading-relaxed text-stop">
+          <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
           <span>
             {fmtMonth(missing[0].month, lang)} is not in this ledger because your employer never filed
             it. It is not lost — it was never sent.
@@ -104,26 +100,29 @@ export default function Passbook() {
       ) : null}
 
       {/* Ledger rules and tabular figures: it should read like a passbook. */}
-      <div className="overflow-x-auto rounded-xl border bg-card">
+      <div className="overflow-x-auto rounded-lg border bg-card">
         <table className="w-full min-w-[40rem] text-sm">
           <caption className="sr-only">Provident fund ledger</caption>
-          <thead className="border-b bg-secondary/40">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium">Date</th>
-              <th className="px-4 py-3 text-left font-medium">Particulars</th>
-              <th className="px-4 py-3 text-right font-medium">Your share</th>
-              <th className="px-4 py-3 text-right font-medium">Employer</th>
-              <th className="px-4 py-3 text-right font-medium">
-                <Term id="eps">Pension</Term>
+          <thead className="bg-muted">
+            <tr className="eyebrow">
+              <th className="px-4 py-3 text-left">Date</th>
+              <th className="px-4 py-3 text-left">Particulars</th>
+              <th className="px-4 py-3 text-right">Your share</th>
+              <th className="px-4 py-3 text-right">Employer</th>
+              <th className="px-4 py-3 text-right">
+                <Term id="eps" className="text-muted-foreground">Pension</Term>
               </th>
-              <th className="px-4 py-3 text-right font-medium">Balance</th>
+              <th className="px-4 py-3 text-right">Balance</th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {rows.map((r) => (
-              <tr key={r.id} className={r.kind === 'interest' ? 'bg-gold-soft/60' : undefined}>
-                <td className="num px-4 py-2.5 whitespace-nowrap">{fmtDate(r.date, lang)}</td>
-                <td className="px-4 py-2.5">
+              <tr
+                key={r.id}
+                className={r.kind === 'interest' ? 'bg-brand-tint' : 'transition-colors hover:bg-muted'}
+              >
+                <td className="num px-4 py-3 whitespace-nowrap text-muted-foreground">{fmtDate(r.date, lang)}</td>
+                <td className="px-4 py-3 font-medium">
                   {r.particulars}
                   {r.kind === 'interest' ? (
                     <StatusPill tone="neutral" className="ml-2">
@@ -131,21 +130,38 @@ export default function Passbook() {
                     </StatusPill>
                   ) : null}
                 </td>
-                <td className="px-4 py-2.5 text-right">
+                <td className="px-4 py-3 text-right">
                   <Money value={r.employee} size="sm" />
                 </td>
-                <td className="px-4 py-2.5 text-right">
+                <td className="px-4 py-3 text-right">
                   {r.employer ? <Money value={r.employer} size="sm" /> : <span className="text-muted-foreground">—</span>}
                 </td>
-                <td className="px-4 py-2.5 text-right">
+                <td className="px-4 py-3 text-right">
                   {r.eps ? <Money value={r.eps} size="sm" /> : <span className="text-muted-foreground">—</span>}
                 </td>
-                <td className="px-4 py-2.5 text-right font-medium">
+                <td className="px-4 py-3 text-right font-bold">
                   <Money value={r.balanceAfter} size="sm" />
                 </td>
               </tr>
             ))}
           </tbody>
+          {/* A passbook ends in its own total. It is the balance after the
+              latest row shown, not the account total, so a filtered view never
+              claims more than it displays. */}
+          {rows.length ? (
+            <tfoot className="border-t bg-muted">
+              <tr>
+                <td className="px-4 py-3" />
+                <td className="px-4 py-3 text-[0.8125rem] font-bold">
+                  {fy === 'all' && est === 'all' ? 'Closing balance' : 'Balance after the latest row shown'}
+                </td>
+                <td className="px-4 py-3" colSpan={3} />
+                <td className="px-4 py-3 text-right">
+                  <Money value={rows[0].balanceAfter} size="sm" className="font-bold" />
+                </td>
+              </tr>
+            </tfoot>
+          ) : null}
         </table>
       </div>
       <p className="mt-3 text-sm text-muted-foreground">

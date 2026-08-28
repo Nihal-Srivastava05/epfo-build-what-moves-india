@@ -30,7 +30,7 @@ export default function Employees() {
       {/* Cards on mobile, a table only where there is room for one. */}
       <ul className="space-y-2 sm:hidden">
         {rows.map((r) => (
-          <li key={r.uan} className="rounded-xl border bg-card p-4">
+          <li key={r.uan} className="rounded-lg border bg-card p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-medium">{r.name}</p>
@@ -51,21 +51,24 @@ export default function Employees() {
         ))}
       </ul>
 
-      <div className="hidden overflow-x-auto rounded-xl border bg-card sm:block">
+      <div className="hidden overflow-x-auto rounded-lg border bg-card sm:block">
         <table className="w-full text-sm">
-          <thead className="border-b bg-secondary/40">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium">Name</th>
-              <th className="px-4 py-3 text-left font-medium">UAN</th>
-              <th className="px-4 py-3 text-left font-medium">Joined</th>
-              <th className="px-4 py-3 text-right font-medium">Monthly wage</th>
-              <th className="px-4 py-3 text-left font-medium">KYC</th>
+          <thead className="bg-muted">
+            <tr className="eyebrow">
+              <th className="px-4 py-3 text-left">Name</th>
+              <th className="px-4 py-3 text-left">UAN</th>
+              <th className="px-4 py-3 text-left">Joined</th>
+              <th className="px-4 py-3 text-right">Monthly wage</th>
+              <th className="px-4 py-3 text-left">KYC</th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {rows.map((r) => (
-              <tr key={r.uan} className={r.exited ? 'text-muted-foreground' : ''}>
-                <td className="px-4 py-3 font-medium">
+              <tr
+                key={r.uan}
+                className={r.exited ? 'text-muted-foreground' : 'transition-colors hover:bg-muted'}
+              >
+                <td className="px-4 py-3 font-semibold">
                   {r.name}
                   {r.exited ? (
                     <span className="num ml-2 text-xs font-normal">left {fmtDate(r.exited, lang)}</span>
@@ -78,7 +81,7 @@ export default function Employees() {
                 </td>
                 <td className="px-4 py-3">
                   <StatusPill tone={r.kyc === 'verified' ? 'ok' : r.kyc === 'pending' ? 'neutral' : 'wait'}>
-                    {r.kyc}
+                    {r.kyc === 'verified' ? 'Verified' : r.kyc === 'pending' ? 'Pending' : 'Needs attention'}
                   </StatusPill>
                 </td>
               </tr>

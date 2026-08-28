@@ -21,13 +21,13 @@ export default function GlossaryTerm() {
       </Button>
 
       <p className="eyebrow mb-2">{entry.expansion ?? 'Term'}</p>
-      <h1 className="text-3xl font-semibold tracking-tight">{entry.term}</h1>
+      <h1 className="text-[1.75rem] font-extrabold tracking-[-0.03em]">{entry.term}</h1>
       <p className="mt-4 text-lg leading-relaxed">{lang === 'hi' ? entry.oneLineHi : entry.oneLine}</p>
       {entry.more ? (
         <p className="mt-4 leading-relaxed text-muted-foreground">{entry.more}</p>
       ) : null}
 
-      <section className="mt-8 rounded-xl border bg-card p-5">
+      <section className="mt-8 rounded-lg border bg-card p-5">
         <p className="eyebrow mb-3">Where you will see this</p>
         <ul className="space-y-1.5 text-sm">
           {entry.whereYouSeeIt.map((w) => (
@@ -38,7 +38,7 @@ export default function GlossaryTerm() {
         </ul>
       </section>
 
-      <section className="mt-4 rounded-xl border border-dashed p-5">
+      <section className="mt-4 rounded-lg border border-dashed p-5">
         <p className="eyebrow mb-2">Also called</p>
         <p className="text-sm leading-relaxed text-muted-foreground">
           {entry.aliases.join(' · ')}

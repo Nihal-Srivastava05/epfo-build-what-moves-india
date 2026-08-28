@@ -17,12 +17,12 @@ export default function Payments() {
         sub={`Every credit to ${pensioner.bankName} ending ${pensioner.bankLast4}.`}
       />
 
-      <div className="mb-6 rounded-xl border bg-card p-5">
+      <div className="mb-6 rounded-lg border bg-card p-5">
         <p className="eyebrow mb-2">Last six months</p>
         <Money value={total} size="xl" />
       </div>
 
-      <ul className="divide-y rounded-xl border bg-card">
+      <ul className="divide-y rounded-lg border bg-card">
         {pensionPayments.map((p) => (
           <li key={p.id} className="flex flex-wrap items-center gap-4 p-4">
             <div className="min-w-0 flex-1">

@@ -28,7 +28,7 @@ export default function Glossary() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
-      <h1 className="text-3xl font-semibold tracking-tight">What the words mean</h1>
+      <h1 className="text-[1.75rem] font-extrabold tracking-[-0.03em]">What the words mean</h1>
       <p className="mt-3 max-w-prose leading-relaxed text-muted-foreground">
         One line each. Search what you actually call it — “PF number” finds UAN, “insurance” finds EDLI.
         Every entry has its own link, so a letter or an SMS can point straight at one.
@@ -52,10 +52,10 @@ export default function Glossary() {
             type="button"
             onClick={() => setAudience(f.key)}
             className={cn(
-              '!min-h-0 rounded-full border px-3.5 py-1.5 text-sm transition-colors',
+              '!min-h-0 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors',
               audience === f.key
-                ? 'border-foreground bg-foreground text-background'
-                : 'hover:bg-secondary',
+                ? 'border-brand bg-primary text-primary-foreground'
+                : 'border-border text-muted-foreground hover:border-brand hover:text-foreground',
             )}
           >
             {f.label}
@@ -63,12 +63,12 @@ export default function Glossary() {
         ))}
       </div>
 
-      <ul className="mt-8 divide-y rounded-xl border bg-card">
+      <ul className="mt-8 divide-y rounded-lg border bg-card">
         {results.map((g) => (
           <li key={g.id}>
             <Link
               to={`/glossary/${g.id}`}
-              className="flex items-start gap-4 p-5 transition-colors hover:bg-secondary/40"
+              className="flex items-start gap-4 p-5 transition-colors hover:bg-muted"
             >
               <div className="min-w-0 flex-1">
                 <p className="font-semibold">

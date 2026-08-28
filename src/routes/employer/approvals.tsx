@@ -4,11 +4,11 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/patterns/page-header'
 import { Money } from '@/components/patterns/money'
-import { OwnerClock } from '@/components/patterns/owner-clock'
 import { StatusPill } from '@/components/patterns/status-pill'
 import { useData } from '@/store/data'
 import { useMotionOk } from '@/hooks/use-motion-ok'
 import { daysBetween, fmtUan } from '@/lib/format'
+import { cn } from '@/lib/utils'
 
 const kindLabel = {
   claim: 'Withdrawal',
@@ -34,17 +34,19 @@ export default function Approvals() {
       />
 
       {queue.length === 0 ? (
-        <div className="flex items-start gap-3 rounded-xl border border-ok-line bg-ok-soft p-5">
+        <div className="flex items-start gap-3 rounded-lg border border-ok-line bg-ok-soft p-5">
           <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
           <div>
-            <p className="font-medium">The queue is empty</p>
+            <p className="font-semibold">The queue is empty</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Nobody is waiting on you. Their claims have moved on to EPFO.
             </p>
           </div>
         </div>
       ) : (
-        <ul className="space-y-3">
+        /* A queue is a list, not a stack of cards. The days-waiting badge does
+           the sorting argument visually: it reddens as the wait gets old. */
+        <ul className="divide-y overflow-hidden rounded-lg border bg-card">
           <AnimatePresence initial={false}>
             {queue.map((a) => {
               const days = daysBetween(a.waitingSince)
@@ -52,34 +54,45 @@ export default function Approvals() {
                 <motion.li
                   key={a.id}
                   layout={motionOk}
-                  exit={motionOk ? { opacity: 0, height: 0, marginBottom: 0 } : undefined}
+                  exit={motionOk ? { opacity: 0, height: 0 } : undefined}
                   transition={{ duration: motionOk ? 0.25 : 0 }}
-                  className="overflow-hidden rounded-xl border bg-card"
+                  className="overflow-hidden"
                 >
-                  <div className="flex flex-wrap items-start gap-4 p-5">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4">
+                    <span
+                      className={cn(
+                        'grid size-10 shrink-0 place-items-center rounded-sm text-xs font-bold',
+                        days >= 7 ? 'bg-stop-soft text-stop' : days >= 3 ? 'bg-wait-soft text-wait' : 'bg-muted text-muted-foreground',
+                      )}
+                      title={`Waiting ${days} days`}
+                    >
+                      {days}d
+                    </span>
+
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-semibold">{a.personName}</p>
-                        <StatusPill tone={days >= 7 ? 'stop' : days >= 3 ? 'wait' : 'neutral'}>
+                        <p className="text-sm font-semibold">{a.personName}</p>
+                        <StatusPill tone={a.kind === 'claim' ? 'brand' : 'neutral'}>
                           {kindLabel[a.kind]}
                         </StatusPill>
+                        <span className="ident text-xs text-muted-foreground">{fmtUan(a.uan)}</span>
                       </div>
-                      <p className="ident mt-1 text-sm text-muted-foreground">{fmtUan(a.uan)}</p>
-                      <p className="mt-2 text-sm">{a.detail}</p>
-                      {a.amount ? (
-                        <p className="mt-1">
-                          <Money value={a.amount} className="font-medium" />
-                        </p>
-                      ) : null}
-                      <OwnerClock holder="employer" since={a.waitingSince} className="mt-3" compact />
-                      {a.claimId ? (
-                        <p className="ident mt-2 text-xs text-muted-foreground">
-                          {a.claimId} — {a.personName.split(' ')[0]} is watching this reference on their
-                          own claim tracker.
-                        </p>
-                      ) : null}
+                      <p className="mt-1 text-[0.8125rem] text-muted-foreground">
+                        {a.detail}
+                        {a.claimId ? (
+                          <>
+                            <span className="mx-1.5" aria-hidden>·</span>
+                            <span className="ident">{a.claimId}</span> is on{' '}
+                            {a.personName.split(' ')[0]}’s own tracker
+                          </>
+                        ) : null}
+                      </p>
                     </div>
+
+                    {a.amount ? <Money value={a.amount} className="font-bold" /> : null}
+
                     <Button
+                      size="sm"
                       onClick={() => {
                         if (a.claimId) approveClaim(a.claimId)
                         else useData.setState((s) => ({ approvals: s.approvals.filter((x) => x.id !== a.id) }))

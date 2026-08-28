@@ -99,10 +99,10 @@ export default function MonthlyReturn() {
           initial={motionOk ? { opacity: 0, scale: 0.98 } : false}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: motionOk ? 0.3 : 0 }}
-          className="rounded-xl border border-ok-line bg-ok-soft p-6 text-center"
+          className="rounded-lg border border-ok-line bg-ok-soft p-6 text-center"
         >
           <CheckCircle2 className="mx-auto mb-4 size-12 text-ok" aria-hidden />
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-[1.5rem] font-extrabold tracking-[-0.03em]">
             {fmtMonthLong(month)} filed and paid
           </h1>
           <p className="mt-2 text-muted-foreground">
@@ -112,7 +112,7 @@ export default function MonthlyReturn() {
             <p className="eyebrow mb-1">
               <Term id="trrn">TRRN</Term>
             </p>
-            <p className="ident text-lg font-semibold">{filed.trrn}</p>
+            <p className="ident text-[1.125rem] font-bold">{filed.trrn}</p>
             <p className="mt-3 text-sm text-muted-foreground">
               Paid {fmtDate(TODAY, lang)}. The receipt is in your challan history.
             </p>
@@ -150,7 +150,7 @@ export default function MonthlyReturn() {
 
       {step === 1 ? (
         <div className="space-y-5">
-          <div className="rounded-xl border bg-card p-5">
+          <div className="rounded-lg border bg-card p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="font-semibold">Carried over from the last filed month</p>
@@ -170,9 +170,10 @@ export default function MonthlyReturn() {
 
           <div>
             <p className="mb-3 text-sm font-semibold">
-              We found <span className="num">{diffs.length}</span> changes since then
+              We found <span className="num">{diffs.length}</span>{' '}
+              {diffs.length === 1 ? 'change' : 'changes'} since then
             </p>
-            <ul className="divide-y rounded-xl border bg-card">
+            <ul className="divide-y rounded-lg border bg-card">
               {diffs.map((d, i) => (
                 <motion.li
                   key={d.name}
@@ -209,7 +210,7 @@ export default function MonthlyReturn() {
       {step === 2 ? (
         <div className="space-y-5">
           {/* Every line states the rule that produced it. */}
-          <dl className="divide-y rounded-xl border bg-card">
+          <dl className="divide-y rounded-lg border bg-card">
             {[
               { label: 'Employee EPF', value: totals.employee, rule: '12% of each wage' },
               { label: 'Employer EPF', value: totals.employerEpf, rule: '12% of wage, less the pension share' },
@@ -227,7 +228,7 @@ export default function MonthlyReturn() {
                 </dd>
               </div>
             ))}
-            <div className="flex items-baseline justify-between gap-4 bg-secondary/50 px-5 py-4">
+            <div className="flex items-baseline justify-between gap-4 bg-muted px-5 py-4">
               <dt className="font-semibold">Total payable</dt>
               <dd>
                 <Money value={grand} size="lg" mark />
@@ -260,7 +261,7 @@ export default function MonthlyReturn() {
 
       {step === 3 ? (
         <div className="space-y-5">
-          <div className="rounded-xl border bg-card p-5">
+          <div className="rounded-lg border bg-card p-5">
             <p className="eyebrow mb-2">Challan for {fmtMonthLong(month)}</p>
             <Money value={grand} size="xl" mark />
             <p className="mt-2 text-sm text-muted-foreground">
@@ -269,7 +270,7 @@ export default function MonthlyReturn() {
             </p>
           </div>
 
-          <div className="rounded-xl border bg-card p-5">
+          <div className="rounded-lg border bg-card p-5">
             <p className="mb-3 font-medium">Pay from</p>
             <div className="flex items-center gap-3 rounded-lg border p-3">
               <div className="min-w-0 flex-1">

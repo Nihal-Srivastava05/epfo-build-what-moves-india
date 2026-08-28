@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowRight, KeyRound, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, ArrowRight, KeyRound, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,6 +12,7 @@ import { Term } from '@/components/patterns/term'
 import { MockBadge } from '@/components/patterns/mock-badge'
 import type { Persona } from '@/lib/types'
 import { personaMeta } from '@/lib/nav'
+import { cn } from '@/lib/utils'
 
 const DEMO_OTP = '284116'
 
@@ -48,23 +49,26 @@ export default function SignIn() {
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-12 sm:py-16">
-      <Link to="/" className="mb-8 inline-block text-sm text-muted-foreground hover:text-foreground">
-        ← {t('landing.choose')}
-      </Link>
+    <div className="mx-auto w-full max-w-[27rem] px-4 py-12 sm:py-16">
+      <Button asChild variant="ghost" size="sm" className="mb-6 -ml-3">
+        <Link to="/">
+          <ArrowLeft className="size-4" aria-hidden />
+          {t('landing.choose')}
+        </Link>
+      </Button>
 
       <div className="mb-6 flex items-center gap-3">
-        <span className="flex size-11 items-center justify-center rounded-full bg-secondary">
-          <Icon className="size-5 text-gold" aria-hidden />
+        <span className="grid size-11 shrink-0 place-items-center rounded-md bg-brand-tint text-primary">
+          <Icon className="size-5" aria-hidden />
         </span>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t('signin.title')}</h1>
+          <h1 className="text-[1.75rem] font-extrabold tracking-[-0.03em]">{t('signin.title')}</h1>
           <p className="text-sm text-muted-foreground">{t(`persona.${persona}`)}</p>
         </div>
       </div>
 
-      <p className="mb-6 flex items-start gap-2 rounded-lg border border-info-line bg-info-soft p-3 text-sm leading-relaxed">
-        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-info" aria-hidden />
+      <p className="mb-6 flex items-start gap-2.5 rounded-sm bg-brand-tint p-3.5 text-[0.8125rem] leading-relaxed text-primary">
+        <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
         {t('signin.oneAccount')}
       </p>
 
@@ -77,19 +81,19 @@ export default function SignIn() {
           className="space-y-5"
         >
           <div className="space-y-2">
-            <Label htmlFor="identity">
+            <Label htmlFor="identity" className="text-xs font-semibold text-muted-foreground">
               <Term id={identity[persona].termId}>{t(identity[persona].labelKey)}</Term>
             </Label>
             <Input
               id="identity"
               value={id}
               onChange={(e) => setId(e.target.value)}
-              className="ident h-12 text-base"
+              className="ident h-12 text-base font-semibold tracking-[0.03em]"
               inputMode={persona === 'member' ? 'numeric' : 'text'}
               autoComplete="off"
             />
             {persona === 'member' ? (
-              <p className="text-sm text-muted-foreground">{t('signin.uanHint')}</p>
+              <p className="text-[0.8125rem] text-muted-foreground">{t('signin.uanHint')}</p>
             ) : null}
           </div>
           <Button type="submit" size="lg" className="w-full">
@@ -109,36 +113,59 @@ export default function SignIn() {
           className="space-y-5"
         >
           <div className="space-y-2">
-            <Label htmlFor="otp">{t('signin.otp')}</Label>
-            <p className="text-sm text-muted-foreground">
+            <Label htmlFor="otp" className="text-xs font-semibold text-muted-foreground">
+              {t('signin.otp')}
+            </Label>
+            <p className="text-[0.8125rem] text-muted-foreground">
               {t('signin.otpSent')} +91 98XXX XX210
             </p>
-            <Input
-              id="otp"
-              value={otp}
-              onChange={(e) => {
-                setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
-                setError('')
-              }}
-              inputMode="numeric"
-              autoFocus
-              aria-invalid={Boolean(error)}
-              aria-describedby={error ? 'otp-error' : undefined}
-              className="ident h-14 text-center text-2xl tracking-[0.4em]"
-              placeholder="000000"
-            />
+
+            {/* One real field behind six boxes: the caret, paste and screen
+                reader all keep working, and the digits still land in cells. */}
+            <div className="relative">
+              <input
+                id="otp"
+                value={otp}
+                onChange={(e) => {
+                  setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
+                  setError('')
+                }}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                autoFocus
+                maxLength={6}
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? 'otp-error' : undefined}
+                className="peer absolute inset-0 z-10 w-full rounded-sm bg-transparent text-transparent caret-transparent outline-none"
+              />
+              <div className="flex gap-2" aria-hidden>
+                {Array.from({ length: 6 }, (_, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      'num grid h-14 flex-1 place-items-center rounded-sm border-[1.35px] bg-card text-[1.375rem] font-bold',
+                      error ? 'border-stop' : otp.length > i ? 'border-brand' : 'border-input',
+                      otp.length === i ? 'peer-focus:border-brand peer-focus:bg-brand-tint' : '',
+                    )}
+                  >
+                    {otp[i] ?? ''}
+                  </span>
+                ))}
+              </div>
+            </div>
+
             {error ? (
-              <p id="otp-error" className="text-sm font-medium text-stop">
+              <p id="otp-error" className="text-[0.8125rem] font-semibold text-stop">
                 {error}
               </p>
             ) : null}
           </div>
 
-          <div className="flex items-start gap-2.5 rounded-lg border border-dashed p-3">
+          <div className="flex items-start gap-3 rounded-sm border border-dashed p-3.5">
             <KeyRound className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
-            <div className="min-w-0 flex-1 text-sm">
-              <p className="text-muted-foreground">{t('signin.mockOtp')}</p>
-              <p className="ident mt-1.5 text-lg font-semibold tracking-[0.2em]">{DEMO_OTP}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.8125rem] text-muted-foreground">{t('signin.mockOtp')}</p>
+              <p className="ident mt-1.5 text-lg font-bold tracking-[0.2em]">{DEMO_OTP}</p>
             </div>
             <MockBadge what="No SMS is sent. This code is fixed so reviewers can sign in." />
           </div>

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { ArrowRight, ChevronRight, HandCoins, RotateCcw, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { PageHeader, SectionTitle } from '@/components/patterns/page-header'
+import { SectionTitle } from '@/components/patterns/page-header'
 import { Money } from '@/components/patterns/money'
 import { ClaimTracker } from '@/components/patterns/claim-tracker'
 import { StatusPill } from '@/components/patterns/status-pill'
@@ -21,20 +21,18 @@ export default function Claims() {
   const past = claims.filter((c) => c.settledOn)
 
   return (
-    <div className="space-y-10">
-      <PageHeader title={t('nav.claims')} />
-
+    <div className="space-y-4">
       {/* The three steps are shown before you commit to them, so the shape of
           the task is known up front rather than discovered one screen at a time. */}
-      <section className="overflow-hidden rounded-xl border bg-card" aria-labelledby="start">
-        <div className="border-b bg-secondary/40 p-5 sm:p-6">
+      <section className="overflow-hidden rounded-lg border bg-card" aria-labelledby="start">
+        <div className="border-b bg-muted p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-start gap-4">
               <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-background">
-                <Wallet className="size-5 text-gold" aria-hidden />
+                <Wallet className="size-5 text-primary" aria-hidden />
               </span>
               <div>
-                <h2 id="start" className="text-lg font-semibold tracking-tight">
+                <h2 id="start" className="text-[0.9375rem] font-semibold tracking-[-0.01em]">
                   {t('claims.startTitle')}
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">{t('claims.startSub')}</p>
@@ -70,7 +68,7 @@ export default function Claims() {
           initial={motionOk ? { opacity: 0, y: 6 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: motionOk ? 0.25 : 0 }}
-          className="flex flex-wrap items-center gap-4 rounded-xl border border-info-line bg-info-soft p-5"
+          className="flex flex-wrap items-center gap-4 rounded-lg border border-info-line bg-info-soft p-5"
         >
           <RotateCcw className="size-5 shrink-0 text-info" aria-hidden />
           <div className="min-w-0 flex-1">
@@ -100,7 +98,7 @@ export default function Claims() {
           </SectionTitle>
           <div className="space-y-4">
             {open.map((c) => (
-              <div key={c.id} className="overflow-hidden rounded-xl border bg-card">
+              <div key={c.id} className="overflow-hidden rounded-lg border bg-card">
                   <div className="p-5">
                     <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
                       <div>
@@ -122,7 +120,7 @@ export default function Claims() {
                   </div>
                   <Link
                     to={`/member/claims/${c.id}`}
-                    className="flex items-center justify-between gap-2 border-t bg-secondary/30 px-5 py-3.5 text-sm font-medium transition-colors hover:bg-secondary/60"
+                    className="flex items-center justify-between gap-2 border-t bg-muted px-5 py-3.5 text-sm font-medium transition-colors hover:bg-muted"
                   >
                     {t('claims.viewDetail')}
                     <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
@@ -138,7 +136,7 @@ export default function Claims() {
           <span id="past">{t('claims.past')}</span>
         </SectionTitle>
         {past.length === 0 && open.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-8 text-center">
+          <div className="rounded-lg border border-dashed p-8 text-center">
             <HandCoins className="mx-auto mb-3 size-8 text-muted-foreground" aria-hidden />
             <p className="font-medium">{t('claims.none')}</p>
             <p className="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-muted-foreground">
@@ -146,17 +144,17 @@ export default function Claims() {
             </p>
           </div>
         ) : past.length === 0 ? (
-          <p className="rounded-xl border border-dashed p-5 text-sm text-muted-foreground">
+          <p className="rounded-lg border border-dashed p-5 text-sm text-muted-foreground">
             Nothing settled yet.
           </p>
         ) : (
-          <ul className="divide-y rounded-xl border bg-card">
+          <ul className="divide-y rounded-lg border bg-card">
             {past.map((c) => (
               <li key={c.id}>
                 <Link
                   to={`/member/claims/${c.id}`}
                   className={cn(
-                    'flex flex-wrap items-center gap-4 p-4 transition-colors hover:bg-secondary/40',
+                    'flex flex-wrap items-center gap-4 p-4 transition-colors hover:bg-muted',
                   )}
                 >
                   <div className="min-w-0 flex-1">

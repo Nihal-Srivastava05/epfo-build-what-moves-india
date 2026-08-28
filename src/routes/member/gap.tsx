@@ -25,9 +25,9 @@ export default function Gap() {
   if (row.status !== 'missing') {
     return (
       <div className="mx-auto max-w-xl">
-        <div className="rounded-xl border border-ok-line bg-ok-soft p-6 text-center">
+        <div className="rounded-lg border border-ok-line bg-ok-soft p-6 text-center">
           <CheckCircle2 className="mx-auto mb-4 size-12 text-ok" aria-hidden />
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-[1.5rem] font-extrabold tracking-[-0.03em]">
             {fmtMonthLong(month)} has been credited
           </h1>
           <p className="mt-2 text-muted-foreground">
@@ -52,9 +52,9 @@ export default function Gap() {
 
       <div className="space-y-4">
         {/* Name the counterparty and the clock. */}
-        <div className="rounded-xl border bg-card p-5">
+        <div className="rounded-lg border bg-card p-5">
           <div className="flex items-start gap-4">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-muted">
               <Building2 className="size-5 text-muted-foreground" aria-hidden />
             </span>
             <div className="min-w-0 flex-1">
@@ -69,7 +69,7 @@ export default function Gap() {
           </div>
         </div>
 
-        <div className="rounded-xl border bg-card p-5">
+        <div className="rounded-lg border bg-card p-5">
           <p className="eyebrow mb-3">What is not in your account</p>
           <dl className="space-y-2 text-sm">
             {[
@@ -95,7 +95,7 @@ export default function Gap() {
 
         {/* The nudge travels along the relation. The member is not the messenger. */}
         {notified ? (
-          <div className="flex items-start gap-3 rounded-xl border border-ok-line bg-ok-soft p-5">
+          <div className="flex items-start gap-3 rounded-lg border border-ok-line bg-ok-soft p-5">
             <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
             <div>
               <p className="font-medium">{t('gap.notified')}</p>
@@ -106,7 +106,7 @@ export default function Gap() {
             </div>
           </div>
         ) : (
-          <div className="rounded-xl border bg-card p-5">
+          <div className="rounded-lg border bg-card p-5">
             <p className="font-medium">You do not have to chase them</p>
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
               EPFO writes to the employer directly and escalates on a fixed schedule. Ask us to start
@@ -125,7 +125,7 @@ export default function Gap() {
           </div>
         )}
 
-        <div className="rounded-xl border border-dashed p-5">
+        <div className="rounded-lg border border-dashed p-5">
           <p className="text-sm font-medium">If you would rather speak to them yourself</p>
           <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
             <Phone className="size-4" aria-hidden />

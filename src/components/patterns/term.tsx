@@ -26,8 +26,8 @@ export function Term({ id, children, className }: { id: string; children?: strin
     <button
       type="button"
       className={cn(
-        'inline items-baseline gap-1 rounded-sm underline decoration-gold decoration-dotted decoration-2 underline-offset-4',
-        'font-medium text-foreground transition-colors hover:decoration-solid focus-visible:outline-2',
+        'inline items-baseline gap-1 rounded-xs underline decoration-brand-line decoration-dotted decoration-2 underline-offset-4',
+        'font-semibold text-foreground transition-colors hover:decoration-brand hover:decoration-solid focus-visible:outline-2',
         '!min-h-0 align-baseline',
         className,
       )}

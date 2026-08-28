@@ -58,14 +58,14 @@ export default function LifeCertificate() {
           initial={motionOk ? { opacity: 0, scale: 0.98 } : false}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: motionOk ? 0.3 : 0 }}
-          className="rounded-xl border border-ok-line bg-ok-soft p-6 text-center"
+          className="rounded-lg border border-ok-line bg-ok-soft p-6 text-center"
         >
           <CheckCircle2 className="mx-auto mb-4 size-12 text-ok" aria-hidden />
-          <h1 className="text-2xl font-semibold tracking-tight">Life certificate accepted</h1>
+          <h1 className="text-[1.5rem] font-extrabold tracking-[-0.03em]">Life certificate accepted</h1>
           <p className="mt-2 text-muted-foreground">Submitted by {done}</p>
           <div className="mt-6 rounded-lg border bg-card p-4 text-left">
             <p className="eyebrow mb-1">Now valid until</p>
-            <p className="num text-lg font-semibold">
+            <p className="num text-[1.125rem] font-bold">
               {fmtDate(pensioner.lifeCertificateValidTill, lang)}
             </p>
             <p className="mt-3 text-sm text-muted-foreground">
@@ -84,10 +84,10 @@ export default function LifeCertificate() {
   return (
     <div className="mx-auto max-w-2xl">
       {/* Validity first. The answer to "am I in trouble?" before the options. */}
-      <div className="mb-8 rounded-xl border bg-card p-5 rule-gold">
+      <div className="mb-8 rounded-lg border bg-card p-5 rule-brand">
         <p className="eyebrow mb-2">Your certificate right now</p>
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <p className="num text-2xl font-semibold tracking-tight">
+          <p className="num text-[1.5rem] font-extrabold tracking-[-0.03em]">
             Valid until {fmtDate(pensioner.lifeCertificateValidTill, lang)}
           </p>
           <StatusPill tone={daysLeft <= 30 ? 'stop' : daysLeft <= 120 ? 'wait' : 'ok'}>
@@ -118,11 +118,11 @@ export default function LifeCertificate() {
             initial={motionOk ? { opacity: 0, y: 6 } : false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: motionOk ? 0.25 : 0, delay: motionOk ? i * 0.05 : 0 }}
-            className="rounded-xl border bg-card p-5"
+            className="rounded-lg border bg-card p-5"
           >
             <div className="flex items-start gap-4">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
-                <r.icon className="size-5 text-gold" aria-hidden />
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-muted">
+                <r.icon className="size-5 text-primary" aria-hidden />
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -131,7 +131,10 @@ export default function LifeCertificate() {
                 </div>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{r.detail}</p>
                 <div className="mt-4 flex flex-wrap items-center gap-2">
+                  {/* One filled button per screen. The other two routes are
+                      equally valid, so they are offered, not pushed. */}
                   <Button
+                    variant={i === 0 ? 'default' : 'outline'}
                     onClick={() => {
                       if (r.key === 'face') {
                         setScanning(true)

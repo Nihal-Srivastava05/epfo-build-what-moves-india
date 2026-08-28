@@ -45,7 +45,7 @@ const scale = [
 export default function About() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
-      <h1 className="text-3xl font-semibold tracking-tight">About this prototype</h1>
+      <h1 className="text-[1.75rem] font-extrabold tracking-[-0.03em]">About this prototype</h1>
       <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
         An independent redesign concept for the EPFO web estate, built to show that nine portals can be
         one account. It is not affiliated with, endorsed by, or connected to EPFO or the Government of
@@ -53,7 +53,7 @@ export default function About() {
       </p>
 
       <section className="mt-10">
-        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+        <h2 className="mb-4 flex items-center gap-2 text-[0.9375rem] font-bold">
           <CheckCircle2 className="size-5 text-ok" aria-hidden />
           What actually works
         </h2>
@@ -68,7 +68,7 @@ export default function About() {
       </section>
 
       <section className="mt-10">
-        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+        <h2 className="mb-4 flex items-center gap-2 text-[0.9375rem] font-bold">
           <FlaskConical className="size-5 text-wait" aria-hidden />
           What is mocked
         </h2>
@@ -88,13 +88,13 @@ export default function About() {
       </section>
 
       <section className="mt-10">
-        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+        <h2 className="mb-4 flex items-center gap-2 text-[0.9375rem] font-bold">
           <Server className="size-5 text-info" aria-hidden />
           How this would work at real scale
         </h2>
         <div className="space-y-4">
           {scale.map((s) => (
-            <div key={s.title} className="rounded-xl border bg-card p-5">
+            <div key={s.title} className="rounded-lg border bg-card p-5">
               <p className="font-medium">{s.title}</p>
               <p className="mt-1.5 text-[0.95rem] leading-relaxed text-muted-foreground">{s.body}</p>
             </div>
@@ -102,7 +102,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-xl border border-dashed p-5">
+      <section className="mt-10 rounded-lg border border-dashed p-5">
         <h2 className="font-semibold">The on-device assistant</h2>
         <p className="mt-2 text-[0.95rem] leading-relaxed text-muted-foreground">
           The help assistant runs on Chrome’s built-in model, on your own device. Nothing is sent to a

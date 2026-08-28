@@ -26,43 +26,41 @@ export default function Notifications() {
       />
 
       {/* The anti-scam primitive: absence from this list is the tell. */}
-      <div className="mb-6 flex items-start gap-3 rounded-xl border border-info-line bg-info-soft p-5">
-        <ShieldCheck className="mt-0.5 size-5 shrink-0 text-info" aria-hidden />
+      <div className="mb-4 flex items-start gap-3 rounded-lg bg-info-soft p-4 text-info">
+        <ShieldCheck className="mt-0.5 size-5 shrink-0" aria-hidden />
         <div>
-          <p className="font-medium">Did EPFO really send this?</p>
-          <p className="mt-1 text-sm leading-relaxed">
+          <p className="text-sm font-semibold">Did EPFO really send this?</p>
+          <p className="mt-1 text-[0.8125rem] leading-relaxed">
             If a message claiming to be from EPFO is not in this list, we did not send it. We never ask
             for an OTP, a fee or your password — not by SMS, not on a call.
           </p>
         </div>
       </div>
 
-      <ul className="space-y-3">
+      <ul className="divide-y overflow-hidden rounded-lg border bg-card">
         {mine.map((n) => {
           const Icon = channelIcon[n.channel]
           return (
-            <li key={n.id} className="rounded-xl border bg-card p-5">
-              <div className="flex items-start gap-4">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary">
-                  <Icon className="size-4 text-muted-foreground" aria-hidden />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium">{n.title}</p>
-                    <StatusPill tone="ok">Sent by EPFO</StatusPill>
-                  </div>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{n.body}</p>
-                  <p className="num mt-2 text-xs text-muted-foreground">
-                    {channelLabel[n.channel]} · {fmtDate(n.sentAt, lang)}
-                  </p>
+            <li key={n.id} className="flex items-start gap-3.5 px-5 py-4">
+              <span className="grid size-8 shrink-0 place-items-center rounded-sm bg-muted">
+                <Icon className="size-4 text-muted-foreground" aria-hidden />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-semibold">{n.title}</p>
+                  <StatusPill tone="ok">Sent by EPFO</StatusPill>
                 </div>
+                <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted-foreground">{n.body}</p>
+                <p className="num mt-1.5 text-xs text-faint">
+                  {channelLabel[n.channel]} · {fmtDate(n.sentAt, lang)}
+                </p>
               </div>
             </li>
           )
         })}
       </ul>
 
-      <p className="mt-6 text-sm text-muted-foreground">
+      <p className="mt-4 text-sm text-muted-foreground">
         Got a message that is not here?{' '}
         <Link to="/grievance/new" className="font-medium text-foreground underline underline-offset-4">
           Report it

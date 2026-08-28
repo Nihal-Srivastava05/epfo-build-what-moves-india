@@ -7,52 +7,43 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
 import { useSession } from '@/store/session'
-import { useData } from '@/store/data'
-import { personaMeta } from '@/lib/nav'
 import { useT } from '@/i18n'
-import { fmtUan } from '@/lib/format'
-import { establishments, personById } from '@/lib/mock/db'
+import { useIdentity } from '@/hooks/use-identity'
 import { cn } from '@/lib/utils'
 
-/**
- * Who is signed in, and the way out. Each persona is a different real person
- * with a different identifier — an employee is not their own employer — so
- * there is no switching between them without signing out.
- */
+/** There is no switching between personas without signing out. */
 export function AccountMenu({ className }: { className?: string }) {
   const { persona, signOut } = useSession()
-  const pensioner = useData((s) => s.pensioner)
   const { t } = useT()
-  const Icon = personaMeta[persona].icon
-
-  const identity =
-    persona === 'member'
-      ? { name: personById('p-priya').name, sub: `UAN ${fmtUan(personById('p-priya').uan)}` }
-      : persona === 'employer'
-        ? { name: personById('p-hr').name, sub: establishments[0].name }
-        : { name: personById('p-ram').name, sub: `PPO ${pensioner.ppo}` }
+  const identity = useIdentity()
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn('h-10 gap-2 pr-2 pl-3', className)}
+        <button
+          type="button"
+          className={cn(
+            'flex items-center gap-2 rounded-md px-1.5 py-1 transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+            className,
+          )}
           aria-label={`${identity.name} — account menu`}
         >
-          <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-          <span className="hidden max-w-32 truncate text-sm font-medium sm:block">
-            {identity.name}
+          <span className="hidden text-right sm:block">
+            <span className="block text-[0.8125rem] font-semibold leading-tight">{identity.name}</span>
+            <span className="num block text-[0.6875rem] leading-tight text-muted-foreground">
+              {identity.sub}
+            </span>
+          </span>
+          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-[0.6875rem] font-bold text-primary-foreground">
+            {identity.initials}
           </span>
           <ChevronDown className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-        </Button>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel className="font-normal">
-          <span className="block text-sm font-medium">{identity.name}</span>
+          <span className="block text-sm font-semibold">{identity.name}</span>
           <span className="ident mt-0.5 block text-xs text-muted-foreground">{identity.sub}</span>
           <span className="mt-1.5 block text-xs text-muted-foreground">{t(`persona.${persona}`)}</span>
         </DropdownMenuLabel>

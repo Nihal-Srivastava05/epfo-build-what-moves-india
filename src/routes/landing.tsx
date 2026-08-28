@@ -6,16 +6,29 @@ import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
 import { useSession } from '@/store/session'
 import type { Persona } from '@/lib/types'
+import type { StringKey } from '@/i18n/strings'
 import { cn } from '@/lib/utils'
 
-const personas: {
-  key: Persona
-  icon: typeof CircleUser
-  was: string
-}[] = [
+const personas: { key: Persona; icon: typeof CircleUser; was: string }[] = [
   { key: 'member', icon: CircleUser, was: 'Member e-Sewa · Passbook · Claim status' },
   { key: 'employer', icon: Building2, was: 'Employer e-Sewa · ECR upload · Challan history' },
   { key: 'pensioner', icon: HandCoins, was: 'Pensioners’ Portal · Jeevan Pramaan' },
+]
+
+const stats: { n: string; labelKey: StringKey }[] = [
+  { n: '9', labelKey: 'landing.statPortals' },
+  { n: '1', labelKey: 'landing.statAccount' },
+  { n: '3', labelKey: 'landing.statViews' },
+]
+
+/** Every task names the portal it replaces. The claim is checkable, not asserted. */
+const tasks: { titleKey: StringKey; subKey: StringKey; was: string; to: string }[] = [
+  { titleKey: 'landing.task.balance', subKey: 'landing.task.balanceSub', was: 'Member Passbook portal', to: '/signin/member' },
+  { titleKey: 'landing.task.withdraw', subKey: 'landing.task.withdrawSub', was: 'Online Claim Member', to: '/signin/member' },
+  { titleKey: 'landing.task.track', subKey: 'landing.task.trackSub', was: 'Know Your Claim Status', to: '/status' },
+  { titleKey: 'landing.task.kyc', subKey: 'landing.task.kycSub', was: 'Manage KYC', to: '/signin/member' },
+  { titleKey: 'landing.task.return', subKey: 'landing.task.returnSub', was: 'ECR upload', to: '/signin/employer' },
+  { titleKey: 'landing.task.life', subKey: 'landing.task.lifeSub', was: 'Jeevan Pramaan', to: '/signin/pensioner' },
 ]
 
 export default function Landing() {
@@ -24,70 +37,119 @@ export default function Landing() {
   const setPersona = useSession((s) => s.setPersona)
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 sm:py-16">
-      <section className="max-w-2xl">
-        <p className="eyebrow mb-4 inline-flex items-center gap-2">
-          <span className="h-px w-6 bg-gold" aria-hidden />
-          {t('app.tagline')}
-        </p>
-        <h1 className="text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">
-          {t('landing.headline')}
-        </h1>
-        <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{t('landing.sub')}</p>
-      </section>
+    <div>
+      <section className="mx-auto grid max-w-[68rem] gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.15fr_1fr] lg:items-center lg:py-18">
+        <div>
+          <p className="eyebrow mb-4 inline-flex items-center gap-2">
+            <span className="h-px w-6 bg-brand" aria-hidden />
+            {t('app.tagline')}
+          </p>
+          <h1 className="text-[2.25rem] leading-[1.06] font-extrabold tracking-[-0.035em] text-balance sm:text-[2.875rem]">
+            {t('landing.headline')}
+          </h1>
+          <p className="mt-5 max-w-[46ch] text-[1.0625rem] leading-relaxed text-muted-foreground">
+            {t('landing.sub')}
+          </p>
 
-      <section className="mt-12" aria-labelledby="choose">
-        <h2 id="choose" className="mb-5 text-lg font-semibold tracking-tight">
-          {t('landing.choose')}
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {personas.map((p, i) => (
-            <motion.div
-              key={p.key}
-              initial={motionOk ? { opacity: 0, y: 8 } : false}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: motionOk ? 0.3 : 0, delay: motionOk ? 0.05 + i * 0.05 : 0 }}
-            >
-              <Link
-                to={`/signin/${p.key}`}
-                onClick={() => setPersona(p.key)}
-                className={cn(
-                  'group flex h-full flex-col rounded-xl border bg-card p-5 transition-all',
-                  'hover:border-gold-line hover:shadow-[0_1px_0_var(--gold-line),0_8px_24px_-16px_rgb(0_0_0/0.4)]',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-                )}
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Button asChild size="lg">
+              <Link to="/signin/member" onClick={() => setPersona('member')}>
+                {t('landing.signIn')}
+                <ArrowRight className="size-4" aria-hidden />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link to="/status">
+                <Search className="size-4" aria-hidden />
+                {t('landing.lookup')}
+              </Link>
+            </Button>
+          </div>
+
+          <dl className="mt-9 flex flex-wrap gap-x-10 gap-y-4">
+            {stats.map((s) => (
+              <div key={s.labelKey}>
+                <dt className="figure text-[1.5rem]">{s.n}</dt>
+                <dd className="mt-0.5 text-[0.8125rem] text-muted-foreground">{t(s.labelKey)}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        {/* The picker is the sign-in panel: three people, three identifiers. */}
+        <div className="rounded-lg border bg-muted p-5 sm:p-6">
+          <p className="eyebrow mb-4">{t('landing.choose')}</p>
+          <div className="flex flex-col gap-2.5">
+            {personas.map((p, i) => (
+              <motion.div
+                key={p.key}
+                initial={motionOk ? { opacity: 0, y: 6 } : false}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: motionOk ? 0.26 : 0, delay: motionOk ? 0.04 + i * 0.05 : 0 }}
               >
-                <p.icon className="mb-4 size-6 text-gold" aria-hidden />
-                <p className="text-lg font-semibold tracking-tight">{t(`persona.${p.key}`)}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{t(`persona.${p.key}.sub`)}</p>
-                <p className="mt-4 text-xs leading-relaxed text-muted-foreground/70">
-                  <span className="font-medium">{t('common.was')}:</span> {p.was}
-                </p>
-                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
-                  {t('landing.continue')}
+                <Link
+                  to={`/signin/${p.key}`}
+                  onClick={() => setPersona(p.key)}
+                  className={cn(
+                    'group flex items-center gap-3.5 rounded-md border-[1.35px] border-transparent bg-card p-3.5',
+                    'ring-1 ring-border transition-colors duration-[var(--dur-fast)]',
+                    'hover:border-brand hover:ring-brand',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+                  )}
+                >
+                  <span className="grid size-10 shrink-0 place-items-center rounded-sm bg-brand-tint text-primary">
+                    <p.icon className="size-[1.125rem]" aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[0.9375rem] font-semibold tracking-[-0.01em]">
+                      {t(`persona.${p.key}`)}
+                    </span>
+                    <span className="block text-[0.8125rem] text-muted-foreground">
+                      {t(`persona.${p.key}.sub`)}
+                    </span>
+                  </span>
                   <ArrowRight
-                    className="size-4 transition-transform group-hover:translate-x-0.5"
+                    className="size-4 shrink-0 text-faint transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
                     aria-hidden
                   />
-                </span>
-              </Link>
-            </motion.div>
-          ))}
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+            {t('signin.oneAccount')}
+          </p>
         </div>
       </section>
 
-      <section className="mt-8 rounded-xl border border-dashed p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="font-medium">{t('landing.lookup')}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{t('landing.lookupSub')}</p>
+      <section className="border-t bg-background" aria-labelledby="tasks">
+        <div className="mx-auto max-w-[68rem] px-4 py-12 sm:px-6 lg:py-14">
+          <h2 id="tasks" className="eyebrow mb-5">
+            {t('landing.tasks')}
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {tasks.map((task) => (
+              <Link
+                key={task.titleKey}
+                to={task.to}
+                className={cn(
+                  'flex flex-col gap-1.5 rounded-lg border bg-card p-5',
+                  'transition-colors duration-[var(--dur-fast)] hover:border-brand',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+                )}
+              >
+                <span className="text-[0.9375rem] font-semibold tracking-[-0.01em]">
+                  {t(task.titleKey)}
+                </span>
+                <span className="text-[0.8125rem] leading-relaxed text-muted-foreground">
+                  {t(task.subKey)}
+                </span>
+                <span className="mt-2 text-[0.6875rem] font-semibold text-faint">
+                  {t('common.was')}: {task.was}
+                </span>
+              </Link>
+            ))}
           </div>
-          <Button asChild variant="outline">
-            <Link to="/status">
-              <Search className="size-4" aria-hidden />
-              Check a status
-            </Link>
-          </Button>
         </div>
       </section>
     </div>

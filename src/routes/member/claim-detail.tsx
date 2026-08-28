@@ -52,7 +52,7 @@ export default function ClaimDetail() {
         }
       />
 
-      <section className="rounded-xl border bg-card p-5" aria-labelledby="tracker">
+      <section className="rounded-lg border bg-card p-5" aria-labelledby="tracker">
         <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
           <h2 id="tracker" className="text-sm font-semibold">
             {t('member.trackClaim')}
@@ -68,7 +68,7 @@ export default function ClaimDetail() {
       </section>
 
       {/* Not "under process" — the stage it is actually at, and what that means. */}
-      <section className="mt-4 rounded-xl border border-info-line bg-info-soft p-5" aria-labelledby="next">
+      <section className="mt-4 rounded-lg border border-info-line bg-info-soft p-5" aria-labelledby="next">
         <h2 id="next" className="eyebrow mb-2">
           {t('claims.whatNext')}
         </h2>
@@ -80,7 +80,7 @@ export default function ClaimDetail() {
         <SectionTitle>
           <span id="details">{t('claims.details')}</span>
         </SectionTitle>
-        <dl className="divide-y rounded-xl border bg-card">
+        <dl className="divide-y rounded-lg border bg-card">
           {[
             { k: t('withdraw.reference'), v: <span className="ident">{claim.id}</span> },
             {
@@ -115,7 +115,7 @@ export default function ClaimDetail() {
         </dl>
       </section>
 
-      <section className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-dashed p-5">
+      <section className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-dashed p-5">
         <div className="min-w-0 flex-1">
           <p className="font-medium">{t('claims.somethingWrong')}</p>
           <p className="mt-1 text-sm text-muted-foreground">

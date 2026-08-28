@@ -72,16 +72,16 @@ export default function Withdraw() {
           initial={motionOk ? { opacity: 0, scale: 0.98 } : false}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: motionOk ? 0.3 : 0 }}
-          className="rounded-xl border border-ok-line bg-ok-soft p-6 text-center"
+          className="rounded-lg border border-ok-line bg-ok-soft p-6 text-center"
         >
           <CheckCircle2 className="mx-auto mb-4 size-12 text-ok" aria-hidden />
-          <h1 className="text-2xl font-semibold tracking-tight">{t('withdraw.filed')}</h1>
+          <h1 className="text-[1.5rem] font-extrabold tracking-[-0.03em]">{t('withdraw.filed')}</h1>
           <p className="mt-2 text-muted-foreground">
             <Money value={claim.amount} size="lg" /> · {reason?.title}
           </p>
           <div className="mt-6 rounded-lg border bg-card p-4 text-left">
             <p className="eyebrow mb-1">{t('withdraw.reference')}</p>
-            <p className="ident text-lg font-semibold">{claim.id}</p>
+            <p className="ident text-[1.125rem] font-bold">{claim.id}</p>
             <p className="mt-3 text-sm text-muted-foreground">
               Quote this number in any call or grievance about this claim.
             </p>
@@ -138,49 +138,55 @@ export default function Withdraw() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: motionOk ? 0.25 : 0, delay: motionOk ? i * 0.04 : 0 }}
               className={cn(
-                'flex w-full flex-col rounded-xl border bg-card p-5 text-left transition-all',
-                r.eligible
-                  ? 'hover:border-gold-line hover:shadow-[0_8px_24px_-18px_rgb(0_0_0/0.5)]'
-                  : 'cursor-not-allowed opacity-70',
+                'flex w-full flex-col rounded-lg border-[1.35px] border-border bg-card p-4 text-left transition-colors duration-[var(--dur-fast)] sm:p-[1.125rem]',
+                r.eligible ? 'hover:border-brand' : 'cursor-not-allowed bg-muted',
               )}
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="text-lg font-semibold tracking-tight">
+              <div className="flex items-start gap-3.5">
+                <span
+                  className={cn(
+                    'mt-0.5 grid size-[1.125rem] shrink-0 place-items-center rounded-full border-2',
+                    r.eligible ? 'border-input' : 'border-transparent text-faint',
+                  )}
+                  aria-hidden
+                >
+                  {r.eligible ? null : <Lock className="size-3.5" />}
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-[0.9375rem] font-semibold tracking-[-0.01em]">
                     {lang === 'hi' ? r.titleHi : r.title}
                   </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-muted-foreground">
                     {lang === 'hi' ? r.blurbHi : r.blurb}
                   </p>
                 </div>
+
                 {r.eligible ? (
-                  <ArrowRight className="mt-1 size-5 shrink-0 text-muted-foreground" aria-hidden />
+                  <span className="shrink-0 text-right">
+                    <span className="block text-[0.6875rem] text-muted-foreground">
+                      {t('withdraw.youCanTake')}
+                    </span>
+                    <Money value={r.cap} size="lg" mark className="block" />
+                  </span>
                 ) : (
-                  <Lock className="mt-1 size-5 shrink-0 text-muted-foreground" aria-hidden />
+                  <StatusPill tone="neutral" className="shrink-0">
+                    {t('withdraw.notEligible')}
+                  </StatusPill>
                 )}
               </div>
 
-              {r.eligible ? (
-                <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t pt-4">
-                  <span className="text-sm text-muted-foreground">{t('withdraw.youCanTake')}</span>
-                  <Money value={r.cap} size="lg" mark />
-                </div>
-              ) : (
-                <div className="mt-4 border-t pt-4">
-                  <StatusPill tone="neutral">{t('withdraw.notEligible')}</StatusPill>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {r.blockedBecause}
-                  </p>
-                </div>
+              {r.eligible ? null : (
+                <p className="mt-2.5 pl-8 text-[0.8125rem] leading-relaxed text-muted-foreground">
+                  {r.blockedBecause}
+                </p>
               )}
 
-              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-                <span className="font-medium">{t('withdraw.rule')}:</span>{' '}
+              <p className="mt-2.5 pl-8 text-xs leading-relaxed text-faint">
+                <span className="font-semibold">{t('withdraw.rule')}:</span>{' '}
                 {lang === 'hi' ? r.ruleHi : r.rule}
-                <span className="mx-1.5 text-border" aria-hidden>·</span>
-                <span className="text-muted-foreground/70">
-                  {t('common.was')} {r.formNumber}
-                </span>
+                <span className="mx-1.5" aria-hidden>·</span>
+                {t('common.was')} {r.formNumber}
               </p>
             </motion.button>
           ))}
@@ -190,7 +196,7 @@ export default function Withdraw() {
       {/* Step 2 — the computed cap above the field, the verified bank shown not re-entered. */}
       {step === 2 && reason ? (
         <div className="space-y-6">
-          <div className="rounded-xl border bg-card p-5">
+          <div className="rounded-lg border bg-card p-5">
             <p className="text-sm text-muted-foreground">{lang === 'hi' ? reason.titleHi : reason.title}</p>
             <div className="mt-3 flex flex-wrap items-baseline gap-x-2">
               <span className="text-sm text-muted-foreground">{t('withdraw.youCanTake')}</span>
@@ -245,7 +251,7 @@ export default function Withdraw() {
             </div>
           </div>
 
-          <div className="rounded-xl border bg-card p-5">
+          <div className="rounded-lg border bg-card p-5">
             <p className="eyebrow mb-3">{t('withdraw.paidInto')}</p>
             <div className="flex items-start gap-3">
               <Landmark className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
@@ -354,7 +360,7 @@ export default function Withdraw() {
       {/* Step 3 — read back, one checkbox, one code. */}
       {step === 3 && reason ? (
         <div className="space-y-6">
-          <dl className="divide-y rounded-xl border bg-card">
+          <dl className="divide-y rounded-lg border bg-card">
             {[
               { k: 'Reason', v: lang === 'hi' ? reason.titleHi : reason.title, editStep: 1 },
               { k: 'Amount', v: rupees(amountNum), editStep: 2, big: true },
@@ -400,7 +406,7 @@ export default function Withdraw() {
             </span>
           </label>
 
-          <div className="space-y-2 rounded-xl border bg-card p-5">
+          <div className="space-y-2 rounded-lg border bg-card p-5">
             <Label htmlFor="claim-otp">{t('signin.otp')}</Label>
             <p className="text-sm text-muted-foreground">
               {t('signin.otpSent')} +91 98XXX XX210

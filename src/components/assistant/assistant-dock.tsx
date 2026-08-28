@@ -82,19 +82,17 @@ export function AssistantDock() {
             animate={{ opacity: 1, y: 0 }}
             exit={motionOk ? { opacity: 0, y: 12 } : undefined}
             transition={{ duration: motionOk ? 0.2 : 0, ease: 'easeOut' }}
-            className="fixed inset-x-3 bottom-3 z-50 flex max-h-[min(32rem,80dvh)] flex-col overflow-hidden rounded-xl border bg-popover shadow-2xl sm:inset-x-auto sm:right-5 sm:bottom-5 sm:w-[26rem]"
+            className="fixed inset-x-3 bottom-3 z-50 flex max-h-[min(32rem,80dvh)] flex-col overflow-hidden rounded-lg border bg-popover shadow-pop sm:inset-x-auto sm:right-5 sm:bottom-5 sm:w-[26rem]"
             role="dialog"
             aria-label="Help assistant"
           >
             <header className="flex items-center gap-2 border-b px-4 py-3">
-              <Sparkles className="size-4 text-gold" aria-hidden />
+              <Sparkles className="size-4 text-ai" aria-hidden />
               <p className="text-sm font-semibold">Ask about this page</p>
               <span
                 className={cn(
-                  'ml-auto inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[0.6875rem]',
-                  aiState === 'on'
-                    ? 'border-ok-line bg-ok-soft text-ok'
-                    : 'border-border bg-muted text-muted-foreground',
+                  'ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold',
+                  aiState === 'on' ? 'bg-ai-soft text-ai' : 'bg-muted text-muted-foreground',
                 )}
                 title={
                   aiState === 'on'
@@ -130,7 +128,7 @@ export function AssistantDock() {
                           key={s}
                           type="button"
                           onClick={() => ask(s)}
-                          className="!min-h-0 rounded-full border px-3 py-1.5 text-xs hover:bg-secondary"
+                          className="!min-h-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors hover:border-brand hover:bg-muted"
                         >
                           {s}
                         </button>
@@ -146,7 +144,7 @@ export function AssistantDock() {
                       'max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed',
                       turn.role === 'you'
                         ? 'ml-auto bg-primary text-primary-foreground'
-                        : 'bg-secondary',
+                        : 'bg-muted',
                     )}
                   >
                     {turn.text}
@@ -161,7 +159,8 @@ export function AssistantDock() {
                       </Link>
                     ) : null}
                     {turn.rephrased ? (
-                      <span className="mt-1.5 block text-[0.625rem] text-muted-foreground">
+                      <span className="mt-1.5 flex items-center gap-1 text-[0.625rem] font-semibold text-ai">
+                        <Cpu className="size-2.5" aria-hidden />
                         Phrased on your device · figures come from your record
                       </span>
                     ) : null}
@@ -198,7 +197,7 @@ export function AssistantDock() {
         <Button
           onClick={() => setAssistantOpen(true)}
           size="lg"
-          className="fixed right-4 bottom-20 z-40 h-12 gap-2 rounded-full shadow-lg lg:bottom-6"
+          className="fixed right-4 bottom-20 z-40 gap-2 rounded-full lg:bottom-6"
         >
           <MessageCircle className="size-4" aria-hidden />
           Ask

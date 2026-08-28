@@ -6,8 +6,9 @@ import { useMotionOk } from '@/hooks/use-motion-ok'
 import { cn } from '@/lib/utils'
 
 /**
- * A persistent "step 2 of 3" on every long flow, with the label of each step
- * spelled out so nobody has to guess how much is left.
+ * Every step is named under its own bar, so "how much is left" is answered by
+ * looking rather than by counting. The old pattern — one bar and a "step 2 of
+ * 3" caption — makes you hold the total in your head.
  */
 export function StepProgress({
   step,
@@ -22,44 +23,49 @@ export function StepProgress({
 }) {
   const motionOk = useMotionOk()
   return (
-    <div className={cn('mb-8', className)}>
-      <div className="mb-3 flex items-center gap-3">
-        {onBack ? (
-          <Button variant="ghost" size="sm" onClick={onBack} className="-ml-2 h-9 px-2">
-            <ArrowLeft className="size-4" aria-hidden />
-            Back
-          </Button>
-        ) : null}
-        <p className="num text-sm font-medium text-muted-foreground">
-          Step {step} of {labels.length}
-          <span className="mx-2 text-border" aria-hidden>
-            ·
-          </span>
-          <span className="text-foreground">{labels[step - 1]}</span>
-        </p>
-      </div>
+    <div className={cn('mb-7', className)}>
+      {onBack ? (
+        <Button variant="ghost" size="sm" onClick={onBack} className="mb-3 -ml-3">
+          <ArrowLeft className="size-4" aria-hidden />
+          Back
+        </Button>
+      ) : null}
       <div
-        className="flex gap-1.5"
+        className="flex gap-2.5"
         role="progressbar"
         aria-valuenow={step}
         aria-valuemin={1}
         aria-valuemax={labels.length}
         aria-label={`Step ${step} of ${labels.length}: ${labels[step - 1]}`}
       >
-        {labels.map((label, i) => (
-          <div key={label} className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-            {i < step ? (
-              <motion.div
-                layoutId={`step-fill-${i}`}
-                className="h-full rounded-full bg-primary"
-                initial={{ scaleX: motionOk ? 0 : 1 }}
-                animate={{ scaleX: 1 }}
-                style={{ originX: 0 }}
-                transition={{ duration: motionOk ? 0.32 : 0, ease: 'easeOut' }}
-              />
-            ) : null}
-          </div>
-        ))}
+        {labels.map((label, i) => {
+          const state = i < step - 1 ? 'done' : i === step - 1 ? 'current' : 'todo'
+          return (
+            <div key={label} className="flex min-w-0 flex-1 flex-col gap-2">
+              <div className="h-1 overflow-hidden rounded-full bg-border">
+                {state !== 'todo' ? (
+                  <motion.div
+                    className={cn(
+                      'h-full origin-left rounded-full',
+                      state === 'current' ? 'bg-primary' : 'bg-brand-line',
+                    )}
+                    initial={{ scaleX: motionOk ? 0 : 1 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: motionOk ? 0.32 : 0, ease: 'easeOut' }}
+                  />
+                ) : null}
+              </div>
+              <span
+                className={cn(
+                  'truncate text-xs font-semibold',
+                  state === 'todo' ? 'text-faint' : state === 'current' ? 'text-foreground' : 'text-muted-foreground',
+                )}
+              >
+                {label}
+              </span>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -69,8 +75,8 @@ export function StepActions({ children, className }: { children: ReactNode; clas
   return (
     <div
       className={cn(
-        'sticky bottom-16 z-30 -mx-4 mt-8 flex flex-col-reverse gap-3 border-t bg-background/95 px-4 py-4 backdrop-blur',
-        'sm:static sm:mx-0 sm:flex-row sm:justify-end sm:border-t-0 sm:bg-transparent sm:px-0 sm:backdrop-blur-none',
+        'sticky bottom-16 z-30 -mx-4 mt-7 flex flex-col-reverse gap-3 border-t bg-card/95 px-4 py-4 backdrop-blur',
+        'sm:static sm:mx-0 sm:flex-row sm:items-center sm:justify-end sm:border-t sm:bg-transparent sm:px-0 sm:pt-5 sm:pb-0 sm:backdrop-blur-none',
         className,
       )}
     >
