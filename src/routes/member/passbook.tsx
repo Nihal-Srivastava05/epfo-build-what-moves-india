@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Building2, Download, Info } from 'lucide-react'
+import { Building2, ChartColumn, Download, Info, Table2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -8,11 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { CountUpMoney } from '@/components/patterns/count-up'
 import { Money } from '@/components/patterns/money'
 import { StatusPill } from '@/components/patterns/status-pill'
 import { MockBadge } from '@/components/patterns/mock-badge'
+import { MultiSelect } from '@/components/patterns/multi-select'
+import { BalanceTrend } from '@/components/charts/balance-trend'
+import { ContributionBars } from '@/components/charts/contribution-bars'
+import { EmployerSplit } from '@/components/charts/employer-split'
 import { Term } from '@/components/patterns/term'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
@@ -29,12 +34,14 @@ import {
   EPF_RATE,
   INTEREST_RATE,
   TODAY,
+  employmentById,
   employments,
   establishmentByCode,
   establishments,
   personById,
   splitContribution,
 } from '@/lib/mock/db'
+import type { Grain } from '@/lib/chart-data'
 import { downloadCsv, exportName } from '@/lib/export'
 
 export default function Passbook() {
@@ -48,15 +55,49 @@ export default function Passbook() {
     return ['all', ...Array.from(set).sort().reverse()]
   }, [ledger])
   const [fy, setFy] = useState('all')
-  const [est, setEst] = useState('all')
+  /** Empty means every employer — see MultiSelect. */
+  const [ests, setEsts] = useState<string[]>([])
+  const estOptions = establishments.map((e) => ({ value: e.code, label: e.name }))
+  const allEsts = ests.length === 0
 
-  const rows = ledger.filter(
-    (r) =>
-      (fy === 'all' || financialYear(r.month ?? r.date.slice(0, 7)) === fy) &&
-      (est === 'all' || r.estCode === est || r.kind === 'interest'),
+  const rows = useMemo(
+    () =>
+      ledger.filter(
+        (r) =>
+          (fy === 'all' || financialYear(r.month ?? r.date.slice(0, 7)) === fy) &&
+          (allEsts || (r.estCode ? ests.includes(r.estCode) : false) || r.kind === 'interest'),
+      ),
+    [ledger, fy, ests, allEsts],
   )
 
+  /**
+   * The table is the record; the charts are the shape of it. Both read the same
+   * filtered rows, so switching view can never change what is being looked at.
+   */
+  const [view, setView] = useState<'table' | 'chart'>('table')
+  /**
+   * Left on 'auto' the period follows the year filter — eighty-five monthly
+   * bars is a texture, twelve is a chart — until the reader says otherwise.
+   */
+  const [grain, setGrain] = useState<Grain | 'auto'>('auto')
+  const shownGrain: Grain = grain === 'auto' ? (fy === 'all' ? 'fy' : 'month') : grain
+
   const missing = contributions.filter((c) => c.status === 'missing')
+  /** Months an employer never filed, narrowed by the same two filters, so the
+   *  gap is only drawn on a chart that is actually showing that employer. */
+  const unfiledMonths = useMemo(
+    () =>
+      contributions
+        .filter(
+          (c) =>
+            c.status === 'missing' &&
+            (fy === 'all' || financialYear(c.month) === fy) &&
+            (allEsts || ests.includes(employmentById(c.employmentId).estCode)),
+        )
+        .map((c) => c.month),
+    [contributions, fy, ests, allEsts],
+  )
+
   const me = personById('p-priya')
 
   const splits = [
@@ -78,7 +119,9 @@ export default function Passbook() {
   const exportCsv = () => {
     const closing = rows.length ? rows[0].balanceAfter : 0
     const scope = fy === 'all' ? 'all years' : `FY ${fy}`
-    const employer = est === 'all' ? 'all employers' : establishmentByCode(est).name
+    const employer = allEsts
+      ? 'all employers'
+      : ests.map((code) => establishmentByCode(code).name).join('; ')
 
     downloadCsv(exportName(['epfo-passbook', me.uan, fy === 'all' ? 'all' : fy], 'csv'), [
       ['EPFO passbook (prototype — every figure below is synthetic)'],
@@ -100,7 +143,7 @@ export default function Passbook() {
       [],
       [
         '',
-        fy === 'all' && est === 'all' ? 'Closing balance' : 'Balance after the latest row shown',
+        fy === 'all' && allEsts ? 'Closing balance' : 'Balance after the latest row shown',
         '',
         '',
         '',
@@ -227,123 +270,165 @@ export default function Passbook() {
         running balance.
       </p>
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Select value={fy} onValueChange={setFy}>
-          <SelectTrigger className="w-44">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map((y) => (
-              <SelectItem key={y} value={y}>
-                {y === 'all' ? 'All years' : `FY ${y}`}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={est} onValueChange={setEst}>
-          <SelectTrigger className="w-60">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All employers</SelectItem>
-            {establishments.map((e) => (
-              <SelectItem key={e.code} value={e.code}>
-                {e.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* One control row above everything it scopes: the view switch, then the
+          two filters, then the export that writes out exactly what they leave.
+          Both views read the same rows, so switching never changes the slice. */}
+      <Tabs
+        value={view}
+        onValueChange={(v) => setView(v as 'table' | 'chart')}
+        className="gap-0"
+      >
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <TabsList aria-label="Passbook view">
+            <TabsTrigger value="table">
+              <Table2 aria-hidden />
+              Table
+            </TabsTrigger>
+            <TabsTrigger value="chart">
+              <ChartColumn aria-hidden />
+              Charts
+            </TabsTrigger>
+          </TabsList>
 
-        {/* The export sits with the filters, because what it writes out is
-            whatever those two are currently showing. */}
-        <div className="ml-auto flex items-center gap-2">
-          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
-            <Download className="size-4" aria-hidden />
-            Export CSV
-          </Button>
-          <MockBadge what="The download is real and opens in any spreadsheet. The figures inside it are synthetic, like everything else here." />
+          <Select value={fy} onValueChange={setFy}>
+            <SelectTrigger className="w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map((y) => (
+                <SelectItem key={y} value={y}>
+                  {y === 'all' ? 'All years' : `FY ${y}`}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <MultiSelect
+            className="w-60"
+            label="Employers"
+            options={estOptions}
+            value={ests}
+            onValueChange={setEsts}
+            allLabel="All employers"
+            summary={(n) => `${n} employers`}
+          />
+
+          {/* The export sits with the filters, because what it writes out is
+              whatever those two are currently showing. */}
+          <div className="ml-auto flex items-center gap-2">
+            <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
+              <Download className="size-4" aria-hidden />
+              Export CSV
+            </Button>
+            <MockBadge what="The download is real and opens in any spreadsheet. The figures inside it are synthetic, like everything else here." />
+          </div>
         </div>
-      </div>
 
-      {missing.length > 0 ? (
-        <p className="mb-4 flex items-start gap-2.5 rounded-sm bg-stop-soft p-3.5 text-[0.8125rem] leading-relaxed text-stop">
-          <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
-          <span>
-            {fmtMonth(missing[0].month, lang)} is not in this ledger because your employer never filed
-            it. It is not lost — it was never sent.
-          </span>
+        {missing.length > 0 ? (
+          <p className="mb-4 flex items-start gap-2.5 rounded-sm bg-stop-soft p-3.5 text-[0.8125rem] leading-relaxed text-stop">
+            <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <span>
+              {fmtMonth(missing[0].month, lang)} is not in this ledger because your employer never
+              filed it. It is not lost — it was never sent.
+            </span>
+          </p>
+        ) : null}
+
+        <TabsContent value="table">
+          {/* Ledger rules and tabular figures: it should read like a passbook. */}
+          <div className="overflow-x-auto rounded-lg border bg-card">
+            <table className="w-full min-w-[40rem] text-sm">
+              <caption className="sr-only">Provident fund ledger</caption>
+              <thead className="bg-muted">
+                <tr className="eyebrow">
+                  <th className="px-4 py-3 text-left">Date</th>
+                  <th className="px-4 py-3 text-left">Particulars</th>
+                  <th className="px-4 py-3 text-right">Your share</th>
+                  <th className="px-4 py-3 text-right">Employer</th>
+                  <th className="px-4 py-3 text-right">
+                    <Term id="eps" className="text-muted-foreground">Pension</Term>
+                  </th>
+                  <th className="px-4 py-3 text-right">Balance</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {rows.map((r) => (
+                  <tr
+                    key={r.id}
+                    className={r.kind === 'interest' ? 'bg-brand-tint' : 'transition-colors hover:bg-muted'}
+                  >
+                    <td className="num px-4 py-3 whitespace-nowrap text-muted-foreground">{fmtDate(r.date, lang)}</td>
+                    <td className="px-4 py-3 font-medium">
+                      {r.particulars}
+                      {r.kind === 'interest' ? (
+                        <StatusPill tone="neutral" className="ml-2">
+                          Interest
+                        </StatusPill>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Money value={r.employee} size="sm" />
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {r.employer ? <Money value={r.employer} size="sm" /> : <span className="text-muted-foreground">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {r.eps ? <Money value={r.eps} size="sm" /> : <span className="text-muted-foreground">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-right font-bold">
+                      <Money value={r.balanceAfter} size="sm" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              {/* A passbook ends in its own total. It is the balance after the
+                  latest row shown, not the account total, so a filtered view never
+                  claims more than it displays. */}
+              {rows.length ? (
+                <tfoot className="border-t bg-muted">
+                  <tr>
+                    <td className="px-4 py-3" />
+                    <td className="px-4 py-3 text-[0.8125rem] font-bold">
+                      {fy === 'all' && allEsts ? 'Closing balance' : 'Balance after the latest row shown'}
+                    </td>
+                    <td className="px-4 py-3" colSpan={3} />
+                    <td className="px-4 py-3 text-right">
+                      <Money value={rows[0].balanceAfter} size="sm" className="font-bold" />
+                    </td>
+                  </tr>
+                </tfoot>
+              ) : null}
+            </table>
+          </div>
+        </TabsContent>
+
+        {/* The charts answer the questions the table makes you do arithmetic
+            for: is it growing, who is paying, and which job built which part.
+            Every figure in them is a row above, never a re-derived number. */}
+        <TabsContent value="chart" className="space-y-4">
+          {rows.length === 0 ? (
+            <p className="panel p-5 text-[0.8125rem] leading-relaxed text-muted-foreground">
+              Nothing to plot — no entry matches these filters.
+            </p>
+          ) : (
+            <>
+              <BalanceTrend rows={rows} lang={lang} />
+              <ContributionBars
+                rows={rows}
+                unfiledMonths={unfiledMonths}
+                lang={lang}
+                grain={shownGrain}
+                onGrainChange={setGrain}
+              />
+              <EmployerSplit rows={rows} />
+            </>
+          )}
+        </TabsContent>
+
+        <p className="mt-3 text-sm text-muted-foreground">
+          Showing <span className="num">{rows.length}</span> of{' '}
+          <span className="num">{ledger.length}</span> entries.
         </p>
-      ) : null}
-
-      {/* Ledger rules and tabular figures: it should read like a passbook. */}
-      <div className="overflow-x-auto rounded-lg border bg-card">
-        <table className="w-full min-w-[40rem] text-sm">
-          <caption className="sr-only">Provident fund ledger</caption>
-          <thead className="bg-muted">
-            <tr className="eyebrow">
-              <th className="px-4 py-3 text-left">Date</th>
-              <th className="px-4 py-3 text-left">Particulars</th>
-              <th className="px-4 py-3 text-right">Your share</th>
-              <th className="px-4 py-3 text-right">Employer</th>
-              <th className="px-4 py-3 text-right">
-                <Term id="eps" className="text-muted-foreground">Pension</Term>
-              </th>
-              <th className="px-4 py-3 text-right">Balance</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {rows.map((r) => (
-              <tr
-                key={r.id}
-                className={r.kind === 'interest' ? 'bg-brand-tint' : 'transition-colors hover:bg-muted'}
-              >
-                <td className="num px-4 py-3 whitespace-nowrap text-muted-foreground">{fmtDate(r.date, lang)}</td>
-                <td className="px-4 py-3 font-medium">
-                  {r.particulars}
-                  {r.kind === 'interest' ? (
-                    <StatusPill tone="neutral" className="ml-2">
-                      Interest
-                    </StatusPill>
-                  ) : null}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Money value={r.employee} size="sm" />
-                </td>
-                <td className="px-4 py-3 text-right">
-                  {r.employer ? <Money value={r.employer} size="sm" /> : <span className="text-muted-foreground">—</span>}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  {r.eps ? <Money value={r.eps} size="sm" /> : <span className="text-muted-foreground">—</span>}
-                </td>
-                <td className="px-4 py-3 text-right font-bold">
-                  <Money value={r.balanceAfter} size="sm" />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-          {/* A passbook ends in its own total. It is the balance after the
-              latest row shown, not the account total, so a filtered view never
-              claims more than it displays. */}
-          {rows.length ? (
-            <tfoot className="border-t bg-muted">
-              <tr>
-                <td className="px-4 py-3" />
-                <td className="px-4 py-3 text-[0.8125rem] font-bold">
-                  {fy === 'all' && est === 'all' ? 'Closing balance' : 'Balance after the latest row shown'}
-                </td>
-                <td className="px-4 py-3" colSpan={3} />
-                <td className="px-4 py-3 text-right">
-                  <Money value={rows[0].balanceAfter} size="sm" className="font-bold" />
-                </td>
-              </tr>
-            </tfoot>
-          ) : null}
-        </table>
-      </div>
-      <p className="mt-3 text-sm text-muted-foreground">
-        Showing <span className="num">{rows.length}</span> of{' '}
-        <span className="num">{ledger.length}</span> entries.
-      </p>
+      </Tabs>
     </div>
   )
 }

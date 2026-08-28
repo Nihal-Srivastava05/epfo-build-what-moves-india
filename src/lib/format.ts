@@ -15,6 +15,19 @@ export function rupees(value: number, opts: { paise?: boolean } = {}) {
   return `₹${inr(value, opts)}`
 }
 
+/**
+ * Axis-tick money: lakh and crore, the units this audience counts in. Never for
+ * a figure the user has to act on — those stay unabbreviated, in full digits.
+ */
+export function compactInr(value: number) {
+  const abs = Math.abs(value)
+  const trim = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1))
+  if (abs >= 10_000_000) return `₹${trim(value / 10_000_000)}Cr`
+  if (abs >= 100_000) return `₹${trim(value / 100_000)}L`
+  if (abs >= 1_000) return `₹${trim(value / 1_000)}K`
+  return `₹${Math.round(value)}`
+}
+
 /** "14 Aug 2026" — never a bare numeric date, which reads differently by country. */
 export function fmtDate(iso: string, lang: 'en' | 'hi' = 'en') {
   const d = new Date(iso.length <= 10 ? `${iso}T00:00:00` : iso)

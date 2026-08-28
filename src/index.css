@@ -63,6 +63,17 @@
 
   /* On-device assistant — the only warm colour in the system, and it means
      exactly one thing: a machine wrote this sentence, not the record. */
+  /* ---------------------------------------------------------------------
+     Chart series. Three slots, fixed order, assigned by what they mean and
+     never by rank — your share keeps the brand blue whatever the filters do.
+     Validated (OKLCH band, chroma floor, protan/deutan ΔE, contrast) against
+     the card surface in both modes; aqua sits below 3:1 on white, which the
+     legend, the direct labels and the table view are the relief for.
+     --------------------------------------------------------------------- */
+  --series-you: #0040dd;
+  --series-employer: #eb6834;
+  --series-interest: #1baf7a;
+
   --ai: #e54800;
   --ai-soft: #fff1e7;
   --ai-line: #ffc79e;
@@ -132,6 +143,10 @@
     --info-soft: #101f2c;
     --info-line: #23415c;
 
+    --series-you: #5b8cff;
+    --series-employer: #d95926;
+    --series-interest: #199e70;
+
     --ai: #ff9a4d;
     --ai-soft: #271a10;
     --ai-line: #4d341c;
@@ -192,6 +207,10 @@
   --info: #6cb2ec;
   --info-soft: #101f2c;
   --info-line: #23415c;
+
+  --series-you: #5b8cff;
+  --series-employer: #d95926;
+  --series-interest: #199e70;
 
   --ai: #ff9a4d;
   --ai-soft: #271a10;
@@ -259,6 +278,10 @@
   --color-ai: var(--ai);
   --color-ai-soft: var(--ai-soft);
   --color-ai-line: var(--ai-line);
+
+  --color-series-you: var(--series-you);
+  --color-series-employer: var(--series-employer);
+  --color-series-interest: var(--series-interest);
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
