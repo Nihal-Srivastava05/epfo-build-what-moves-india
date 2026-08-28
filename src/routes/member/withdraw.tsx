@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'motion/react'
 import {
   ArrowRight,
@@ -40,8 +40,18 @@ export default function Withdraw() {
 
   const reasons = useMemo(() => withdrawalReasons(contributions), [contributions])
   const balance = useMemo(() => totalBalance(contributions), [contributions])
-  const [step, setStep] = useState(claimDraft?.step ?? 1)
-  const [reasonKey, setReasonKey] = useState(claimDraft?.reasonKey ?? '')
+
+  /**
+   * A life-event card on the claims page hands the reason over in the URL, so
+   * arriving from one skips step 1 rather than asking the same question twice.
+   * An unknown or ineligible key is ignored — the flow then opens where it
+   * always did, at the list.
+   */
+  const [params] = useSearchParams()
+  const handed = reasons.find((r) => r.key === params.get('reason') && r.eligible)
+
+  const [step, setStep] = useState(claimDraft?.step ?? (handed ? 2 : 1))
+  const [reasonKey, setReasonKey] = useState(claimDraft?.reasonKey ?? handed?.key ?? '')
   const [amount, setAmount] = useState<string>(claimDraft?.amount ? String(claimDraft.amount) : '')
   const [agreed, setAgreed] = useState(false)
   const [otp, setOtp] = useState('')
@@ -308,8 +318,8 @@ export default function Withdraw() {
                         {issue.detail}
                         {issue.key === 'bank' ? (
                           <span className="ident mt-3 block rounded-md border bg-card p-2.5 text-xs">
-                            <span className="block text-stop line-through">PUNB0234500</span>
-                            <span className="block font-semibold text-ok">PUNB0234501</span>
+                            <span className="block text-stop line-through">PRGB0234500</span>
+                            <span className="block font-semibold text-ok">PRGB0234501</span>
                           </span>
                         ) : null}
                       </>

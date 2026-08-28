@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { Bell, Languages, Settings2 } from 'lucide-react'
+import { Bell, Languages, Settings2, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AccountMenu } from '@/components/layout/account-menu'
@@ -12,7 +12,6 @@ import { useData } from '@/store/data'
 import { navByPersona, navTitleKey } from '@/lib/nav'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
-import { useIdentity } from '@/hooks/use-identity'
 import { cn } from '@/lib/utils'
 
 /**
@@ -56,6 +55,25 @@ function NavRail() {
           </span>
         </NavLink>
       ))}
+
+      {/* Your own record is not one of the five tasks, so it sits apart from
+          them — pinned to the foot of the rail, where an account always is. */}
+      <NavLink
+        to="/profile"
+        className={({ isActive }) =>
+          cn(
+            'mt-auto flex w-[70px] flex-col items-center gap-1.5 rounded-md px-1 pt-2.5 pb-2 transition-colors duration-[var(--dur-fast)]',
+            isActive
+              ? 'bg-brand-tint text-primary'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+          )
+        }
+      >
+        <UserRound className="size-5 shrink-0" aria-hidden />
+        <span className="text-center text-[0.625rem] leading-tight font-semibold">
+          {t('nav.profile')}
+        </span>
+      </NavLink>
     </nav>
   )
 }
@@ -105,7 +123,6 @@ export function AppShell() {
   const toggleLang = useSession((s) => s.toggleLang)
   const notifications = useData((s) => s.notifications)
   const persona = useSession((s) => s.persona)
-  const identity = useIdentity()
   const unread = notifications.filter((n) =>
     persona === 'pensioner' ? n.personId === 'p-ram' : n.personId === 'p-priya',
   ).length
@@ -116,17 +133,20 @@ export function AppShell() {
       ? t('nav.settings')
       : location.pathname === '/notifications'
         ? t('nav.notifications')
-        : titleKey
-          ? t(titleKey)
-          : t('app.name')
+        : location.pathname === '/profile'
+          ? t('nav.profile')
+          : titleKey
+            ? t(titleKey)
+            : t('app.name')
 
   return (
     <div className="flex min-h-dvh">
       <NavRail />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* The bar names the screen and the person, in that order. Nobody has to
-            remember which of nine portals they are standing in. */}
+        {/* The bar names the screen you are on, and nothing else. Who you are
+            belongs to the account menu and the profile page, not to every
+            screen's chrome. */}
         <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b bg-card px-4 lg:px-6">
           <Link to="/" className="lg:hidden" aria-label="EPFO home">
             <Emblem className="size-8" />
@@ -134,9 +154,6 @@ export function AppShell() {
 
           <div className="min-w-0">
             <h1 className="truncate text-[0.9375rem] font-semibold tracking-[-0.01em]">{title}</h1>
-            <p className="num hidden truncate text-[0.6875rem] leading-tight text-muted-foreground lg:block">
-              {identity.name} · {identity.sub}
-            </p>
           </div>
 
           <div className="ml-auto flex items-center gap-0.5">

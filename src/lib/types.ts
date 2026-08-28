@@ -11,11 +11,17 @@ export type Holder = 'you' | 'employer' | 'epfo' | 'bank'
 
 export type Persona = 'member' | 'employer' | 'pensioner'
 
+export type Gender = 'female' | 'male' | 'other'
+
 export interface Person {
   id: string
   name: string
   uan: string
   dob: string
+  gender: Gender
+  /** EPFO records one relation on every member. Which one it is, is stated. */
+  relationName: string
+  relationKind: 'father' | 'mother' | 'spouse'
   aadhaarMasked: string
   panMasked: string
   mobileMasked: string

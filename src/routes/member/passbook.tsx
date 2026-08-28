@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Download, Info } from 'lucide-react'
+import { Building2, Download, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -9,20 +9,37 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+import { CountUpMoney } from '@/components/patterns/count-up'
 import { Money } from '@/components/patterns/money'
 import { StatusPill } from '@/components/patterns/status-pill'
 import { MockBadge } from '@/components/patterns/mock-badge'
 import { Term } from '@/components/patterns/term'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
-import { buildLedger, totalBalance } from '@/lib/derive'
-import { financialYear, fmtDate, fmtMonth } from '@/lib/format'
-import { INTEREST_RATE, establishmentByCode, establishments, personById } from '@/lib/mock/db'
+import {
+  buildLedger,
+  employeeShareTotal,
+  employerShareTotal,
+  interestTotal,
+  pensionShareTotal,
+  totalBalance,
+} from '@/lib/derive'
+import { financialYear, fmtDate, fmtMonth, inr } from '@/lib/format'
+import {
+  EPF_RATE,
+  INTEREST_RATE,
+  TODAY,
+  employments,
+  establishmentByCode,
+  establishments,
+  personById,
+  splitContribution,
+} from '@/lib/mock/db'
 import { downloadCsv, exportName } from '@/lib/export'
 
 export default function Passbook() {
   const contributions = useData((s) => s.contributions)
-  const { lang } = useT()
+  const { t, lang } = useT()
   const ledger = useMemo(() => buildLedger(contributions), [contributions])
   const balance = totalBalance(contributions)
 
@@ -41,6 +58,16 @@ export default function Passbook() {
 
   const missing = contributions.filter((c) => c.status === 'missing')
   const me = personById('p-priya')
+
+  const splits = [
+    { label: t('member.yourShare'), value: employeeShareTotal(contributions) },
+    { label: t('member.employerShare'), value: employerShareTotal(contributions) },
+    { label: t('member.interest'), value: interestTotal(contributions) },
+  ]
+
+  const current = employments.find((e) => e.current && e.personId === me.id)
+  const currentEst = current ? establishmentByCode(current.estCode) : undefined
+  const monthly = splitContribution(current?.monthlyWage ?? 0)
 
   /**
    * Exports exactly what is on screen, filters included — a file that disagrees
@@ -85,26 +112,122 @@ export default function Passbook() {
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-4 rounded-lg border bg-card p-5">
-        <div>
-          <p className="eyebrow mb-2">Closing balance</p>
-          <Money value={balance} size="xl" />
-          <p className="mt-2 max-w-prose text-[0.8125rem] leading-relaxed text-muted-foreground">
-            Every rupee, per employer, per year — searchable here rather than locked in a PDF.
-            Interest is credited once a year at {(INTEREST_RATE * 100).toFixed(2)}%, calculated on
-            your monthly running balance.
+      {/* The same balance card as the home screen, so the number a person
+          remembers from one page is the number that greets them on the next.
+          Beside it: who is paying into the account right now, because the first
+          question a ledger raises is "whose money is this row?". */}
+      <div className="mb-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <section
+          aria-labelledby="balance"
+          className="flex flex-col gap-5 rounded-lg bg-hero p-6 text-hero-foreground"
+        >
+          <h2
+            id="balance"
+            className="text-[0.6875rem] font-semibold uppercase tracking-[0.055em] text-hero-foreground/70"
+          >
+            {t('member.balanceLabel')}
+          </h2>
+
+          <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
+            <CountUpMoney value={balance} />
+            <p className="pb-1.5 text-[0.8125rem] text-hero-foreground/70">
+              {t('member.asOf')} {fmtDate(TODAY, lang)}
+            </p>
+          </div>
+
+          <dl className="grid gap-px overflow-hidden rounded-sm bg-hero-foreground/20 sm:grid-cols-3">
+            {splits.map((s) => (
+              <div
+                key={s.label}
+                className="flex items-baseline justify-between gap-3 bg-hero px-3.5 py-2.5 sm:block sm:py-3"
+              >
+                <dt className="text-[0.6875rem] text-hero-foreground/70">{s.label}</dt>
+                <dd className="num text-[1.0625rem] font-bold sm:mt-0.5">₹{inr(s.value)}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <p className="mt-auto text-[0.8125rem] text-hero-foreground/80">
+            <Term
+              id="eps"
+              className="text-hero-foreground decoration-hero-foreground/50 hover:decoration-hero-foreground"
+            >
+              {lang === 'hi' ? 'पेंशन (ईपीएस)' : 'Pension (EPS)'}
+            </Term>{' '}
+            <span className="num font-semibold">₹{inr(pensionShareTotal(contributions))}</span>{' '}
+            <span className="text-hero-foreground/60">— {t('member.pensionAside')}</span>
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
-            <Download className="size-4" aria-hidden />
-            Export CSV
-          </Button>
-          <MockBadge what="The download is real and opens in any spreadsheet. The figures inside it are synthetic, like everything else here." />
-        </div>
+        </section>
+
+        {/* Current employment. Every figure is derived from the same record the
+            ledger below is built from — nothing here is typed by hand. */}
+        <section aria-labelledby="employment" className="flex flex-col rounded-lg border bg-card p-5">
+          <h2 id="employment" className="eyebrow mb-3.5">
+            Currently employed at
+          </h2>
+
+          {current && currentEst ? (
+            <>
+              <div className="flex items-start gap-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-sm bg-muted">
+                  <Building2 className="size-4 text-muted-foreground" aria-hidden />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-semibold tracking-[-0.01em]">{currentEst.name}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{currentEst.city}</p>
+                </div>
+              </div>
+
+              <dl className="mt-4 space-y-2.5 border-t pt-4 text-[0.8125rem]">
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-muted-foreground">Establishment code</dt>
+                  <dd className="ident font-medium">{currentEst.code}</dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-muted-foreground">Working here since</dt>
+                  <dd className="num font-medium">{fmtDate(current.joined, lang)}</dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-muted-foreground">Monthly EPF wage</dt>
+                  <dd>
+                    <Money value={current.monthlyWage} size="sm" className="font-semibold" />
+                  </dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-muted-foreground">Going in each month</dt>
+                  <dd>
+                    <Money
+                      value={monthly.employee + monthly.employerEpf}
+                      size="sm"
+                      className="font-semibold"
+                      mark
+                    />
+                  </dd>
+                </div>
+              </dl>
+
+              <p className="mt-auto pt-4 text-xs leading-relaxed text-muted-foreground">
+                Your <span className="num">{(EPF_RATE * 100).toFixed(0)}%</span> and your employer’s
+                match land as one row a month in the ledger below. Anything wrong with these details
+                is corrected by your employer, not by EPFO.
+              </p>
+            </>
+          ) : (
+            <p className="text-[0.8125rem] leading-relaxed text-muted-foreground">
+              No current employer on your record. The ledger below still holds everything paid in by
+              every past employer.
+            </p>
+          )}
+        </section>
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-3">
+      <p className="mb-4 max-w-prose text-[0.8125rem] leading-relaxed text-muted-foreground">
+        Every rupee, per employer, per year — searchable here rather than locked in a PDF. Interest
+        is credited once a year at {(INTEREST_RATE * 100).toFixed(2)}%, calculated on your monthly
+        running balance.
+      </p>
+
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <Select value={fy} onValueChange={setFy}>
           <SelectTrigger className="w-44">
             <SelectValue />
@@ -130,6 +253,16 @@ export default function Passbook() {
             ))}
           </SelectContent>
         </Select>
+
+        {/* The export sits with the filters, because what it writes out is
+            whatever those two are currently showing. */}
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
+            <Download className="size-4" aria-hidden />
+            Export CSV
+          </Button>
+          <MockBadge what="The download is real and opens in any spreadsheet. The figures inside it are synthetic, like everything else here." />
+        </div>
       </div>
 
       {missing.length > 0 ? (

@@ -6,7 +6,6 @@
 export const en = {
   'app.name': 'EPFO',
   'app.tagline': 'Provident fund, pension and insurance — in one place',
-  'app.ministry': 'Ministry of Labour & Employment, Government of India',
   'app.prototype': 'Prototype',
   'app.prototypeNote': 'Independent redesign concept. Not an official government service.',
 
@@ -24,6 +23,7 @@ export const en = {
   'nav.lifeCertificate': 'Life certificate',
   'nav.details': 'My details',
   'nav.notifications': 'Notifications',
+  'nav.profile': 'Profile',
   'nav.settings': 'Settings',
   'nav.glossary': 'What the words mean',
   'nav.kyc.short': 'KYC',
@@ -108,7 +108,7 @@ export const en = {
   'gap.seeNext': 'See what happens next',
   'kyc.bankTitle': 'Your bank details will fail a payment',
   'kyc.bankProblem':
-    'Your branch merged in April 2026 and its IFSC changed. Payments to PUNB0234500 will be returned by the bank.',
+    'Your branch merged in April 2026 and its IFSC changed. Payments to PRGB0234500 will be returned by the bank.',
   'kyc.bankFix': 'Use the new IFSC',
   'kyc.nomineeTitle': 'No nominee on record',
   'kyc.nomineeProblem':
@@ -121,6 +121,9 @@ export const en = {
   'claim.reason.leftJob': 'Left the job',
   'claim.reason.jobChange': 'Transfer on job change',
 
+  'claims.lifeEvents': 'Life events',
+  'claims.lifeEventsSub':
+    'PF is money for the moments that cost. Pick what is happening and we take you straight to the right claim, already filled in.',
   'claims.startTitle': 'Take money out of your PF',
   'claims.startSub': 'Three steps. Nothing to upload, and no visit to an office.',
   'claims.start': 'Start a withdrawal',
@@ -201,7 +204,6 @@ export type StringKey = keyof typeof en
 export const hi: Partial<Record<StringKey, string>> = {
   'app.name': 'ईपीएफ़ओ',
   'app.tagline': 'भविष्य निधि, पेंशन और बीमा — एक ही जगह',
-  'app.ministry': 'श्रम एवं रोज़गार मंत्रालय, भारत सरकार',
   'app.prototype': 'प्रोटोटाइप',
   'app.prototypeNote': 'स्वतंत्र पुनर्रचना अवधारणा। यह सरकारी सेवा नहीं है।',
 
@@ -219,6 +221,7 @@ export const hi: Partial<Record<StringKey, string>> = {
   'nav.lifeCertificate': 'जीवन प्रमाण पत्र',
   'nav.details': 'मेरा विवरण',
   'nav.notifications': 'सूचनाएँ',
+  'nav.profile': 'प्रोफ़ाइल',
   'nav.settings': 'सेटिंग्स',
   'nav.glossary': 'शब्दों का अर्थ',
   'nav.kyc.short': 'केवाईसी',
@@ -303,7 +306,7 @@ export const hi: Partial<Record<StringKey, string>> = {
   'gap.seeNext': 'आगे क्या होगा, देखें',
   'kyc.bankTitle': 'आपके बैंक विवरण से भुगतान विफल होगा',
   'kyc.bankProblem':
-    'अप्रैल 2026 में आपकी शाखा का विलय हुआ और आईएफ़एससी बदल गया। PUNB0234500 पर भेजा भुगतान बैंक लौटा देगा।',
+    'अप्रैल 2026 में आपकी शाखा का विलय हुआ और आईएफ़एससी बदल गया। PRGB0234500 पर भेजा भुगतान बैंक लौटा देगा।',
   'kyc.bankFix': 'नया आईएफ़एससी लगाएँ',
   'kyc.nomineeTitle': 'कोई नामांकित व्यक्ति दर्ज नहीं',
   'kyc.nomineeProblem':
@@ -316,6 +319,9 @@ export const hi: Partial<Record<StringKey, string>> = {
   'claim.reason.leftJob': 'नौकरी छोड़ दी',
   'claim.reason.jobChange': 'नौकरी बदलने पर स्थानांतरण',
 
+  'claims.lifeEvents': 'जीवन की घटनाएँ',
+  'claims.lifeEventsSub':
+    'पीएफ़ उन्हीं मौक़ों के लिए है जिनमें ख़र्च आता है। जो हो रहा है उसे चुनिए — हम सीधे सही दावे तक ले चलेंगे।',
   'claims.startTitle': 'अपने पीएफ़ से पैसा निकालें',
   'claims.startSub': 'तीन चरण। कुछ अपलोड नहीं करना, कहीं जाना नहीं।',
   'claims.start': 'निकासी शुरू करें',

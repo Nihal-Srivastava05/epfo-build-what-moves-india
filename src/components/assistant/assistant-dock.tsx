@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowRight, Cpu, MessageCircle, Send, Sparkles, X } from 'lucide-react'
+import { ArrowRight, Cpu, MessageCircle, MessageCirclePlus, Send, Sparkles, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -70,6 +70,20 @@ export function AssistantDock() {
     setBusy(false)
   }
 
+  /**
+   * Start over. The dock is a scratchpad, not a transcript to keep: once a
+   * question is answered, the next one usually has nothing to do with it, and
+   * an old thread scrolled above the fold only makes the new answer harder to
+   * find. Ids restart too, so the suggestion chips come back exactly as they
+   * were on first open.
+   */
+  const newChat = () => {
+    setTurns([])
+    setInput('')
+    setBusy(false)
+    nextId.current = 1
+  }
+
   // The assistant never appears on the sign-in screen, where it would only be noise.
   if (location.pathname.startsWith('/signin')) return null
 
@@ -86,12 +100,12 @@ export function AssistantDock() {
             role="dialog"
             aria-label="Help assistant"
           >
-            <header className="flex items-center gap-2 border-b px-4 py-3">
+            <header className="flex items-center gap-1.5 border-b px-3 py-3">
               <Sparkles className="size-4 text-ai" aria-hidden />
-              <p className="text-sm font-semibold">Ask about this page</p>
+              <p className="truncate text-sm font-semibold">Ask about this page</p>
               <span
                 className={cn(
-                  'ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold',
+                  'ml-auto inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold',
                   aiState === 'on' ? 'bg-ai-soft text-ai' : 'bg-muted text-muted-foreground',
                 )}
                 title={
@@ -103,6 +117,17 @@ export function AssistantDock() {
                 <Cpu className="size-3" aria-hidden />
                 {aiState === 'on' ? 'On-device AI' : 'Built-in answers'}
               </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8"
+                onClick={newChat}
+                disabled={turns.length === 0 && !input}
+                aria-label="New chat"
+                title="Start a new chat"
+              >
+                <MessageCirclePlus className="size-4" aria-hidden />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"

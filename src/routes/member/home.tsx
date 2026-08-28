@@ -20,8 +20,8 @@ import {
   pensionShareTotal,
   totalBalance,
 } from '@/lib/derive'
-import { employments, establishmentByCode, personById, TODAY } from '@/lib/mock/db'
-import { fmtDate, fmtMonth, fmtMonthLong, fmtUan, inr } from '@/lib/format'
+import { employments, establishmentByCode, TODAY } from '@/lib/mock/db'
+import { fmtDate, fmtMonth, fmtMonthLong, inr } from '@/lib/format'
 import type { StringKey } from '@/i18n/strings'
 
 const quickActions: { to: string; titleKey: StringKey; subKey: StringKey }[] = [
@@ -35,7 +35,6 @@ export default function MemberHome() {
   const { contributions, claims, kyc, employerNotified } = useData()
   const { t, lang } = useT()
   const motionOk = useMotionOk()
-  const me = personById('p-priya')
 
   const balance = totalBalance(contributions)
   const claim = activeClaim(claims)
@@ -83,7 +82,7 @@ export default function MemberHome() {
             ))}
           </dl>
 
-          <p className="text-[0.8125rem] text-hero-foreground/80">
+          <p className="mt-auto text-[0.8125rem] text-hero-foreground/80">
             {/* EPS is a different pot from the PF balance, so it is stated apart
                 from the three parts that add up to the figure above. */}
             <Term id="eps" className="text-hero-foreground decoration-hero-foreground/50 hover:decoration-hero-foreground">
@@ -91,11 +90,6 @@ export default function MemberHome() {
             </Term>{' '}
             <span className="num font-semibold">₹{inr(pensionShareTotal(contributions))}</span>{' '}
             <span className="text-hero-foreground/60">— {t('member.pensionAside')}</span>
-          </p>
-
-          <p className="num mt-auto text-xs text-hero-foreground/60">
-            {me.name} · <Term id="uan" className="text-hero-foreground/80 decoration-hero-foreground/40">UAN</Term>{' '}
-            {fmtUan(me.uan)}
           </p>
         </section>
 

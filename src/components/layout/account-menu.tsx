@@ -1,4 +1,5 @@
-import { ChevronDown, LogOut } from 'lucide-react'
+import { ChevronDown, LogOut, Settings2, UserRound } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +48,19 @@ export function AccountMenu({ className }: { className?: string }) {
           <span className="ident mt-0.5 block text-xs text-muted-foreground">{identity.sub}</span>
           <span className="mt-1.5 block text-xs text-muted-foreground">{t(`persona.${persona}`)}</span>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="gap-2.5 py-2.5">
+          <Link to="/profile">
+            <UserRound className="size-4 text-muted-foreground" aria-hidden />
+            {t('nav.profile')}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="gap-2.5 py-2.5">
+          <Link to="/settings">
+            <Settings2 className="size-4 text-muted-foreground" aria-hidden />
+            {t('nav.settings')}
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={signOut} className="gap-2.5 py-2.5">
           <LogOut className="size-4 text-muted-foreground" aria-hidden />

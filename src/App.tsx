@@ -16,6 +16,7 @@ const Glossary = lazy(() => import('@/routes/glossary'))
 const GlossaryTerm = lazy(() => import('@/routes/glossary-term'))
 const About = lazy(() => import('@/routes/about'))
 const Settings = lazy(() => import('@/routes/settings'))
+const Profile = lazy(() => import('@/routes/profile'))
 const Notifications = lazy(() => import('@/routes/notifications'))
 const Grievance = lazy(() => import('@/routes/grievance'))
 
@@ -93,6 +94,7 @@ export default function App() {
             <Route path="pensioner/details" element={<PensionerDetails />} />
             <Route path="pensioner/help" element={<PensionerHelp />} />
 
+            <Route path="profile" element={<Profile />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="settings" element={<Settings />} />
             <Route path="grievance/new" element={<Grievance />} />
