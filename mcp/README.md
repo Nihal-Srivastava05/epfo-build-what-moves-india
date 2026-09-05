@@ -3,7 +3,7 @@
 A [Model Context Protocol](https://modelcontextprotocol.io) server that exposes the **member** and
 **pensioner** experience from the "Build What Moves India" EPFO redesign to any MCP-compatible AI
 tool — check PF balance, browse the passbook, see how interest was calculated, check claim status,
-check KYC, read official notifications, and raise a grievance.
+check KYC, read official notifications, look up EPFO jargon, and raise a grievance.
 
 This is a **mocked demo**, not a connection to the real EPFO. It reuses the exact same seed data and
 arithmetic (contribution splits, interest accrual, growth projections) as the live Vite app in this
@@ -75,6 +75,10 @@ Call `epfo_list_demo_accounts` to get this from the server itself.
 - `epfo_login` — validate a UAN/PPO + OTP (optional; nothing else requires it).
 - `epfo_get_profile` — member's personal details.
 - `epfo_get_employment_history` — every employer on record, with tenure and wage.
+
+**Glossary**
+- `epfo_lookup_term` — look up what an EPFO acronym, form number, or piece of jargon (UAN, EPS, Form 19, KYC, wage ceiling, …) actually means, matching on the term, its expansion, or common alternate names. Reads from the same glossary that backs the live app's tooltips and glossary page, so the answer can't drift or get hallucinated.
+- `epfo_list_glossary_terms` — list every term this server has a definition for, optionally filtered by persona.
 
 **Balance & interest**
 - `epfo_get_pf_balance` — current balance broken into employee/employer/interest/EPS shares.

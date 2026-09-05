@@ -1,5 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { registerDiscoveryTools } from './tools/discovery.js'
+import { registerGlossaryTools } from './tools/glossary.js'
 import { registerBalanceTools } from './tools/balance.js'
 import { registerClaimTools } from './tools/claims.js'
 import { registerKycTools } from './tools/kyc.js'
@@ -16,6 +17,7 @@ export function createServer(): McpServer {
   })
 
   registerDiscoveryTools(server)
+  registerGlossaryTools(server)
   registerBalanceTools(server)
   registerClaimTools(server)
   registerKycTools(server)
