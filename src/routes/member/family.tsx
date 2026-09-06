@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { HandCoins, ShieldCheck, Trash2, UserPlus, Users } from 'lucide-react'
+import { HandCoins, HeartCrack, ShieldCheck, Trash2, UserPlus, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/patterns/page-header'
 import { personById } from '@/lib/mock/db'
@@ -80,7 +80,7 @@ export default function Family() {
                     Revoke
                   </Button>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap items-center gap-2">
                   {link.scope.map((s) => {
                     const meta = SCOPE_LABEL[s]
                     return (
@@ -94,6 +94,22 @@ export default function Family() {
                     )
                   })}
                 </div>
+
+                {link.scope.includes('file-claims') ? (
+                  <div className="mt-4 flex flex-wrap gap-2 border-t pt-4">
+                    <Button asChild variant="outline" size="sm">
+                      <Link to={`/death-claim?linked=${link.personId}`}>
+                        <HeartCrack className="size-3.5" aria-hidden />
+                        Raise a death claim for {person.name}
+                      </Link>
+                    </Button>
+                    <p className="w-full text-xs text-muted-foreground">
+                      For something they're still going through — a withdrawal, not a death claim —
+                      ask on the <Link to="/member" className="underline underline-offset-4">home screen</Link>{' '}
+                      instead: "File a claim for my {link.relation}'s medical treatment."
+                    </p>
+                  </div>
+                ) : null}
               </motion.div>
             )
           })}

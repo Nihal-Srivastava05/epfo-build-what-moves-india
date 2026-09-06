@@ -1,8 +1,10 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowRight, HandCoins, HeartCrack, Wallet } from 'lucide-react'
+import { ArrowRight, HandCoins, HeartCrack, ShieldCheck, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/patterns/page-header'
+import { personById } from '@/lib/mock/db'
+import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
 import { cn } from '@/lib/utils'
@@ -32,12 +34,30 @@ const options = [
 export default function DeathClaim() {
   const { t } = useT()
   const motionOk = useMotionOk()
+  const [params] = useSearchParams()
+  const { familyLinks } = useData()
 
-  const startHref = (type: 'pf' | 'pension') => `/death-claim/file?type=${type}`
+  /** Set only when reached from a linked family member's own suggestion or
+   *  their Family card — carried through so the filing flow can skip
+   *  re-verifying who they are. */
+  const linked = params.get('linked') || undefined
+  const linkedPerson = linked ? personById(linked) : undefined
+  const linkedOk = linked ? familyLinks.some((f) => f.personId === linked && f.scope.includes('file-claims')) : false
+
+  const startHref = (type: 'pf' | 'pension') =>
+    `/death-claim/file?type=${type}${linked && linkedOk ? `&linked=${linked}` : ''}`
 
   return (
     <div className="mx-auto max-w-[52rem] px-4 py-10 sm:py-14">
       <PageHeader eyebrow={t('deathClaim.eyebrow')} title={t('deathClaim.title')} sub={t('deathClaim.sub')} />
+
+      {linkedOk && linkedPerson ? (
+        <p className="mb-6 flex items-start gap-2.5 rounded-lg border border-info-line bg-info-soft p-4 text-sm leading-relaxed">
+          <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
+          Filing for <span className="font-medium">{linkedPerson.name}</span>, already linked to your
+          account — their UAN and Aadhaar won't need re-entering.
+        </p>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
         {options.map((opt, i) => (

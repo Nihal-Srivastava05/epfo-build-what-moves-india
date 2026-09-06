@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ArrowRight, Cpu, HandCoins, Mic, MicOff, Send, Sparkles } from 'lucide-react'
+import { ArrowRight, Cpu, HandCoins, HeartCrack, Mic, MicOff, Send, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MockBadge } from '@/components/patterns/mock-badge'
 import { answer as groundedAnswer } from '@/lib/assistant/engine'
-import { resolveAction, type DelegateClaimAction } from '@/lib/assistant/actions'
+import { resolveAction, type ResolvedAction } from '@/lib/assistant/actions'
 import { checkAvailability, rephrase } from '@/lib/assistant/chrome-ai'
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition'
 import { useSession } from '@/store/session'
@@ -43,7 +43,7 @@ export function AskBar() {
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
   const [aiState, setAiState] = useState<'checking' | 'on' | 'off'>('checking')
-  const [pendingAction, setPendingAction] = useState<DelegateClaimAction | null>(null)
+  const [pendingAction, setPendingAction] = useState<ResolvedAction | null>(null)
   const [qa, setQa] = useState<QaTurn | null>(null)
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export function AskBar() {
         <span className="text-xs text-muted-foreground">Voice runs on your device.</span>
       </div>
 
-      {pendingAction ? (
+      {pendingAction?.kind === 'delegate-claim' ? (
         <motion.div
           initial={motionOk ? { opacity: 0, y: 4 } : false}
           animate={{ opacity: 1, y: 0 }}
@@ -179,6 +179,43 @@ export function AskBar() {
             <Button size="sm" variant="ghost" onClick={() => setPendingAction(null)}>
               Cancel
             </Button>
+          </div>
+        </motion.div>
+      ) : null}
+
+      {/* A death claim never has an account of theirs to bill it to, and the
+          right next step depends on whether they're already linked — so this
+          always offers a real choice rather than picking one path for them. */}
+      {pendingAction?.kind === 'death-claim-suggestion' ? (
+        <motion.div
+          initial={motionOk ? { opacity: 0, y: 4 } : false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: motionOk ? 0.2 : 0 }}
+          className="mt-4 rounded-lg border border-info-line bg-info-soft p-4"
+        >
+          <p className="flex items-start gap-2 text-sm leading-relaxed">
+            <HeartCrack className="mt-0.5 size-4 shrink-0" aria-hidden />
+            {pendingAction.linked
+              ? `We're sorry for your loss. ${pendingAction.targetName} is already linked to your account, so their details don't need re-verifying.`
+              : `We're sorry for your loss. Here's how to raise this.`}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {pendingAction.linked ? (
+              <Button size="sm" onClick={() => navigate(`/death-claim?linked=${pendingAction.targetPersonId}`)}>
+                Raise it now, already verified
+                <ArrowRight className="size-3.5" aria-hidden />
+              </Button>
+            ) : null}
+            <Button asChild size="sm" variant={pendingAction.linked ? 'outline' : 'default'}>
+              <Link to="/death-claim">
+                {pendingAction.linked ? 'Use the public Death Claim page instead' : 'Go to the Death Claim page'}
+              </Link>
+            </Button>
+            {!pendingAction.linked ? (
+              <Button asChild size="sm" variant="ghost">
+                <Link to="/member/family/link">Link them first to skip this next time</Link>
+              </Button>
+            ) : null}
           </div>
         </motion.div>
       ) : null}

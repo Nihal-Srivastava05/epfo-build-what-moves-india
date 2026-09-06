@@ -25,11 +25,12 @@ import { PageHeader } from '@/components/patterns/page-header'
 import { Money } from '@/components/patterns/money'
 import { MockBadge } from '@/components/patterns/mock-badge'
 import { Term } from '@/components/patterns/term'
+import type { FamilyLink } from '@/lib/types'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
 import { fmtDate, rupees } from '@/lib/format'
-import { TODAY } from '@/lib/mock/db'
+import { TODAY, personById } from '@/lib/mock/db'
 import { cn } from '@/lib/utils'
 
 const DEMO_OTP = '284116'
@@ -58,24 +59,44 @@ const RELATIONS = ['Spouse', 'Son', 'Daughter', 'Father', 'Mother', 'Other nomin
 
 const STEP_TITLES = ['Verify the deceased member', 'Documents & payment', 'Review & confirm']
 
+/** The claimant's relationship to the deceased is the mirror of the family
+ * link's relationship to the claimant — linking your father makes you their
+ * daughter (or son), not "the father" the link is named for. */
+function reciprocalRelation(relation: FamilyLink['relation']): string {
+  if (relation === 'father' || relation === 'mother') return 'Daughter'
+  if (relation === 'spouse') return 'Spouse'
+  return 'Other nominee'
+}
+
 export default function DeathClaimFile() {
   const { lang } = useT()
   const motionOk = useMotionOk()
-  const { fileDeathClaim } = useData()
+  const { fileDeathClaim, familyLinks } = useData()
 
   const [params] = useSearchParams()
   const initialType = params.get('type') === 'pension' ? 'pension' : 'pf'
   const [type, setType] = useState<'pf' | 'pension'>(initialType)
 
+  /**
+   * Reached from a linked family member's suggestion or their Family card.
+   * Re-derived once, at mount, from the URL and the current family links —
+   * this only ever pre-fills what's already true (who they are, what your
+   * relationship is), never the date of death, which is a fact about this
+   * specific claim and always has to be entered fresh.
+   */
+  const linkedId = params.get('linked') || undefined
+  const linkedLink = linkedId ? familyLinks.find((f) => f.personId === linkedId && f.scope.includes('file-claims')) : undefined
+  const linkedPerson = linkedLink ? personById(linkedLink.personId) : undefined
+
   const [step, setStep] = useState(1)
 
   // Step 1 — verifying the deceased member, not the person filing.
-  const [deceasedUan, setDeceasedUan] = useState('100234500021')
+  const [deceasedUan, setDeceasedUan] = useState(linkedPerson?.uan.replace(/\s/g, '') ?? '100234500021')
   const [deceasedAadhaar, setDeceasedAadhaar] = useState('XXXX XXXX 5588')
   const [dateOfDeath, setDateOfDeath] = useState('')
-  const [verified, setVerified] = useState(false)
-  const [relation, setRelation] = useState('Daughter')
-  const [claimantName, setClaimantName] = useState('')
+  const [verified, setVerified] = useState(Boolean(linkedLink))
+  const [relation, setRelation] = useState(linkedLink ? reciprocalRelation(linkedLink.relation) : 'Daughter')
+  const [claimantName, setClaimantName] = useState(linkedLink ? 'Priya Sharma' : '')
   const [claimantMobile, setClaimantMobile] = useState('')
 
   // Step 2 — documents and where the money goes.
@@ -127,6 +148,9 @@ export default function DeathClaimFile() {
           <p className="mt-2 text-muted-foreground">
             <Money value={claim.amount} size="lg" /> ·{' '}
             {type === 'pension' ? 'Nominee / Family Pension Claim' : 'PF Death Claim'}
+          </p>
+          <p className="mt-1 text-sm font-medium">
+            Filed as {record.name}'s {relation.toLowerCase()}
           </p>
           <div className="mt-6 rounded-lg border bg-card p-4 text-left">
             <p className="eyebrow mb-1">Reference number</p>
@@ -203,8 +227,9 @@ export default function DeathClaimFile() {
           <div className="space-y-4 rounded-lg border bg-card p-5">
             <p className="eyebrow mb-1">Verify the deceased member</p>
             <p className="text-sm text-muted-foreground">
-              No sign-in is needed for this. We identify the deceased member by their own UAN and
-              Aadhaar, not by the person filing.
+              {linkedLink
+                ? `${linkedPerson?.name} is already linked to your account, so their UAN and Aadhaar are pre-filled and verified — you only need to confirm the date of death below.`
+                : 'No sign-in is needed for this. We identify the deceased member by their own UAN and Aadhaar, not by the person filing.'}
             </p>
             <div className="space-y-2">
               <Label htmlFor="deceased-uan">Deceased member's <Term id="uan">UAN</Term></Label>
@@ -249,10 +274,7 @@ export default function DeathClaimFile() {
                 id="date-of-death"
                 type="date"
                 value={dateOfDeath}
-                onChange={(e) => {
-                  setDateOfDeath(e.target.value)
-                  setVerified(false)
-                }}
+                onChange={(e) => setDateOfDeath(e.target.value)}
                 onBlur={() => touch('dod')}
                 max={TODAY}
                 aria-invalid={touched.dod && !dodValid}
