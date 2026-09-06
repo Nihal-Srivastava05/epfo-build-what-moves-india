@@ -493,7 +493,11 @@ export const useData = create<DataState>()(
 
       resetDemo: () => set({ ...seed() }),
     }),
-    { name: 'epfo-data', version: 5 },
+    // Bumped whenever the seed changes shape or content: a stale demo state in
+    // localStorage otherwise wins over the new seed, and the change looks like
+    // it simply did not happen. No `migrate` on purpose — a mismatched version
+    // is dropped and reseeded, which is what a demo wants.
+    { name: 'epfo-data', version: 6 },
   ),
 )
 

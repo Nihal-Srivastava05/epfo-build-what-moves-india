@@ -6,10 +6,14 @@
  */
 interface SpeechRecognitionResultLike {
   0: { transcript: string }
+  /** False while the engine is still revising this phrase. */
+  isFinal: boolean
 }
 
 interface SpeechRecognitionEventLike extends Event {
   results: SpeechRecognitionResultLike[]
+  /** First result changed by this event; earlier ones are already settled. */
+  resultIndex: number
 }
 
 interface SpeechRecognition extends EventTarget {

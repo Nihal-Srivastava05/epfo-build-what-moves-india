@@ -65,6 +65,25 @@ export function fmtWhen(iso: string, lang: 'en' | 'hi' = 'en') {
   return fmtDate(iso, lang)
 }
 
+/**
+ * "3 years back" / "8 months back" / "earlier today" — a rounded look over
+ * the shoulder, for prose where the point is that something was set up long
+ * ago rather than exactly when. Anything a person has to act on still gets a
+ * real date from `fmtDate`.
+ */
+export function fmtAgo(iso: string, lang: 'en' | 'hi' = 'en') {
+  const days = daysBetween(iso)
+  if (days <= 0) return lang === 'hi' ? 'आज' : 'earlier today'
+  if (days < 30) return lang === 'hi' ? `${days} दिन पहले` : `${days} days back`
+  const months = Math.round(days / 30.44)
+  if (months < 12) {
+    const n = Math.max(1, months)
+    return lang === 'hi' ? `${n} माह पहले` : `${n} month${n === 1 ? '' : 's'} back`
+  }
+  const years = Math.round(days / 365.25)
+  return lang === 'hi' ? `${years} साल पहले` : `${years} year${years === 1 ? '' : 's'} back`
+}
+
 /** "9 days" / "71 days" — the clock half of every waiting object. */
 export function fmtDuration(sinceIso: string, lang: 'en' | 'hi' = 'en') {
   const days = daysBetween(sinceIso)

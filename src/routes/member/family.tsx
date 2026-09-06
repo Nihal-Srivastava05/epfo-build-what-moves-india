@@ -4,6 +4,7 @@ import { HandCoins, HeartCrack, ShieldCheck, Trash2, UserPlus, Users } from 'luc
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/patterns/page-header'
 import { personById } from '@/lib/mock/db'
+import { fmtDate } from '@/lib/format'
 import { useData } from '@/store/data'
 import { useMotionOk } from '@/hooks/use-motion-ok'
 import { toast } from 'sonner'
@@ -65,7 +66,7 @@ export default function Family() {
                   <div>
                     <p className="font-semibold">{person.name}</p>
                     <p className="text-sm capitalize text-muted-foreground">
-                      {link.relation} · linked {link.linkedOn}
+                      {link.relation} · linked {fmtDate(link.linkedOn)}
                     </p>
                   </div>
                   <Button

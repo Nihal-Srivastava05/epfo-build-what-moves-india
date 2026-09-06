@@ -624,8 +624,28 @@ export const notifications: AppNotification[] = [
   },
 ]
 
-/** No family linked yet, by default — the demo links one live. */
-export const familyLinks: FamilyLink[] = []
+/**
+ * Priya linked her father on Republic Day 2024 and hasn't thought about it
+ * since — which is the point. A family circle earns its keep on the day
+ * something goes wrong, not on the day it is set up, so the demo starts with
+ * one that is already old and already forgotten.
+ *
+ * Both permissions are on: she has been checking his balance for him for
+ * years, and `file-claims` is the scope the ask-anything bar is later allowed
+ * to act on. `verified` is true because his own OTP confirmed it back then —
+ * a link is never one-sided, even a stale one.
+ */
+export const familyLinks: FamilyLink[] = [
+  {
+    id: 'fam-anil',
+    ownerId: 'p-priya',
+    personId: 'p-anil',
+    relation: 'father',
+    linkedOn: '2024-01-26',
+    verified: true,
+    scope: ['view-balance', 'file-claims'],
+  },
+]
 
 export function personById(id: string) {
   return people.find((p) => p.id === id)!

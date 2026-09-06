@@ -18,7 +18,15 @@ export interface DelegateClaimAction {
  * it always hands the person a choice between the two real paths.
  */
 export type DeathClaimSuggestion =
-  | { kind: 'death-claim-suggestion'; linked: true; targetPersonId: string; targetName: string; relation: FamilyLink['relation'] }
+  | {
+      kind: 'death-claim-suggestion'
+      linked: true
+      targetPersonId: string
+      targetName: string
+      relation: FamilyLink['relation']
+      /** When the family circle link was made — the reason re-verifying is skipped. */
+      linkedOn: string
+    }
   | { kind: 'death-claim-suggestion'; linked: false; relation: FamilyLink['relation'] }
 
 export type ResolvedAction = DelegateClaimAction | DeathClaimSuggestion
@@ -62,7 +70,14 @@ export function resolveAction(question: string, familyLinks: FamilyLink[]): Reso
     const link = familyLinks.find((f) => f.relation === relation && f.scope.includes('file-claims'))
     if (!link) return { kind: 'death-claim-suggestion', linked: false, relation }
     const target = personById(link.personId)
-    return { kind: 'death-claim-suggestion', linked: true, targetPersonId: link.personId, targetName: target.name, relation }
+    return {
+      kind: 'death-claim-suggestion',
+      linked: true,
+      targetPersonId: link.personId,
+      targetName: target.name,
+      relation,
+      linkedOn: link.linkedOn,
+    }
   }
 
   if (!CLAIM_VERB.test(question)) return null
