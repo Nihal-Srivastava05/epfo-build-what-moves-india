@@ -5,12 +5,36 @@
  */
 import { addDays } from '../lib/format.js'
 import { TODAY } from './seed.js'
-import type { Grievance } from './types.js'
+import type { FamilyLink, Grievance } from './types.js'
 
 let grievances: Grievance[] = []
+let familyLinks: FamilyLink[] = []
 
 export function listGrievances(): readonly Grievance[] {
   return grievances
+}
+
+export function listFamilyLinks(): readonly FamilyLink[] {
+  return familyLinks
+}
+
+/** Reproduces src/store/data.ts's linkFamilyMember() exactly. */
+export function addFamilyLink(input: {
+  ownerId: string
+  personId: string
+  relation: FamilyLink['relation']
+  scope: FamilyLink['scope']
+}): FamilyLink {
+  const link: FamilyLink = { id: `fam-${Date.now()}`, linkedOn: TODAY, ...input }
+  familyLinks = [link, ...familyLinks]
+  return link
+}
+
+/** Returns true if a link was actually removed. */
+export function removeFamilyLink(id: string): boolean {
+  const before = familyLinks.length
+  familyLinks = familyLinks.filter((f) => f.id !== id)
+  return familyLinks.length < before
 }
 
 /** Reproduces src/store/data.ts's raiseGrievance() exactly. */
@@ -36,4 +60,5 @@ export function addGrievance(input: {
 /** Mirrors the app's "Reset the demo" action. */
 export function resetDemoState(): void {
   grievances = []
+  familyLinks = []
 }

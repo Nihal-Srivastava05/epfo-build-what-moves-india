@@ -86,7 +86,7 @@ export function registerClaimTools(server: McpServer) {
       const person = resolveMember(uan)
       if (!person) return errorResult(`No member found for UAN "${uan}".`)
       const contributions = contributionsForPerson(person.id)
-      return textResult({ uan: person.uan, reasons: withdrawalReasons(contributions) })
+      return textResult({ uan: person.uan, reasons: withdrawalReasons(contributions, person.id) })
     },
   )
 

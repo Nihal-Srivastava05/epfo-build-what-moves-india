@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { DEMO_OTP, DEMO_PPO, DEMO_UAN, TODAY, employments, establishmentByCode } from '../data/seed.js'
+import { ANIL_UAN, DEMO_OTP, DEMO_PPO, DEMO_UAN, TODAY, employments, establishmentByCode } from '../data/seed.js'
 import { resolveMember, resolvePensionerPerson } from '../lib/identity.js'
 import { fmtMemberId, fmtTenure, fmtUan } from '../lib/format.js'
 import { errorResult, textResult } from './helpers.js'
@@ -11,7 +11,7 @@ export function registerDiscoveryTools(server: McpServer) {
     {
       title: 'List demo accounts',
       description:
-        'List the demo member and pensioner identities available in this mocked EPFO sandbox, with the credentials to use them. Call this first if you are not sure which UAN or PPO to use.',
+        'List the demo member and pensioner identities available in this mocked EPFO sandbox, with the credentials to use them. Call this first if you are not sure which UAN or PPO to use, or which family members can be linked with epfo_link_family_member.',
       annotations: { readOnlyHint: true, idempotentHint: true },
     },
     async () =>
@@ -21,6 +21,13 @@ export function registerDiscoveryTools(server: McpServer) {
         accounts: [
           { persona: 'member', name: 'Priya Sharma', uan: DEMO_UAN, uanFormatted: fmtUan(DEMO_UAN) },
           { persona: 'pensioner', name: 'Ram Prasad Verma', ppo: DEMO_PPO },
+          {
+            persona: 'member',
+            name: 'Anil Sharma',
+            uan: ANIL_UAN,
+            uanFormatted: fmtUan(ANIL_UAN),
+            note: "Priya's father — an independent member account, not yet linked to hers until epfo_link_family_member is called.",
+          },
         ],
       }),
   )

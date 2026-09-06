@@ -7,6 +7,7 @@ import { registerKycTools } from './tools/kyc.js'
 import { registerNotificationTools } from './tools/notifications.js'
 import { registerGrievanceTools } from './tools/grievances.js'
 import { registerPensionerTools } from './tools/pensioner.js'
+import { registerFamilyTools } from './tools/family.js'
 import { registerAdminTools } from './tools/admin.js'
 
 export function createServer(): McpServer {
@@ -24,6 +25,7 @@ export function createServer(): McpServer {
   registerNotificationTools(server)
   registerGrievanceTools(server)
   registerPensionerTools(server)
+  registerFamilyTools(server)
   registerAdminTools(server)
 
   return server

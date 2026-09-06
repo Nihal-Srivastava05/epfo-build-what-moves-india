@@ -155,6 +155,19 @@ export interface Grievance {
   resolution?: string
 }
 
+/**
+ * A family member linked to an owner's account, with an explicit, revocable
+ * scope — ported from the same idea in the main app's `src/lib/types.ts`.
+ */
+export interface FamilyLink {
+  id: string
+  ownerId: string
+  personId: string
+  relation: 'father' | 'mother' | 'spouse' | 'other'
+  linkedOn: string
+  scope: ('view-balance' | 'file-claims')[]
+}
+
 export interface LedgerRow {
   id: string
   date: string

@@ -3,7 +3,8 @@
 A [Model Context Protocol](https://modelcontextprotocol.io) server that exposes the **member** and
 **pensioner** experience from the "Build What Moves India" EPFO redesign to any MCP-compatible AI
 tool — check PF balance, browse the passbook, see how interest was calculated, check claim status,
-check KYC, read official notifications, look up EPFO jargon, and raise a grievance.
+check KYC, read official notifications, look up EPFO jargon, raise a grievance, and link a family
+member's account to check their details too.
 
 This is a **mocked demo**, not a connection to the real EPFO. It reuses the exact same seed data and
 arithmetic (contribution splits, interest accrual, growth projections) as the live Vite app in this
@@ -54,8 +55,9 @@ claude mcp add epfo-demo -- node "$(pwd)/mcp/dist/index.js"
 
 **Cursor** — add the same shape to `.cursor/mcp.json`.
 
-Then ask your assistant something like *"What's Priya's PF balance?"* or *"Raise a grievance about my
-missing June contribution"* and it should call the matching tool.
+Then ask your assistant something like *"What's Priya's PF balance?"*, *"Raise a grievance about my
+missing June contribution"*, or *"Link my father Anil Sharma to my account and check his balance"*
+and it should call the matching tool(s).
 
 ## Demo identities
 
@@ -65,6 +67,7 @@ No real sign-in — tools default to these if you don't pass an identifier:
 |---|---|---|---|
 | Member | Priya Sharma | `100234567890` | `284116` |
 | Pensioner | Ram Prasad Verma | `MH/PUN/00123456` | `284116` |
+| Member | Anil Sharma (Priya's father — link him via the family tools below) | `100234500021` | `284116` |
 
 Call `epfo_list_demo_accounts` to get this from the server itself.
 
@@ -106,15 +109,23 @@ Call `epfo_list_demo_accounts` to get this from the server itself.
 **Pensioner**
 - `epfo_get_pension_details`, `epfo_list_pension_payments`, `epfo_get_life_certificate_status`.
 
+**Family** — mirrors the live app's Family feature
+- `epfo_list_family_members` — who this member has linked, their relation, and what's shared (view-balance and/or file-claims). Each entry's UAN also works directly with every member tool above.
+- `epfo_link_family_member` — link an existing demo identity (e.g. Anil Sharma) as family, gated by *their own* OTP, not the owner's — never one-sided. Grants an explicit, revocable scope. Creates real (in-memory) state.
+- `epfo_revoke_family_member` — remove a link by ID. Immediate.
+- `epfo_get_family_member_details` — one-call snapshot (profile, employment, and balance if shared) for a linked family member, found by relation ("father") or UAN. Returns only what the link's scope actually grants — no scope, no data, same discipline as the live app.
+
 **Admin**
-- `epfo_reset_demo` — clears any grievances raised this session.
+- `epfo_reset_demo` — clears any grievances raised and any family members linked this session.
 
 ## State & limitations
 
-- State is **in-memory per server process** — restarting the server resets everything. Only
-  grievances you raise are ever written; nothing else mutates.
+- State is **in-memory per server process** — restarting the server resets everything. Grievances
+  raised and family members linked are the only things that mutate; nothing else does.
 - No employer/HR tools (roster, approvals, challans) — out of scope.
 - No claim filing — `epfo_file_claim` is a deliberate, explicit decline, not a missing capability.
+  This holds for family members too: `epfo_get_family_member_details` will say a link permits
+  filing claims on their behalf, but no tool here actually files one.
 - Every date is anchored to the app's fixed demo "today", `2026-08-28`, so relative figures ("9 days
   left") match the live site exactly.
 

@@ -221,9 +221,17 @@ export function pensionShareTotal(contributions: Contribution[]) {
   return contributions.filter((c) => c.status !== 'missing').reduce((sum, c) => sum + c.epsShare, 0)
 }
 
-/** Total EPF membership in whole years, across every employer under the one UAN. */
-export function serviceYears() {
-  const first = employments.map((e) => e.joined).sort()[0]
+/**
+ * Total EPF membership in whole years, across every employer under one UAN.
+ * Scoped by `personId` — without it, the earliest `joined` date across every
+ * seeded person wins regardless of whose record is being computed, which
+ * breaks the moment a second person's employments exist in this dataset.
+ */
+export function serviceYears(personId = 'p-priya') {
+  const first = employments
+    .filter((e) => e.personId === personId)
+    .map((e) => e.joined)
+    .sort()[0]
   return Math.floor(daysBetween(first, TODAY) / 365.25)
 }
 
@@ -239,13 +247,17 @@ export interface WithdrawalReason {
   blockedBecause?: string
 }
 
-/** Eligibility and caps are computed from the record, not asserted. */
-export function withdrawalReasons(contributions: Contribution[]): WithdrawalReason[] {
-  const current = employments.find((e) => e.current)!
+/**
+ * Eligibility and caps are computed from the record, not asserted.
+ * `personId` scopes which employment counts as "current" — same reasoning as
+ * `serviceYears` above.
+ */
+export function withdrawalReasons(contributions: Contribution[], personId = 'p-priya'): WithdrawalReason[] {
+  const current = employments.find((e) => e.personId === personId && e.current)!
   const wage = current.monthlyWage
   const balance = totalBalance(contributions)
   const share = employeeShareTotal(contributions)
-  const years = serviceYears()
+  const years = serviceYears(personId)
 
   return [
     {

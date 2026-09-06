@@ -38,7 +38,7 @@ export function registerBalanceTools(server: McpServer) {
         employerShare: employerShareTotal(contributions),
         interestAccrued: interestTotal(contributions),
         epsShare: pensionShareTotal(contributions),
-        serviceYears: serviceYears(),
+        serviceYears: serviceYears(person.id),
       })
     },
   )

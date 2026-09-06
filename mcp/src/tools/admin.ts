@@ -8,7 +8,7 @@ export function registerAdminTools(server: McpServer) {
     {
       title: 'Reset demo state',
       description:
-        'Reset this server\'s in-memory demo state — currently just clears any grievances raised this session — back to the seed data, mirroring the live app\'s "Reset the demo" action.',
+        'Reset this server\'s in-memory demo state — clears any grievances raised and any family members linked this session — back to the seed data, mirroring the live app\'s "Reset the demo" action.',
       annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true },
     },
     async () => {
