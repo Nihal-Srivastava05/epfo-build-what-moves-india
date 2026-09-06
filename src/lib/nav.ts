@@ -81,6 +81,7 @@ const SUBROUTES: { path: string; labelKey: StringKey; parent?: string }[] = [
   { path: '/member/claims/new', labelKey: 'withdraw.title', parent: '/member/claims' },
   { path: '/member/claims/:claimId', labelKey: 'crumb.claim', parent: '/member/claims' },
   { path: '/member/family/link', labelKey: 'crumb.familyLink', parent: '/member/family' },
+  { path: '/member/family/:personId', labelKey: 'crumb.familyMember', parent: '/member/family' },
   { path: '/member/calculators', labelKey: 'nav.calculators' },
   { path: '/profile', labelKey: 'nav.profile' },
   { path: '/notifications', labelKey: 'nav.notifications' },

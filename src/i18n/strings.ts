@@ -35,6 +35,7 @@ export const en = {
   'crumb.gap': 'Missing month',
   'crumb.grievance': 'New grievance',
   'crumb.familyLink': 'Link a family member',
+  'crumb.familyMember': 'Family member',
   'crumb.trail': 'Breadcrumb',
   'nav.kyc.short': 'KYC',
   'nav.return.short': 'Return',
