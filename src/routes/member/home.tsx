@@ -12,6 +12,7 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { AskBar } from '@/components/patterns/ask-bar'
 import { Money } from '@/components/patterns/money'
 import { ActionCard } from '@/components/patterns/action-card'
 import { ClaimTracker } from '@/components/patterns/claim-tracker'
@@ -53,7 +54,7 @@ export default function MemberHome() {
   const { t, lang } = useT()
   const motionOk = useMotionOk()
 
-  const claim = activeClaim(claims)
+  const claim = activeClaim(claims.filter((c) => c.personId === 'p-priya'))
   const grievance = activeGrievance(grievances, 'p-priya')
   const missing = contributions.filter((c) => c.status === 'missing')
   const kycIssues = kyc.filter((k) => k.status !== 'verified')
@@ -61,6 +62,8 @@ export default function MemberHome() {
 
   return (
     <div className="space-y-4">
+      <AskBar />
+
       {/* Status first, menu second. The balance is the heading of this page,
           so it is marked as one. */}
       <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">

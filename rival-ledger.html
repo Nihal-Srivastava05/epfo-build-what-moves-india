@@ -1,0 +1,444 @@
+<title>Rival Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ground:#EEF3F0;
+    --surface:#FFFFFF;
+    --surface-2:#E5EBE6;
+    --ink:#16211D;
+    --ink-muted:#4E5D56;
+    --ink-faint:#7C8C84;
+    --line:#D2DAD5;
+    --line-strong:#B7C3BC;
+    --accent:#1F5C4E;
+    --accent-soft:#DCEAE4;
+    --accent-2:#2B6CA3;
+    --accent-2-soft:#DEEAF3;
+    --warm:#B5651D;
+    --warm-soft:#F3E2CE;
+    --risk:#A5372E;
+    --risk-soft:#F5DEDB;
+    --font-display:'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+    --font-body:'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+    --font-mono:'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0F1613;
+      --surface:#161F1B;
+      --surface-2:#1D2822;
+      --ink:#E7EDE9;
+      --ink-muted:#A3B3AB;
+      --ink-faint:#71827A;
+      --line:#2A3833;
+      --line-strong:#3B4A43;
+      --accent:#59B69A;
+      --accent-soft:#1D3B32;
+      --accent-2:#7BB1DE;
+      --accent-2-soft:#1E3448;
+      --warm:#E2A25C;
+      --warm-soft:#3C2E1A;
+      --risk:#E0897F;
+      --risk-soft:#3E2320;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0F1613;
+    --surface:#161F1B;
+    --surface-2:#1D2822;
+    --ink:#E7EDE9;
+    --ink-muted:#A3B3AB;
+    --ink-faint:#71827A;
+    --line:#2A3833;
+    --line-strong:#3B4A43;
+    --accent:#59B69A;
+    --accent-soft:#1D3B32;
+    --accent-2:#7BB1DE;
+    --accent-2-soft:#1E3448;
+    --warm:#E2A25C;
+    --warm-soft:#3C2E1A;
+    --risk:#E0897F;
+    --risk-soft:#3E2320;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--font-display); text-wrap:balance; margin:0; color:var(--ink);}
+  .mono{font-family:var(--font-mono); font-variant-numeric:tabular-nums;}
+  a{color:var(--accent);}
+  ::selection{background:var(--accent-soft);}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:56px 24px 96px;}
+
+  /* ---------- Header ---------- */
+  header.top{margin-bottom:44px;}
+  .eyebrow{
+    font-family:var(--font-mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); font-weight:600; margin-bottom:14px; display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{content:""; width:22px; height:1px; background:var(--accent); display:inline-block;}
+  h1.title{font-size:clamp(2.4rem, 5vw, 3.4rem); font-weight:700; letter-spacing:-.01em; margin-bottom:16px;}
+  p.lede{max-width:62ch; font-size:16.5px; color:var(--ink-muted); margin-bottom:32px;}
+  p.lede strong{color:var(--ink); font-weight:600;}
+
+  .stats{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+  .stat{background:var(--surface); padding:18px 20px;}
+  .stat .n{font-family:var(--font-mono); font-size:1.9rem; font-weight:600; color:var(--accent); line-height:1;}
+  .stat .l{font-size:12px; color:var(--ink-muted); margin-top:8px;}
+
+  /* ---------- Sections ---------- */
+  section{margin-top:64px;}
+  .section-head{margin-bottom:22px; max-width:74ch;}
+  h2.section-title{font-size:1.55rem; font-weight:600; margin-bottom:10px;}
+  .section-head p{color:var(--ink-muted); font-size:14.5px;}
+  .method{
+    font-size:12.5px; color:var(--ink-faint); border-left:2px solid var(--line-strong);
+    padding-left:12px; margin-top:14px; max-width:60ch;
+  }
+
+  /* ---------- Rival cards ---------- */
+  .rival-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:14px;}
+  .rival{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:20px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .rival.you{border-color:var(--warm); box-shadow:0 0 0 1px var(--warm); background:linear-gradient(180deg, var(--warm-soft), var(--surface) 140px);}
+  .rival-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .rival-num{font-family:var(--font-mono); font-size:12px; color:var(--ink-faint);}
+  .you-badge{
+    font-family:var(--font-mono); font-size:10.5px; font-weight:600; letter-spacing:.06em;
+    background:var(--warm); color:var(--surface); padding:3px 8px; border-radius:20px; text-transform:uppercase;
+  }
+  .rival-name{font-family:var(--font-display); font-size:1.15rem; font-weight:600; line-height:1.25;}
+  .rival-team{font-size:12.5px; color:var(--ink-muted);}
+  .meters{display:flex; flex-direction:column; gap:6px; margin-top:2px;}
+  .meter-row{display:grid; grid-template-columns:78px 1fr 18px; align-items:center; gap:8px;}
+  .meter-label{font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.04em;}
+  .meter-track{height:5px; background:var(--surface-2); border-radius:3px; overflow:hidden;}
+  .meter-fill{height:100%; border-radius:3px;}
+  .meter-fill.depth{background:var(--accent);}
+  .meter-fill.clarity{background:var(--accent-2);}
+  .meter-fill.distinct{background:var(--warm);}
+  .meter-val{font-family:var(--font-mono); font-size:11px; color:var(--ink-muted); text-align:right;}
+  .best{font-size:13px; color:var(--ink); border-top:1px solid var(--line); padding-top:11px; margin-top:2px;}
+  .best b{color:var(--accent);}
+  .rival.you .best b{color:var(--warm);}
+  .rival-foot{display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:4px;}
+  .status-pill{font-size:10.5px; font-family:var(--font-mono); padding:2px 8px; border-radius:20px; border:1px solid var(--line-strong); color:var(--ink-faint);}
+  .status-pill.needs-look{color:var(--warm); border-color:var(--warm);}
+  .visit{font-size:12.5px; font-weight:600; text-decoration:none; white-space:nowrap;}
+  .visit:hover{text-decoration:underline;}
+
+  /* ---------- Callout ---------- */
+  .callout{
+    background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--warm);
+    border-radius:0 10px 10px 0; padding:22px 24px;
+  }
+  .callout h3{font-size:1.05rem; font-weight:600; margin-bottom:14px; font-family:var(--font-body);}
+  .callout ol{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:12px;}
+  .callout li{font-size:14px; color:var(--ink-muted);}
+  .callout li b{color:var(--ink); font-weight:600;}
+  .callout .tag{font-family:var(--font-mono); font-size:11px; color:var(--warm); background:var(--warm-soft); padding:1px 6px; border-radius:4px;}
+
+  .notes-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px;}
+  .note-box{background:var(--surface-2); border-radius:10px; padding:16px 18px; font-size:13px; color:var(--ink-muted);}
+  .note-box b{color:var(--ink);}
+  @media (max-width:720px){.notes-row{grid-template-columns:1fr;}}
+
+  /* ---------- Category bars ---------- */
+  .barlist{display:flex; flex-direction:column; gap:9px; max-width:760px;}
+  .bar-row{display:grid; grid-template-columns:230px 1fr 34px; align-items:center; gap:12px;}
+  .bar-label{font-size:12.5px; color:var(--ink);}
+  .bar-track{height:16px; background:var(--surface-2); border-radius:3px; overflow:hidden; position:relative;}
+  .bar-fill{height:100%; background:var(--accent); border-radius:3px;}
+  .bar-count{font-family:var(--font-mono); font-size:12px; color:var(--ink-muted); text-align:right;}
+
+  /* ---------- Split ---------- */
+  .split-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:14px; margin-top:20px;}
+  .split-card{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px 18px;}
+  .split-card h4{font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent-2); margin-bottom:4px;}
+  .split-card .count{font-family:var(--font-mono); font-size:1.4rem; font-weight:600; margin-bottom:10px;}
+  .split-card ul{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:5px;}
+  .split-card li{font-size:12.5px; color:var(--ink-muted);}
+  .split-card li span{font-family:var(--font-mono); color:var(--ink-faint);}
+
+  /* ---------- Directory ---------- */
+  .dir-controls{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;}
+  #search{
+    flex:1; min-width:200px; padding:10px 14px; border-radius:8px; border:1px solid var(--line-strong);
+    background:var(--surface); color:var(--ink); font-family:var(--font-body); font-size:14px;
+  }
+  #search:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  #catFilter{
+    padding:10px 14px; border-radius:8px; border:1px solid var(--line-strong); background:var(--surface);
+    color:var(--ink); font-family:var(--font-body); font-size:13.5px; max-width:280px;
+  }
+  #catFilter:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  #resultCount{font-size:12.5px; color:var(--ink-faint); margin-bottom:10px; font-family:var(--font-mono);}
+
+  .table-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:10px;}
+  table{width:100%; border-collapse:collapse; min-width:760px;}
+  thead th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint);
+    font-weight:600; padding:11px 14px; background:var(--surface-2); position:sticky; top:0;
+    border-bottom:1px solid var(--line);
+  }
+  tbody td{padding:10px 14px; border-bottom:1px solid var(--line); font-size:13.5px; vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--surface-2);}
+  tbody tr.you-row{background:var(--warm-soft);}
+  td.num{font-family:var(--font-mono); color:var(--ink-faint); font-size:12.5px;}
+  td.name{font-weight:500;}
+  td.team{color:var(--ink-muted); font-size:12.5px;}
+  .badge{
+    font-family:var(--font-mono); font-size:10.5px; color:var(--ink-muted); background:var(--surface-2);
+    border:1px solid var(--line); padding:2px 8px; border-radius:20px; white-space:nowrap; display:inline-block;
+  }
+  td.link a{font-size:12.5px; font-weight:600; white-space:nowrap;}
+  .you-tag{font-family:var(--font-mono); font-size:10px; font-weight:700; color:var(--warm); margin-left:6px;}
+
+  footer{margin-top:72px; padding-top:24px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-faint);}
+</style>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">Build What Moves India — Top 250</div>
+    <h1 class="title">Rival Ledger</h1>
+    <p class="lede">
+      All 250 selections, sorted into families, with a close reading of the thirteen teams standing in
+      <strong>our exact lane — EPFO and Provident Fund.</strong> Built to split across the team before the
+      Stage&nbsp;2 resubmission on <strong>7 Sep</strong>.
+    </p>
+    <div class="stats" id="statRow"></div>
+  </header>
+
+  <section id="rivals">
+    <div class="section-head">
+      <h2 class="section-title">The EPFO / PF cluster — our actual competition</h2>
+      <p>Fourteen teams (including us) picked the same portal to rebuild. Every card below is graded from a first-look
+      pass of that team's own live prototype — its copy, its stated feature set, its tone — on three axes, each out of 5.</p>
+      <div class="method">
+        <b>Depth</b> — how much of the real EPFO workflow it covers. &nbsp;
+        <b>Clarity</b> — how legible the UI/copy is to a non-technical member. &nbsp;
+        <b>Distinctiveness</b> — whether it has an idea nobody else in the cluster has.
+        This is a text-level read of each site, not a full interactive test — treat it as a starting map, not a final verdict.
+      </div>
+    </div>
+    <div class="rival-grid" id="rivalGrid"></div>
+  </section>
+
+  <section id="gap">
+    <div class="callout">
+      <h3>Already shipped by a rival — still on our own roadmap</h3>
+      <ol id="gapList"></ol>
+    </div>
+    <div class="notes-row">
+      <div class="note-box"><b>One false positive:</b> #149 NATS-Copilot matched our EPFO keyword search but is actually
+      about apprenticeship stipends (NATS), not Provident Fund — not a real rival, left in the grid above for completeness only.</div>
+      <div class="note-box"><b>Three worth a manual click-through:</b> #190 EPFO Neo, #218 EPFO One and #222 PF Mitra
+      render almost nothing to an automated fetch (client-side apps with thin server HTML). Someone should actually
+      open these on a phone before Stage 2 — they may be stronger than they look from here.</div>
+    </div>
+  </section>
+
+  <section id="landscape">
+    <div class="section-head">
+      <h2 class="section-title">The other 236 — twenty idea-families</h2>
+      <p>Every non-EPFO selection, grouped by the government service it rebuilds. Sorted by size — grievance redressal
+      (CPGRAMS) and generic "civic portal" concepts are the most crowded fields after ours.</p>
+    </div>
+    <div class="barlist" id="catBars"></div>
+  </section>
+
+  <section id="split">
+    <div class="section-head">
+      <h2 class="section-title">A starting split, four ways</h2>
+      <p>Categories bundled into four roughly equal piles (~62 projects each) by simple greedy balancing — swap
+      categories between piles freely, or split each pile again if there are more than four of you. The "wildcard"
+      pile is names that don't self-describe (SPASHT, INDRA, Kavach…); most resolve in one glance at the live site.</p>
+    </div>
+    <div class="split-grid" id="splitGrid"></div>
+  </section>
+
+  <section id="directory">
+    <div class="section-head">
+      <h2 class="section-title">Full directory — all 250</h2>
+      <p>Search by project or builder name, or filter by category, to pull your slice of the list.</p>
+    </div>
+    <div class="dir-controls">
+      <input id="search" type="search" placeholder="Search project or builder name…" autocomplete="off">
+      <select id="catFilter"></select>
+    </div>
+    <div id="resultCount"></div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th style="width:52px">#</th><th>Project</th><th>Builder(s)</th><th>Category</th><th style="width:70px">Link</th></tr></thead>
+        <tbody id="dirBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Compiled from buildwhatmovesindia.com/top-250 · 250 entries · #208 EPFO Reimagined (Nihal Srivastava &amp; Satyam Mishra) is us.
+  </footer>
+
+</div>
+
+<script>
+const PROJECTS = [{"num": "001", "name": "RTI Navigator", "team": "Vishisht G & Triambak TS", "app": "https://frontend-three-pi-48.vercel.app/filing/dashboard", "video": "https://www.loom.com/share/64f62eee6b274148a87e62d78913289f", "category": "RTI (Right to Information)"}, {"num": "002", "name": "SPASHT", "team": "Aashi Khandelwal & Lovely Gaur", "app": "https://spasht-three.vercel.app/", "video": "https://www.loom.com/share/913212c7db634e46843eeba25c9ce600", "category": "Other / Uncategorized"}, {"num": "003", "name": "eVisa Bharat", "team": "Aarush Diwakar", "app": "https://india-evisa-redesign.aarush-uae.workers.dev/", "video": "https://drive.google.com/file/d/10EP2mLpB-Tp3H3ZR4-8dvzj0YDFbcrNA/view?usp=sharing", "category": "Passport / Visa"}, {"num": "004", "name": "TRASHCHAIN", "team": "Nirmala Devi Patel", "app": "https://trashchain.vercel.app/", "video": "https://drive.google.com/drive/folders/1XtyXGr0zq_7nfWiowGFExHuU1hW_KUcF?usp=sharing", "category": "Other / Uncategorized"}, {"num": "005", "name": "FinTrace", "team": "Sagar Batra", "app": "https://fintrace-three.vercel.app/", "video": "https://www.loom.com/share/7a8a98f7be9548069b6ce7ddbe5d70b2", "category": "Insurance / Banking / Finance / UPI"}, {"num": "006", "name": "India Code 2.0", "team": "Abhinandan Sethi & Shaumik Khanna", "app": "https://india-code.vercel.app/", "video": "https://www.loom.com/share/34f3af20a31b454fa05854cc0d041d1f", "category": "Civic Portal / Government Interface (general)"}, {"num": "007", "name": "Pragyya AI Kendra", "team": "Ekansh Kumar Srivastva", "app": "https://pragyya.n3v.in/", "video": "https://canva.link/xga306dq1qk0xss", "category": "Other / Uncategorized"}, {"num": "008", "name": "Wapsi", "team": "Abdul Basit Siddiqui & Aniket Shaw", "app": "https://wapsi-amber.vercel.app/", "video": "https://youtu.be/RpNbXT05ENI", "category": "Other / Uncategorized"}, {"num": "009", "name": "Challan sakshi", "team": "Shourya Banda", "app": "https://challansakshi.sh1rs.com", "video": "https://www.loom.com/share/943e8284807e4dfa86dcad76a9f44a8d", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "010", "name": "PatentPath", "team": "Yashwant Sasikumar", "app": "https://patentpath-demo-20260829.oliverqueen.chatgpt.site/", "video": "https://drive.google.com/file/d/1MjXCbzK8CGOjsNGmXSmAqNXahzeiwSbQ/view?usp=drivesdk", "category": "Company / MSME / Business Registration"}, {"num": "011", "name": "UdyamPass", "team": "Ronak Raj", "app": "https://udyampass.vercel.app/", "video": "https://drive.google.com/file/d/1Lxpybaji3PG7rvNaL7H0nYMcDW5ykymL/view?usp=sharing", "category": "Company / MSME / Business Registration"}, {"num": "012", "name": "EPFO Reimagined", "team": "Sudikhya Goswami & Tanmay Mehra", "app": "https://pf-fix-india.sudikhya.chatgpt.site/memberinterface", "video": "https://www.loom.com/share/6044ce0458dc4acba140634e0f0410e0", "category": "EPFO / PF / Pension"}, {"num": "013", "name": "SevaRail — Zero-Reset Booking Recovery for Indian Railways", "team": "Tej Narayan Singh", "app": "https://seva-rail.vercel.app/", "video": "https://drive.google.com/file/d/1SKEySj5qPODCfSQ9kX3ZZsNTVT8wtyvW/view?usp=sharing", "category": "Railways / IRCTC / Tatkal"}, {"num": "014", "name": "Kriya.in: Onestop Civic Portal", "team": "Kanha Chandravanshi & Vasudev Pande", "app": "https://kriya-in.vercel.app", "video": "https://drive.google.com/drive/folders/1TkEUz3e3YAUSZoqCp8QdDy-ISNbaG1gF?usp=share_link", "category": "Civic Portal / Government Interface (general)"}, {"num": "015", "name": "Raahi — Transport Services Without the Maze", "team": "Ankit Mishra", "app": "https://raahi-parivahan.raahi-bwmi.workers.dev/en", "video": "https://www.loom.com/share/2d37b22978e94a0fab11ca016c92b358", "category": "Transport / Parivahan / Mobility"}, {"num": "016", "name": "GRAHAK-DRISHTI", "team": "U S S S R Siddhu Chunduri & Dhanush P", "app": "https://grahak-drishti-citizen-web.vercel.app/", "video": "https://www.youtube.com/watch?v=HJ_EqaRWbmw", "category": "Other / Uncategorized"}, {"num": "017", "name": "CASEFILE -- आपका मामला, आपकी कहानी, एक जगह।", "team": "Swarnim Tiwari", "app": "https://casefile-india.vercel.app/", "video": "https://drive.google.com/drive/folders/1tP7LOQhj-R5q6e5QekDlioPWIJgGlAss?usp=drive_link", "category": "Courts / Legal / Case tracking"}, {"num": "018", "name": "Cutoff Lens", "team": "Harin Mani Karri", "app": "https://cutofflens.vercel.app", "video": "https://drive.google.com/file/d/1C8HvBjxH-IO9Fav-NprG0ss7gxIEEw1D/view?usp=sharing", "category": "Education / Scholarship / Skill"}, {"num": "019", "name": "Project Saakshi", "team": "Rahul D & Sudharshan Sakthivel", "app": "https://saakshi-v2.rahu760.chatgpt.site/", "video": "https://drive.google.com/file/d/1MTfATWk3-Hx1bNuuFyNugTomzWvRSU4z/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "020", "name": "sahi return", "team": "Anish Singh Chauhan & Kunwar Divyansh Verma", "app": "https://buildwhatmovesindia.iiviie.dev/", "video": "https://drive.google.com/file/d/1E8lgGE0kemNhnhHaozf4uNZaw4sUT1RZ/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "021", "name": "MCA Business Registry mockup portal", "team": "Rahul Rajelli", "app": "https://bwmi-mca-gateway.rahullrvithal.workers.dev/", "video": "https://bwmi-mca-gateway.rahullrvithal.workers.dev/training/what-it-takes.mp4", "category": "Company / MSME / Business Registration"}, {"num": "022", "name": "Poora Hua?", "team": "Aastik Nayyar & Navjeet Singh", "app": "https://poora-hua.vercel.app/", "video": "https://drive.google.com/file/d/1Qj3xowAOyBkgmSafnflVfaVa0W-k75je/view?usp=drivesdk", "category": "Other / Uncategorized"}, {"num": "023", "name": "UDID Raasta: A clear route for specially abled after rejection", "team": "Krishna Chaitanya", "app": "https://udid-raasta.chitu-atukuri2000.chatgpt.site", "video": "https://drive.google.com/drive/folders/18s23T2LyhuQankUxNLzFbDWrn9BRM8-f?usp=sharing", "category": "Transport / Parivahan / Mobility"}, {"num": "024", "name": "KhelPath - Sports OS for India", "team": "Siddharth Patel", "app": "https://khelpath-india.sidpatel961.chatgpt.site", "video": "https://www.loom.com/share/aa1531e5d12540698dc8aa2e100b6dbf", "category": "Other / Uncategorized"}, {"num": "025", "name": "Rail Bharat", "team": "Bhagat Singh", "app": "https://rail-app.sass-hub.cloud/", "video": "https://drive.google.com/drive/folders/1hbwHWZhvBlv21mErb74zHZCfNitvmOP3?usp=sharing", "category": "Railways / IRCTC / Tatkal"}, {"num": "026", "name": "Sahayak", "team": "Shreyaan Seth", "app": "https://sahayak.anosher.com/", "video": "https://youtu.be/jShTq1AFX2I", "category": "Civic Portal / Government Interface (general)"}, {"num": "027", "name": "Golden-Hour", "team": "Arham Begani", "app": "https://golden-hour-kappa.vercel.app", "video": "https://youtu.be/ql0ffWSjSDw", "category": "Healthcare / Emergency / Blood"}, {"num": "028", "name": "Disha", "team": "Dhruv Gupta & Ramanpreet Kaur", "app": "https://disha-neon.vercel.app/", "video": "https://drive.google.com/file/d/149OkDWpwkhrSn3cOTP7keD4ulndzQSdd/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "029", "name": "Meri Pehchaan 2.0", "team": "Sambit Swarup", "app": "https://meri-pehchaan-concept.vercel.app", "video": "https://youtu.be/AHGAxmtyeqs", "category": "Aadhaar / Identity / KYC"}, {"num": "030", "name": "Udyam Search: Find Indian MSMEs and MCA-Registered Companies", "team": "Taher Ismail Jodhpurwala", "app": "https://udyamsearch.com", "video": "https://www.youtube.com/watch?v=VamSMePAqlM", "category": "Company / MSME / Business Registration"}, {"num": "031", "name": "RAASTA", "team": "Padmesh Kumar Mahalik", "app": "https://padmeshmahalik.github.io/public.../", "video": "https://www.image2url.com/r2/default/videos/1788020814517-5cc7871f-29e7-4ca7-86e5-805ef1188c08.mov", "category": "Transport / Parivahan / Mobility"}, {"num": "032", "name": "UPI Recall", "team": "Ansh Jain", "app": "https://upi-rescue-india.super-lime-3442.chatgpt.site/", "video": "https://drive.google.com/file/d/17EEqp9VNXQHMpNaKk5CdpbozhPPh-QzZ/view?usp=sharing", "category": "Insurance / Banking / Finance / UPI"}, {"num": "033", "name": "RTI reply navigator", "team": "Surya Harshith Balla", "app": "https://rti-reply-map.harshith794.chatgpt.site/", "video": "https://www.loom.com/share/752390345a22407eb172c5ac39f11db8", "category": "RTI (Right to Information)"}, {"num": "034", "name": "RecordSathi", "team": "Varad Bharat Yadav & Sarvesh Patil", "app": "https://recordsaathi-n193u11jf-xen10.vercel.app", "video": "https://echowave.io/app/watch/S6E4b6gt9oVuKseE0mka/", "category": "Digital Locker / Records / Documents"}, {"num": "035", "name": "JansahAI", "team": "Dhairya Aggarwal & Parth Arora", "app": "https://jansahai.shipjoy.io", "video": "https://jansahai.shipjoy.io/video", "category": "Other / Uncategorized"}, {"num": "036", "name": "Kwik : know who is in Krisis", "team": "Swyam Sharma & Jayati Ahuja", "app": "https://pulse112-dispatch-ai.vercel.app/dashboard", "video": "https://youtu.be/JdzAXL08_24", "category": "Other / Uncategorized"}, {"num": "037", "name": "United Transit Interface", "team": "Srinivasa Gopalan K & Kamal Kumar R", "app": "https://uti.alturing.dev", "video": "https://drive.google.com/file/d/1EOKMHSpkOhg6qsDc5E-fAfjzb4nJ3e47/view?usp=sharing", "category": "Transport / Parivahan / Mobility"}, {"num": "038", "name": "Claimity", "team": "Jayant Joshi", "app": "https://claim-continuity-india.jjoshi221.chatgpt.site", "video": "https://youtu.be/cezwDssys2Y", "category": "Insurance / Banking / Finance / UPI"}, {"num": "039", "name": "PM-KISAN Sahayak (पीएम-किसान सहायक)", "team": "Sachin Kumar Singh", "app": "https://pm-kisan-sahayak.vercel.app", "video": "https://drive.google.com/file/d/1shf0Pob8UxLqpdjEUUeWgFMBwb6j6GwD/view?usp=sharing", "category": "Agriculture / Farmer / Land / Ration"}, {"num": "040", "name": "Public Service Atlas", "team": "Salman Mushir", "app": "https://public-service-atlas.vercel.app/", "video": "https://youtu.be/qO8IXAT9rfg", "category": "Civic Portal / Government Interface (general)"}, {"num": "041", "name": "My Next Filing", "team": "Sarthak Mishra", "app": "https://mynextfiling.wekeep.in", "video": "https://mynextfiling.wekeep.in", "category": "Other / Uncategorized"}, {"num": "042", "name": "SAHI - Simplified Assistance for Harmonizing Identity", "team": "Anuj Kumar", "app": "https://sahi-correction-demo.kumaranuj7039.workers.dev/", "video": "https://sahi-correction-demo.kumaranuj7039.workers.dev/", "category": "Aadhaar / Identity / KYC"}, {"num": "043", "name": "राहत · Raahat", "team": "Shivang Shirodkar", "app": "https://raahat-nu.vercel.app", "video": "https://youtu.be/-6Nf0sGyBzM", "category": "Other / Uncategorized"}, {"num": "044", "name": "PAN Path", "team": "Sameer Siddiqui", "app": "https://pan-path.vercel.app/", "video": "https://youtube.com/shorts/ILWWhc5BXCo?feature=share", "category": "Other / Uncategorized"}, {"num": "045", "name": "INDRA", "team": "Abhishek A S", "app": "https://indra.abhishekas.in/", "video": "https://drive.google.com/file/d/1g-34Ml-NI9oSF_P6Hh6v03eBRgrIFL_w/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "046", "name": "Cybercrime Restitution Model", "team": "Aryan Soni", "app": "https://coral-skunk-339023.hostingersite.com/track", "video": "https://drive.google.com/file/d/182-JWinTFSlZPzWWceDTxkFQx-xq78JO/view?usp=sharing", "category": "Cybercrime / Fraud / Scam"}, {"num": "047", "name": "Bijli Saathi", "team": "Varun Parmar & Vishesh Mamoria", "app": "https://temporary-rapid-hawthorn-k4yip9z.vercel.app", "video": "https://drive.google.com/drive/u/0/folders/1iF11ip0sWTx2nov2WBwnyTwO_6n0byNI", "category": "Civic Portal / Government Interface (general)"}, {"num": "048", "name": "VendorPass", "team": "Jasraj singh & Karan Yadav", "app": "https://nfssi.vercel.app/", "video": "https://drive.google.com/drive/folders/1eP8iRABNw5TxlhkIvm9Htg_HOrZ3oOPn?usp=sharing", "category": "Company / MSME / Business Registration"}, {"num": "049", "name": "Nagrik Consumer Grievance Case Builder", "team": "Dinesh Latha Jothimoorthy", "app": "https://nagrik-mu.vercel.app/", "video": "https://www.loom.com/share/b887f1bfbaef44f4849eddff7e26e395", "category": "Grievance / CPGRAMS"}, {"num": "050", "name": "NCRP One Case", "team": "Taran Pal Singh", "app": "https://ncrp-one-case.vercel.app/", "video": "https://www.loom.com/share/539613391db54d26ad339aac0cb32f76", "category": "Cybercrime / Fraud / Scam"}, {"num": "051", "name": "36Pages", "team": "Anjul Bhatia", "app": "https://36pages.vercel.app/", "video": "https://36pages.vercel.app/video", "category": "Other / Uncategorized"}, {"num": "052", "name": "TDR SAHAYAK", "team": "Suhrudh Arjarapu & Akula Dhatri Manohar Siva Kumar", "app": "https://tdr-sahayak.vercel.app/", "video": "https://www.loom.com/share/9da764cdb88f4f7283a36e1cbaf23839", "category": "Civic Portal / Government Interface (general)"}, {"num": "053", "name": "Pf service check", "team": "Bhoomika S Shetty & Raksha", "app": "https://latentsig-pf-service-check.pages.dev/", "video": "https://drive.google.com/file/d/1OzdbbapLeY-JJVIdHlhWj1nSAb4rHxb6/view?usp=drivesdk", "category": "EPFO / PF / Pension"}, {"num": "054", "name": "Adayal", "team": "Sri Santh M", "app": "https://adayal.pages.dev/", "video": "https://drive.google.com/file/d/18VSRcJ1qCTsNg_8LWNAzhzWl5LbzK8DU/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "055", "name": "Seedha Kaam", "team": "Aayush Sharma", "app": "https://seedha-kaam.vercel.app/", "video": "https://docs.google.com/document/d/106R498G6G5_GgL8BvX3jXhDEcCHl1NJr3hWJU8Y7xrE/edit?usp=sharing", "category": "Other / Uncategorized"}, {"num": "056", "name": "Railflow", "team": "Mohammed Tahir", "app": "https://agent-6a87137a163f707--euphonious-baklava-13932a.netlify.app/", "video": "https://drive.google.com/file/d/1r9b_8bWJxp4fXV3KHpbs0dxPPQXYBbkp/view?usp=drivesdk", "category": "Railways / IRCTC / Tatkal"}, {"num": "057", "name": "ECI VOTER PORTAL", "team": "Rishabh Lal", "app": "https://eci-voter-project.netlify.app", "video": "https://drive.google.com/drive/folders/1DWXdGkBA8_wTrf8pz_AZkWlt_9nwGHlB?usp=sharing", "category": "Elections / Voter (ECI)"}, {"num": "058", "name": "Raasta", "team": "Pitani Vanya Triloka", "app": "https://raasta-11.netlify.app/", "video": "https://www.loom.com/share/78dab6c829a648e18ad8d306e0d5b7d2", "category": "Transport / Parivahan / Mobility"}, {"num": "059", "name": "Drivesaathi", "team": "Riya Jain & Prathmesh Namdeo", "app": "https://drivesaathi-codex.onrender.com/", "video": "https://drive.google.com/file/d/1EJ1yLZyA4Eh6Vfc89esoCVBIeCREb9J0/view?usp=sharing", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "060", "name": "Embassies of India", "team": "Shivam Kumar Tiwari & Joy Sengupta", "app": "https://embassiesofindia.vercel.app/", "video": "https://drive.google.com/drive/folders/1kRiFpRNfqTR_GjZHfwUx9DIZFjHGNDSm?usp=sharing", "category": "Passport / Visa"}, {"num": "061", "name": "AdmissionSetu", "team": "Dhruv Kajalkar", "app": "https://admission-setu.vercel.app/dashboard", "video": "https://www.youtube.com/watch?v=2gA_hp-0y6Q", "category": "Education / Scholarship / Skill"}, {"num": "062", "name": "CPGRAMS Reimagined — Resolution, Not Closure", "team": "Hrithik Dass", "app": "https://cpgrams-reimagined.vercel.app/", "video": "https://youtu.be/ofUWvkWI-48", "category": "Grievance / CPGRAMS"}, {"num": "063", "name": "Shikayat Saathi", "team": "Aarju Kumar", "app": "https://shikayatsaathi.netlify.app/", "video": "https://youtu.be/uPtYXoL2Rwk", "category": "Grievance / CPGRAMS"}, {"num": "064", "name": "GST Notice explained: Why doesn't my GST match?", "team": "Gaurav Gupta & Kriti Kandhari Kapoor", "app": "https://prototype-blue-three.vercel.app/", "video": "https://www.loom.com/share/047a1c3ea1a84011b4561fcd9caca18d", "category": "GST / Tax"}, {"num": "065", "name": "Parivahan 2.O - India Mobility Os", "team": "Ameya Jayesh Kasture & Prathmesh Garule", "app": "https://parivahan-sarathi-2.vercel.app/", "video": "https://youtu.be/uxRYqrryGkE?is=O7Qjx1y11n4c8Vht", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "066", "name": "SaathCRS", "team": "Krish Shah & Sahil Asopa", "app": "https://saath-crs.vercel.app/", "video": "https://x.com/_kshah00/status/2093722678679228573?s=20", "category": "Other / Uncategorized"}, {"num": "067", "name": "Paarth: A Guide for Hard Times", "team": "Asutosh Padhi & Bismoy Sutar", "app": "https://paarth-bms.pages.dev/", "video": "https://drive.google.com/drive/folders/1uGAQIDiea0ZR09Jn2kK028cav5zK_q6E?usp=sharing", "category": "Other / Uncategorized"}, {"num": "068", "name": "FASTag Unified", "team": "Sahana Desai", "app": "https://imaginative-taffy-242ce5.netlify.app/", "video": "https://app.screencastify.com/watch/SkVzcT90DbqP69vQXYOK", "category": "Other / Uncategorized"}, {"num": "069", "name": "Sehat", "team": "Vivek Boora", "app": "https://openai-blue-seven.vercel.app/", "video": "https://drive.google.com/drive/folders/1hAOydHZMqmk5DpRKyILbp0QwMcdx0T8b?usp=sharing", "category": "Healthcare / Emergency / Blood"}, {"num": "070", "name": "MindEase", "team": "Shriyash Deshmukh", "app": "https://mind-ease-three.vercel.app/", "video": "https://drive.google.com/file/d/1G6GMAOySW0OhnLoes528iIaTjHE1kFji/view?usp=drive_link", "category": "Healthcare / Emergency / Blood"}, {"num": "071", "name": "ScholarSaathi : Your Scholarship companion", "team": "Krishna Agrawal", "app": "https://scholarsaathi-two.vercel.app/", "video": "https://drive.google.com/file/d/1RspPjGHAjXaLzVNT8xYP400VQLTSJo8l/view?usp=sharing", "category": "Education / Scholarship / Skill"}, {"num": "072", "name": "Road India", "team": "Aitihya ray & Bastab Mushahary", "app": "https://road-india.vercel.app/", "video": "https://drive.google.com/file/d/1T90aoD1RrumIf0YFyH1E466jcenfVp7q/view?usp=drive_link", "category": "Transport / Parivahan / Mobility"}, {"num": "073", "name": "RTI Online", "team": "Ganesh Gurram & Pothumudi Rahul", "app": "https://frontend-brown-kappa-56.vercel.app/", "video": "https://drive.google.com/file/d/1ZamR9TnbVLL2LoPHzy1OiVoVAoUe9wyW/view?usp=sharing", "category": "RTI (Right to Information)"}, {"num": "074", "name": "JanSathi", "team": "Mansi Gangwar & Priyharsh", "app": "https://jansathi-login-preview.mansi58211.chatgpt.site/", "video": "https://drive.google.com/file/d/1pTJlsEonr1UTqjaitYdFSt2cW1dFxyTS/view?usp=sharing", "category": "Grievance / CPGRAMS"}, {"num": "075", "name": "HaqPath", "team": "Suman Kumar", "app": "https://haqpath-prototype.vercel.app/", "video": "https://youtu.be/98SNp7LsIe0?si=JReArT2mAL5CYe6A", "category": "Other / Uncategorized"}, {"num": "076", "name": "raksha", "team": "N.Hariharan & H Yokash", "app": "https://raksha-theta.vercel.app/", "video": "https://www.youtube.com/watch?v=I_Vsm0B9Zz8", "category": "Other / Uncategorized"}, {"num": "077", "name": "MCA One", "team": "Naman Gilra & Ria Somani", "app": "https://mca-one-riasomani.vercel.app/", "video": "https://drive.google.com/file/d/19Ms-rmEJio0uTLbZNn0UL1c1_TxvJyi8/view?usp=sharing", "category": "Company / MSME / Business Registration"}, {"num": "078", "name": "Kavach", "team": "Ashutosh Kumar & Kaustubh Tripathi", "app": "https://cybercrime-assistant.vercel.app/", "video": "https://drive.google.com/file/d/15YK3JONlj1ai6QRl9LvdUHIlY1PBIXUr/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "079", "name": "RaktKhoj - Emergency Blood, on UMANG", "team": "Gurjot Singh Ahluwalia & Sanan Goyal", "app": "https://raktkhoj.vercel.app/umangdemo", "video": "https://youtu.be/T3U7wqGltGc", "category": "Healthcare / Emergency / Blood"}, {"num": "080", "name": "December Terminal Agent", "team": "Chaitanya Sonawane", "app": "https://trydecember.com/", "video": "https://trydecember.com/", "category": "Other / Uncategorized"}, {"num": "081", "name": "RakshakAI", "team": "Deepika Karanji & Manav Koluru", "app": "https://cyber-crime-reporting-portal-sand.vercel.app/", "video": "https://youtu.be/Dw15Zy49fHk", "category": "Other / Uncategorized"}, {"num": "082", "name": "Bhumap", "team": "Divyam Jain & Vrushal Mehta", "app": "https://bhumap-web.vercel.app/map", "video": "https://drive.google.com/file/d/1qEqSE1g5xlSvO241Qo6U-GmojShfRQVc/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "083", "name": "JANSAATHI", "team": "Devika Mukundan", "app": "https://astonishing-frangipane-5b6a79.netlify.app", "video": "https://drive.google.com/file/d/1ltokTDSsj7iGJx_KaMpjFfuMTVpsCo1b/view?usp=drivesdk", "category": "Grievance / CPGRAMS"}, {"num": "084", "name": "OpenFOS", "team": "Venkatasai Reddy Barri", "app": "https://www.openfos.in/", "video": "https://youtu.be/fkt9cr9Y3m8", "category": "Other / Uncategorized"}, {"num": "085", "name": "Parivahan Sarathi", "team": "Arkadeep Nag", "app": "https://buildwhatmovesindia-one.vercel.app/", "video": "https://youtu.be/l8s3AVJZh5A?si=2vOphSXdtCiaVUDf", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "086", "name": "Vote Where You Live", "team": "Aviral agarwal", "app": "https://vote-where-you-live.vercel.app/", "video": "https://youtube.com/shorts/0PS-mGwOakE?si=iS78E0__pWD_cJar", "category": "Elections / Voter (ECI)"}, {"num": "087", "name": "JanSetu - One Nation , One Portal", "team": "Shubham Gagare", "app": "https://jansetu-flame.vercel.app", "video": "https://drive.google.com/file/d/1881X_at9zDxgHI6DVEsE5X3jDzUNI2gW/view?usp=sharing", "category": "Grievance / CPGRAMS"}, {"num": "088", "name": "ECI Citizen Services - Rebuilt and Enhanced", "team": "Bhuvana Shree N & Chithra R", "app": "https://eci-citizen-services-pi.vercel.app/", "video": "https://drive.google.com/file/d/1wnITIMH1iUwitaLmG9ODI3IQVx0OGFFW/view?usp=drive_link", "category": "Elections / Voter (ECI)"}, {"num": "089", "name": "RTI Sahayak", "team": "Ganga Priya S & Ranga Laxmi Jahnavi", "app": "https://rti-sahayak-kappa.vercel.app", "video": "https://drive.google.com/file/d/16FdHkAtuvSS2Pmb7NWYiC1waGix3fTc0/view?usp=drivesdk", "category": "RTI (Right to Information)"}, {"num": "090", "name": "RailSetu - A Precise Way through the Waitlist", "team": "Ankit Shrivastava", "app": "https://railsetu.beatkingkrrish9500.chatgpt.site/", "video": "https://drive.google.com/file/d/1DmNPY7Hm5vK0exPJNRn4Rr86iwAvm2pQ/view?usp=sharing", "category": "Railways / IRCTC / Tatkal"}, {"num": "091", "name": "RailEase India", "team": "Manas kishor shirsath", "app": "https://railease-india-eyq2.vercel.app/", "video": "https://www.youtube.com/watch?v=OraHf-CW0xU", "category": "Railways / IRCTC / Tatkal"}, {"num": "092", "name": "SortIt", "team": "Prabhav Tewari", "app": "https://sequoia-oatmeal-e80.notion.site/SortIt-The-New-Operating-System-for-Indian-Democracy-3cb3976b4819809e9fade009ea5f8062?source=copy_link", "video": "https://youtu.be/teaWFSWn4vU", "category": "Other / Uncategorized"}, {"num": "093", "name": "eCourts Portal revamp", "team": "Madhurjya Saikia", "app": "https://madhurjya-nlp.github.io/ecourts-citizen-case-companion/", "video": "https://drive.google.com/file/d/1pnaXwJLi8KM3TdqVXQpVHbjxOt__e9Ma/view?usp=drivesdk", "category": "Courts / Legal / Case tracking"}, {"num": "094", "name": "SETU", "team": "Abhir Mirikar", "app": "https://buildwhatmovesindia-vert.vercel.app/", "video": "https://drive.google.com/file/d/1-Rs3D5_1vmXjzQRdxXbssauDuFI3m-eh/view?usp=sharing", "category": "Civic Portal / Government Interface (general)"}, {"num": "095", "name": "NagrikFlow", "team": "Alok Srivastava", "app": "https://nagrikflow-five.vercel.app", "video": "https://youtu.be/0BtlhOYW5ok", "category": "Grievance / CPGRAMS"}, {"num": "096", "name": "Parakh: One GSTIN. The whole record.", "team": "Arjun Garg & Keshav Krishna Gupta", "app": "https://build.parakh.biz", "video": "https://www.loom.com/share/14307b529e3a4b829c1d4daf9fbd1aed", "category": "Digital Locker / Records / Documents"}, {"num": "097", "name": "TaxPath", "team": "Yogesh Choudhary", "app": "https://taxpath-navy.vercel.app/", "video": "https://youtu.be/N2NdtjZPkFg", "category": "GST / Tax"}, {"num": "098", "name": "Jeevana — a sequence layer for Indian public services", "team": "Venkata Siva Rama Maruvada", "app": "https://jeevana-brown.vercel.app/", "video": "https://www.loom.com/share/e4df7dd8a13e427593a3befe1f809768", "category": "Civic Portal / Government Interface (general)"}, {"num": "099", "name": "Tatkal 2.0", "team": "Vikas Rajput", "app": "https://tatkal-2-0.vercel.app", "video": "https://www.youtube.com/watch?v=MzvBl371aRo", "category": "Railways / IRCTC / Tatkal"}, {"num": "100", "name": "Setu - a phone relay for deaf and non-verbal India", "team": "Aakanksha Singh & Siddhant Shitole", "app": "https://setu-build.vercel.app/", "video": "https://www.youtube.com/watch?v=YRk466SvR0I", "category": "Civic Portal / Government Interface (general)"}, {"num": "101", "name": "Grievance Copilot", "team": "Siddhant Srivastava", "app": "https://sidbuilds.com/grievancecopilot", "video": "https://youtu.be/ZEGfDcV-cSI", "category": "Grievance / CPGRAMS"}, {"num": "102", "name": "SarvPariksha", "team": "Abhay Mahendra Mourya", "app": "https://sarvpariksha.in", "video": null, "category": "Education / Scholarship / Skill"}, {"num": "103", "name": "RTI - Your Right. Your Information. Your Power.", "team": "Mandadi Manas Chandra & Diddekunta Vishnu Vardhan Reddy", "app": "https://rti-build-what-moves-india.vercel.app/", "video": "https://drive.google.com/file/d/1xSeAYr4IAjAb64cdVtU-9cHzY7WEUmUb/view?usp=drivesdk", "category": "RTI (Right to Information)"}, {"num": "104", "name": "Project name: The Ticket for the Next Train (Recreation of IRCTC)", "team": "Raunak Gupta", "app": "https://irctcslop.vercel.app/", "video": "https://irctcslop.vercel.app/creator-vid", "category": "Railways / IRCTC / Tatkal"}, {"num": "105", "name": "JeeVan (Jeev + Van)", "team": "Neha Boloor & Samyak R Jain", "app": "https://jeev-van.vercel.app/", "video": "https://youtu.be/MggKflVKgFo?si=RgcQK_qKQBpFcaNy", "category": "Other / Uncategorized"}, {"num": "106", "name": "GST Portal, Redesigned — The Tax Portal That Takes Instructions", "team": "Ronaldo Rajan", "app": "https://indiagstportal-production.up.railway.app/", "video": "https://drive.google.com/file/d/1RNYKud-PFt8t8smo55Nn652umPejtZGb/view?usp=sharing", "category": "GST / Tax"}, {"num": "107", "name": "Jan Samadhan", "team": "Aditya Poddar & Kumar Mangalam", "app": "https://cpgrams-gamma.vercel.app/", "video": "https://youtu.be/flSgbcvt9E0?si=m9dPFhRiOROXMP5M", "category": "Grievance / CPGRAMS"}, {"num": "108", "name": "Parivahan Seva", "team": "Ritankar Bhunia & Ananjan Mitra", "app": "https://parivahan.pybash.xyz", "video": "https://drive.google.com/file/d/1SZb_U5RmYZTBxNHaokgDjqzXYnafDMLH/view?usp=sharing", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "109", "name": "SugamyaSetu - Building a Truly Accessible India", "team": "Niyati Agrawal", "app": "https://sugamyasetu-udid-portal.officialtripsie.chatgpt.site/", "video": "https://www.loom.com/share/91770937851d4fc9b534704eea194587", "category": "Civic Portal / Government Interface (general)"}, {"num": "110", "name": "JanSewak — government websites, as easy as talking", "team": "Shivam Kumar Pathak", "app": "https://jansewak.vercel.app", "video": "https://drive.google.com/drive/folders/1TOSiCegrzQ4uQB23ZS-7288mfb3RM56O?usp=sharing", "category": "Grievance / CPGRAMS"}, {"num": "111", "name": "Raksha", "team": "Aryan Kumar & Kamal Kumar", "app": "https://ncrp-reimagined-five.vercel.app/", "video": "https://youtu.be/U677vnIWoqo", "category": "Other / Uncategorized"}, {"num": "112", "name": "EPFO Member Portal", "team": "Rishikesh Swaminathan & S Vishvajith Reddy", "app": "https://preflight-epf.vercel.app/", "video": "https://drive.google.com/file/d/1_dHVGT8Yvw5BCDT7DI9gpxHU8Kp7MQGd/view?usp=drive_link", "category": "EPFO / PF / Pension"}, {"num": "113", "name": "ApplyOnce", "team": "Ayush Kumar Singh", "app": "https://applyonce-silk.vercel.app/", "video": "https://drive.google.com/file/d/11BLUQgor6iwfEWcGlShcZrjdub-w2ViO/view?usp=sharing", "category": "Company / MSME / Business Registration"}, {"num": "114", "name": "India Visa Seva", "team": "Sufyaan Ahmed & Nisar Ahmed", "app": "https://visa-seva.vercel.app/", "video": "https://drive.google.com/file/d/1ipzZ95LOIg1UdrgU2_RId_XSM28o2CgJ/view?usp=sharing", "category": "Passport / Visa"}, {"num": "115", "name": "Atithi - E Visa Platform", "team": "Janvi Mehta & Sarthak Shah", "app": "https://atithitest.sarthakshipsai.com/", "video": "https://drive.google.com/file/d/1Z5jsBtyoWbr5-0t1xQg4VdBQam17UgaW/view?usp=drivesdk", "category": "Passport / Visa"}, {"num": "116", "name": "Berth Right", "team": "Rushiraj Birajdar", "app": "https://berth-right.birajdar.in", "video": "https://youtu.be/rHeWoqqiJIg?si=G3IXh1J1kcxhHVnV", "category": "Railways / IRCTC / Tatkal"}, {"num": "117", "name": "Sarathi One", "team": "Naman Dosho", "app": "https://sarathi-one-pink.vercel.app", "video": "https://drive.google.com/file/d/1qVHVLxChEMt4VmRonL3H7cV0RczmhvhJ/view?usp=sharing", "category": "Transport / Parivahan / Mobility"}, {"num": "118", "name": "Drishti", "team": "Aditya & Kanishk Ashish Dubey", "app": "https://drishti-eight-pearl.vercel.app/", "video": "https://youtu.be/qETO7HHAggU", "category": "Other / Uncategorized"}, {"num": "119", "name": "Samadhan", "team": "Harsh Shrivastava", "app": "https://samadhan-1050.vercel.app", "video": "https://drive.google.com/file/d/1YF_uVIc0HqCc4DuP1_H8SJTqPBBC70tO/view?usp=drivesdk", "category": "Grievance / CPGRAMS"}, {"num": "120", "name": "Sachet", "team": "Suyash Pradhan", "app": "https://sachet-ncrp-prototype.vercel.app", "video": "https://www.loom.com/share/596c0310bdc6490d8573d7517f8654dc", "category": "Other / Uncategorized"}, {"num": "121", "name": "LicenceFlow", "team": "Sambhav jain", "app": "https://licenceflow-mp-demo.eruditespartan108.chatgpt.site/", "video": "https://youtu.be/gtAxoEhZAMM", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "122", "name": "On Record", "team": "Abhisar Pratap Singh", "app": "https://on-record-livid.vercel.app/", "video": "https://drive.google.com/file/d/14FJakb7odbgSuYYmYcsFCNz0bpykGi7m/view?usp=drive_link", "category": "Courts / Legal / Case tracking"}, {"num": "123", "name": "LaunchReady — Incorporation Readiness Navigator", "team": "Purohit Shivkumar Vijay", "app": "https://launchready-hackathon.shivpurohit460.chatgpt.site/", "video": "https://youtu.be/Zi22F5X9zPA", "category": "Company / MSME / Business Registration"}, {"num": "124", "name": "RTI Saathi", "team": "Tejaswi Raghavendra Banda & Akhil Suravarapu", "app": "https://rti-saathi-india.humble-venus-1659.chatgpt.site", "video": "https://screenapp.io/app/v/XyTjoIF8C9", "category": "RTI (Right to Information)"}, {"num": "125", "name": "Pension Saral", "team": "Neeja Suva & Vraj Chauhan", "app": "https://pension-saral.vercel.app", "video": "https://drive.google.com/drive/folders/1U-TGmnxDIQH3A0u3YDWtJLKY1i_89Wp5?usp=sharing", "category": "EPFO / PF / Pension"}, {"num": "126", "name": "CPGrams Reimagined", "team": "Rahul Vidyaprakash Keshervani", "app": "https://cpgrams-hackathon.vercel.app/", "video": "https://www.loom.com/share/b1c6dee7cf7b411abda6e937ae200ebf", "category": "Grievance / CPGRAMS"}, {"num": "127", "name": "FlightPath India", "team": "Agastya Patnaik", "app": "https://flightpath-india-pilot-journey.agastyapatnaik18.chatgpt.site/", "video": "https://drive.google.com/file/d/17FjFMPz3sjcFPLNCVHA9_bKqMKGy6Adk/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "128", "name": "Seven Gates", "team": "Afreen Hossain", "app": "https://build-whatmovesindia.vercel.app/", "video": "https://youtu.be/TFRZGJLVbxQ", "category": "Other / Uncategorized"}, {"num": "129", "name": "Hyperlocal Jobs", "team": "Kheersagar Patel", "app": "https://hyperlocaljobs.knowivate.com/", "video": "https://www.youtube.com/watch?v=uUDwtT1NKC4", "category": "Employment / Jobs / Career"}, {"num": "130", "name": "Case Companion - Revamped Bima Bharosa - A guided layer for India's insurance grievance system", "team": "Aayushi Singh", "app": "https://case-companion-blond.vercel.app", "video": "https://drive.google.com/file/d/1anVE3-0vth0cgIoRRogaXdn7Yd2dZFYc/view?usp=sharing", "category": "Grievance / CPGRAMS"}, {"num": "131", "name": "Sah-Nagrik", "team": "Jayanth R Pawar & Basavaraju Venkata Kamalanabham", "app": "https://sah-nagrik.lovable.app", "video": "https://drive.google.com/file/d/1UkUw6jpPU7bI9ABqAVbSfyhQK584xH-0/view?usp=sharing", "category": "Grievance / CPGRAMS"}, {"num": "132", "name": "EPFORedesign", "team": "Aman Singh Dadsena", "app": "https://epforedesign.vercel.app/", "video": "https://drive.google.com/uc?id=13We325E0O6UUq-9xNpM--bTy-IR3o17T&amp;export=download", "category": "EPFO / PF / Pension"}, {"num": "133", "name": "JanMitra", "team": "Parth Gabale", "app": "https://janmitra-india.netlify.app/", "video": "https://drive.google.com/drive/folders/1S5WRnGOgka1xqIUOlvcvQk8zGDECJcJg?usp=sharing", "category": "Grievance / CPGRAMS"}, {"num": "134", "name": "Umang+", "team": "Pavani Rajula", "app": "https://effervescent-lolly-6ff3f9.netlify.app/", "video": "https://drive.google.com/file/d/1JjdBAi6BiUbG_720uqLhqU_QFZk91qR8/view?usp=sharing", "category": "Civic Portal / Government Interface (general)"}, {"num": "135", "name": "Platform 10", "team": "Kushal Agarwal & Viresh Solanki", "app": "https://irctc-tatkal-revamp-showcase-applic.vercel.app/?tab=system", "video": "https://irctc-tatkal-revamp-showcase-applic.vercel.app/?tab=video", "category": "Railways / IRCTC / Tatkal"}, {"num": "136", "name": "Janam", "team": "Ankit Kumar", "app": "https://janam-app.vercel.app/", "video": "https://www.loom.com/share/64f44a29fd96427e8fb559c692fd311e", "category": "Other / Uncategorized"}, {"num": "137", "name": "Cyber Sahay", "team": "Shreyas Chakraborty", "app": "https://cyberproj-hackathon-web.vercel.app/", "video": "https://drive.google.com/file/d/1KK7opAVrGNfDFNv5arKcPHrkLWJdOjDR/view?usp=drivesdk", "category": "Cybercrime / Fraud / Scam"}, {"num": "138", "name": "tax-assist-prototype", "team": "Nilesh Das", "app": "https://tax-assist-prototype.vercel.app/", "video": "https://www.loom.com/share/f908570e967342a2ba079e1dd277b8cf", "category": "GST / Tax"}, {"num": "139", "name": "Tatak", "team": "Gokul AP & Srivathsan Venkateswaran", "app": "https://app.tatak.tech/", "video": "https://drive.google.com/file/d/1l49tsuCL8y8cxvdmcxkg2e0wlnG8y8F4/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "140", "name": "Virasat", "team": "Shubham agarwal", "app": "https://crazysa.github.io/virasat-app/", "video": "https://youtu.be/96ZEXvvDX1k?si=A0Fve_6lejgq5WOw", "category": "Other / Uncategorized"}, {"num": "141", "name": "Suraksha -- AI-Powered Cyber Fraud Safety Prototype", "team": "Subhadeep Das", "app": "https://suraksha-citizen-safety.onrender.com/", "video": "https://youtu.be/MjJlQCilDRQ", "category": "Cybercrime / Fraud / Scam"}, {"num": "142", "name": "CivicPulse", "team": "Kandhan Vs & Thaaneshvaran P D", "app": "https://civicpulse.kandhanvsk.workers.dev/", "video": "https://drive.google.com/file/d/1CcqdSnjpWDbbmV3VXjoWdy91Q7Hg4FLo/view", "category": "Civic Portal / Government Interface (general)"}, {"num": "143", "name": "TatkalGuard", "team": "Keshav Agarwal & Prajapati Mayank", "app": "https://irctc-tockenizaition-yp9r.vercel.app/", "video": "https://drive.google.com/file/d/1NCyvh8ABBIOV54KRfMT9SrobGfZTDhcx/view?usp=drivesdk", "category": "Railways / IRCTC / Tatkal"}, {"num": "144", "name": "Pramaan-Sahayak", "team": "Hardik Gupta", "app": "https://pramaan-sahayak.vercel.app", "video": "https://drive.google.com/file/d/18Q8djscHSmMwmXMlGnS1xzg_MqT1fuHV/view?usp=sharing", "category": "Aadhaar / Identity / KYC"}, {"num": "145", "name": "khaali", "team": "Pranav raghavan C M & Ankith Gowda", "app": "https://khaali-production.up.railway.app/", "video": "https://www.loom.com/share/0eabb42d1d7949aebf3bbbabe9832a01", "category": "Other / Uncategorized"}, {"num": "146", "name": "Mundhu Tesuko", "team": "Revanth Reddy Chinthala", "app": "https://mundhu-tesuko.vercel.app", "video": "https://mundhu-tesuko-demo.vercel.app", "category": "Other / Uncategorized"}, {"num": "147", "name": "Mera GST", "team": "Anay Somani", "app": "https://mera-gst.vercel.app/", "video": "https://www.loom.com/share/a402fa5418ff4cfe80312017d077d489", "category": "GST / Tax"}, {"num": "148", "name": "VerifyOnce", "team": "Divyesh Bakre", "app": "https://codex-project-navy.vercel.app/", "video": "https://drive.google.com/file/d/1v2Zh-XfVDUlO7jTPS-GoviJD__N06vPC/view?usp=sharing", "category": "Aadhaar / Identity / KYC"}, {"num": "149", "name": "NATS-Copilot", "team": "Tanishka Suryawanshi & Rajat Viraj Adam", "app": "https://nats-copilot.vercel.app/", "video": "https://youtu.be/B1V_PA9kF9c?si=28F4uh2kcuHrnv1_", "category": "EPFO / PF / Pension"}, {"num": "150", "name": "NISHAN (Nidhi Investigation, Status, Help & Accountability Navigator)", "team": "Dhairya Bhosale", "app": "https://project-nishan.vercel.app/", "video": "https://drive.google.com/file/d/1dcQPvb4zT4ivBR09rm3frzvq0WQmrKGL/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "151", "name": "Seema Replay", "team": "Aman", "app": "https://seema-replay.vercel.app", "video": "https://drive.google.com/file/d/1fEU5rQ0czglP9WV2TeRbq1icGt6mcQwA/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "152", "name": "SmartRoute", "team": "Nirmal Kumar Vinod Bhagatkar", "app": "https://msrtc-smartroute.vercel.app", "video": "https://drive.google.com/file/d/1McqGzTv46mm1FjCmzw40obubY8tYXdqM/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "153", "name": "Bharat Career ID", "team": "Aman Maqsood", "app": "https://bharat-career-id.vercel.app", "video": "https://drive.google.com/file/d/1eohEfFv9bXItAtTsVXsQnjk78G8agzXV/view?usp=sharing", "category": "Employment / Jobs / Career"}, {"num": "154", "name": "Rationbolt", "team": "Awil moalim", "app": "https://rationbolt.vercel.app", "video": "https://drive.google.com/file/d/1tUn8hhv2FDCO2vYD6EmsqVqwapHfL1iN/view?usp=drivesdk", "category": "Ration / PDS / Consumer"}, {"num": "155", "name": "DastaReady", "team": "Aman Maqsood", "app": "https://dastaready.vercel.app", "video": "https://drive.google.com/file/d/1axM5l5YuqZWwUXdu2kXsVlSWjXBaBXdz/view?usp=sharing", "category": "Digital Locker / Records / Documents"}, {"num": "156", "name": "Bijli Hisaab", "team": "Aman Maqsood", "app": "https://bijli-hisaab.apexstack.chatgpt.site", "video": "https://drive.google.com/file/d/1qKt-VHXQcWe6KyvC5pyqbKaJXvgWw_fS/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "157", "name": "Sambandh", "team": "Zaara Aziz Rasheed", "app": "https://sambandh-liart.vercel.app", "video": "https://drive.google.com/file/d/1y-hpSNUe04oY0YZaavirM_dTl5gaKdxN/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "158", "name": "Saarthi — Parivahan Sewa", "team": "Nikunj Singh & Sehaj gaba", "app": "https://parivhan-revamp.netlify.app/", "video": "https://drive.google.com/file/d/1VBx9AHBVkx3LTUXfkwe8yWXbKJ2DOJT9/view?usp=sharing", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "159", "name": "Vapasi", "team": "Aman", "app": "https://vapasi.vercel.app", "video": "https://drive.google.com/file/d/1lBPJ41M3tjVychcCQYaGzT7DYKG2YLIc/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "160", "name": "RightRoad", "team": "Aravind Sekar & Sathiya Narayanan", "app": "https://rightroad.vercel.app/", "video": "https://www.youtube.com/watch?v=FqDndi2WdOw", "category": "Other / Uncategorized"}, {"num": "161", "name": "RTI - Jaano — AI Citizen Guidance", "team": "Ahmed hussain khan", "app": "https://go-v-rti-ai-dev.vercel.app/", "video": "https://www.youtube.com/watch?v=e4y0WMjvCZA", "category": "RTI (Right to Information)"}, {"num": "162", "name": "RailSaanjh", "team": "Shakti Nayak", "app": "https://tatkal-queue-deploy.vercel.app/", "video": "https://drive.google.com/file/d/1gJs968vaBqatFTA3t8Z5XuXL_UAbhOVa/view?usp=sharing", "category": "Railways / IRCTC / Tatkal"}, {"num": "163", "name": "eCourt Services", "team": "Utkarsh Singh", "app": "https://ecourt-services.vercel.app/", "video": "https://www.loom.com/share/96f42bcc348d4852b22b6788c76f60a8", "category": "Courts / Legal / Case tracking"}, {"num": "164", "name": "Pension Restart", "team": "Yashdeep Jha", "app": "https://pension-restart.yashdeep-jha.site", "video": "https://drive.google.com/file/d/1a6zZUspBwt-_uVmy9ygnjHH4MfBU_qbL/view?usp=sharing", "category": "EPFO / PF / Pension"}, {"num": "165", "name": "India Visa Online UX MVP", "team": "Sparsh Shandil & Shivam Aggarwal", "app": "https://6a924fc904c392188dd6af73--polite-palmier-b1c87c.netlify.app/", "video": "https://www.loom.com/share/5c2cf02a674c4b1ab3b57686becaa7fb", "category": "Passport / Visa"}, {"num": "166", "name": "Citizen", "team": "Mithun Gowda H & Nishchay M Chandra", "app": "https://citizen-of-india.vercel.app/", "video": "https://www.youtube.com/watch?v=OuqARZ-FIg4", "category": "Other / Uncategorized"}, {"num": "167", "name": "Skill Saathi AI (Skill Access and Action Through Human-centred Intelligence)", "team": "Varun Dhamija", "app": "http://altivai.com/saathi", "video": "https://youtu.be/DYWXPgDf6go", "category": "Education / Scholarship / Skill"}, {"num": "168", "name": "ClaimClarity", "team": "Manas Rajesh Desai & Tanish Suresh Dhende", "app": "https://claim-clarity-lake.vercel.app/", "video": "https://drive.google.com/file/d/1LJIrfejZwGTOhVnDfsEU-teOTDdKO_GP/view?usp=drivesdk", "category": "Insurance / Banking / Finance / UPI"}, {"num": "169", "name": "Karz Setu", "team": "Arnav Madan & Aishwarya Pokharna", "app": "https://karz-setu.vercel.app/", "video": "https://www.loom.com/share/8228b6c6d96446ad8720132b8655ed37", "category": "Insurance / Banking / Finance / UPI"}, {"num": "170", "name": "Digi Locker Chatbot", "team": "Ankit Verma & Samarth Parija", "app": "https://digi-chatbot.vercel.app/", "video": "https://drive.google.com/file/d/1CyuAxjZkGVv34hhSOYrdSReRE0NitucP/view?usp=sharing", "category": "Digital Locker / Records / Documents"}, {"num": "171", "name": "Acres", "team": "Pragyanaaditya Borah & Samridh Singh", "app": "https://acres.jantra.app", "video": "https://youtu.be/J7UUg5IMogI", "category": "Other / Uncategorized"}, {"num": "172", "name": "Tax Mitra", "team": "Dhruvil Mistry", "app": "https://taxmitra.bydhruvil.in/", "video": "https://youtu.be/fbiKwkAtOcU", "category": "GST / Tax"}, {"num": "173", "name": "Seamless Aadhaar", "team": "Chintalapudi Greeshmanjali", "app": "https://seamless-aadhaar-1.onrender.com", "video": "https://drive.google.com/file/d/1ds-kPel-BdaQTOVCZ48qvkPVv0F5AcxE/view?usp=drive_link", "category": "Aadhaar / Identity / KYC"}, {"num": "174", "name": "GEZT", "team": "Rakshan S", "app": "https://gezt-chi.vercel.app/", "video": "https://www.loom.com/share/63c090e2c4bd4899a830a514e22b87ba", "category": "Other / Uncategorized"}, {"num": "175", "name": "Surakhsa", "team": "Aswin Kumar Behera", "app": "https://surakhsa.netlify.app/", "video": "https://youtu.be/KkbjW5iydJE", "category": "Other / Uncategorized"}, {"num": "176", "name": "NakshaFix", "team": "Harsh Karanpuria", "app": "https://nakshafix.kuku0107.chatgpt.site/india-map", "video": "https://www.loom.com/share/34c56d3a09304b00a47edb31c9582720", "category": "Agriculture / Farmer / Land / Ration"}, {"num": "177", "name": "Challan Nyay", "team": "Srimaan Shreyas", "app": "https://challan-nyay.vercel.app/", "video": "https://drive.google.com/file/d/14DjfT9nMizj-_JxMlehqGezXbpJRX7lT/view?usp=sharing", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "178", "name": "Agent Setu — The Best Government Interface Is No Government Interface", "team": "Mahipal Singh Matharu", "app": "https://agent-setu.vercel.app/", "video": "https://drive.google.com/file/d/1GjnHpNQ0SF1BHnTcQkTIHXT8KKqolsPL/view?usp=sharing", "category": "Civic Portal / Government Interface (general)"}, {"num": "179", "name": "NSP Sunlight", "team": "Anuj Jain", "app": "https://hackerthon-pearl.vercel.app/", "video": "https://www.loom.com/share/13c33fd09bf14da780df127ffab17975", "category": "Education / Scholarship / Skill"}, {"num": "180", "name": "DocBridge", "team": "Satya Dileep Kumar thotakura", "app": "https://incredible-taffy-db08a6.netlify.app/", "video": "https://drive.google.com/file/d/1A2hVhebqUdDYSRqY5JrukGsw0jXxzk7c/view?usp=sharing", "category": "Digital Locker / Records / Documents"}, {"num": "181", "name": "Adhikar — Government Application Copilot", "team": "Urranki Nikhil", "app": "https://adhikar-frontend.vercel.app", "video": "https://www.loom.com/share/92cf471e4c2347b78247b223f5423f8c", "category": "Civic Portal / Government Interface (general)"}, {"num": "182", "name": "Ticket Wapas", "team": "Ashmita Pandey", "app": "https://ticket-wapas.ticket-wapas-ashmita41.workers.dev/", "video": "https://www.loom.com/share/dec88c4414544cde99a2635e6c8fc209", "category": "Other / Uncategorized"}, {"num": "183", "name": "SevaSetu - Bridging Government Services", "team": "Kiran Raj", "app": "https://seva-setu-ka.web.app/", "video": "https://youtu.be/N4C-8WunCyM", "category": "Civic Portal / Government Interface (general)"}, {"num": "184", "name": "Challan Lens", "team": "Satyajit Gantayat", "app": "https://challan-lens.satyajitg.chatgpt.site/", "video": "https://www.youtube.com/watch?v=aY8tRWMCKyQ", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "185", "name": "Nagrik", "team": "Augustya Shukla", "app": "https://nagrik-swart.vercel.app/", "video": "https://www.loom.com/share/c637793dded346099f72426f97de1786", "category": "Grievance / CPGRAMS"}, {"num": "186", "name": "Sunwai", "team": "Hingrajiya Briyan Prafulbhai", "app": "https://m58nhkfn.insforge.site/", "video": "https://m58nhkfn.us-east.insforge.app/api/storage/buckets/media/objects/sunwai-demo.mp4", "category": "Grievance / CPGRAMS"}, {"num": "187", "name": "RailSaathi (IRCTC)", "team": "Debanjana Chowdhury", "app": "https://railsaathiforbwmi.netlify.app/", "video": "https://www.loom.com/share/b7b60cd4016a40e0a665f570a474fa55", "category": "Railways / IRCTC / Tatkal"}, {"num": "188", "name": "ReSeat", "team": "Anas Maqsood", "app": "https://reseat-app.vercel.app/", "video": "https://drive.google.com/file/d/15-uQnVnrxyHacsi5MtOpHfJ6YhqMetwo/view?usp=drivesdk", "category": "Other / Uncategorized"}, {"num": "189", "name": "GST Portal Protoype", "team": "Roshni Rajan Naroor", "app": "https://gst-portal-prototype-india.roshninaroor1122.chatgpt.site/login", "video": "https://www.loom.com/share/bda81097fd8846d59e7da23292e12aa3", "category": "GST / Tax"}, {"num": "190", "name": "EPFO Neo", "team": "Abhishek Suresh", "app": "https://epfo-neo.vercel.app/", "video": "https://drive.google.com/file/d/1ArImKg09ApPZKIadQJWqHmDVS173O8Mg/view?usp=drivesdk", "category": "EPFO / PF / Pension"}, {"num": "191", "name": "Saaya lite*", "team": "Abhishai Vardhan", "app": "https://saaya-lite.vercel.app", "video": "https://youtube.com/shorts/s1e5yhstRGI?feature=share", "category": "Other / Uncategorized"}, {"num": "192", "name": "MSRTC Journey Planner - Prototype", "team": "Ranjeet Bhosale", "app": "https://msrtc-journey-service.vercel.app", "video": "https://drive.google.com/file/d/1vI1e1nFJ8mRHbBXSCE1pbjjkHkhzlpfm/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "193", "name": "Kisan Shayak", "team": "Prudhvi Jagannadh", "app": "https://kissan-shayak.netlify.app/?product=PROD-004", "video": "https://www.loom.com/share/0a4f3ba283c84490ba5818e147c8a4ce", "category": "Agriculture / Farmer / Land / Ration"}, {"num": "194", "name": "Parivahan Sewa Reimagined", "team": "Amar Sinha", "app": "https://parivahan-clone.vercel.app/", "video": "https://drive.google.com/file/d/16qjQEdMVU5wJyN00fsD9btU_gm9Zd7W3/view", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "195", "name": "Future MCA", "team": "Subanesh", "app": "https://mca-portal-ten.vercel.app", "video": "https://www.loom.com/share/8575d86d405a4cb3870e65c360ff11c0", "category": "Company / MSME / Business Registration"}, {"num": "196", "name": "RTI-3.0", "team": "Puneet Kumar Vishnawat", "app": "https://rti-3.infinitigrid.workers.dev/en", "video": "https://youtu.be/g1U7RpxEIlQ", "category": "RTI (Right to Information)"}, {"num": "197", "name": "Prism", "team": "Mano Bharathi M", "app": "https://prism-investigate.vercel.app/", "video": "https://youtu.be/md4ZEBDEXzE", "category": "Other / Uncategorized"}, {"num": "198", "name": "Vehicle Life", "team": "Vishwam Shanker Dhavale", "app": "https://buildwhatmovesindia-phi.vercel.app/", "video": "https://drive.google.com/file/d/1DpXi8EXfUD2QhMzMhIn3WU-Jon4TplPQ/view?usp=sharing", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "199", "name": "SahiSetu", "team": "Kshitij Kumar", "app": "https://sahi-setu.vercel.app/", "video": "https://youtu.be/BsBOU1vBBGg", "category": "Civic Portal / Government Interface (general)"}, {"num": "200", "name": "Smart eVisa Portal", "team": "Kartik Gupta & Mohmed Husain Pasheriya", "app": "https://e-visa-hackathon.vercel.app/", "video": "https://youtu.be/QCcPflvrKCA", "category": "Passport / Visa"}, {"num": "201", "name": "Meri Mitti", "team": "Parry", "app": "https://merimitti.site", "video": "https://youtu.be/0aIND41UqWw", "category": "Agriculture / Farmer / Land / Ration"}, {"num": "202", "name": "Sarathi", "team": "Sai Annessha Veluri", "app": "https://sarathi.heytarun.com", "video": "https://drive.google.com/file/d/18JYd2FO9x8juut5rwJl4bsMMvzNs5HR6/view?usp=sharing", "category": "Transport / Parivahan / Mobility"}, {"num": "203", "name": "sarkari aid", "team": "Abbas khalil", "app": "https://sarkariaid.vercel.app/", "video": "https://drive.google.com/file/d/1q3myXnx1omxqOhGfiZ-ci3gJC4ex3OE4/view", "category": "Other / Uncategorized"}, {"num": "204", "name": "Heygov", "team": "Chirantan Bhardwaj", "app": "https://heygov-build-india.netlify.app/", "video": "https://drive.google.com/file/d/1my4-y0vCANu1Kyz8EwN1liyuu2FIHT6D/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "205", "name": "Suno - Reimagining India's public grievance redressal system", "team": "Gautam Misra", "app": "https://sunoportal.lovable.app", "video": "https://drive.google.com/file/d/1vPmjQJPLPxoukjgGM9JWEpBxWTJRrmCN/view?usp=sharing", "category": "Grievance / CPGRAMS"}, {"num": "206", "name": "NAGAR: Enhanced CPGRAMS", "team": "Sanchit Agnihotri", "app": "https://cpgrams-production.up.railway.app/", "video": "https://www.youtube.com/shorts/DoJWiLC6iMk", "category": "Grievance / CPGRAMS"}, {"num": "207", "name": "Nirvahan", "team": "Shreya Shah", "app": "https://nirvahan-bice.vercel.app/", "video": "https://drive.google.com/file/d/1HdSeEGpUxQHe4zA3dTx--8Vb3fcinoYb/view?usp=sharing", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "208", "name": "EPFO Reimagined", "team": "Nihal Srivastava & Satyam Mishra", "app": "https://nihal-srivastava05.github.io/epfo-build-what-moves-india/", "video": "https://drive.google.com/file/d/1aMNBpYF2vKyXNhvZszspEf08B3wJS4ZK/view?usp=drive_link", "category": "EPFO / PF / Pension"}, {"num": "209", "name": "Nyay-Saathi", "team": "Devansh Arora", "app": "https://nyay-saathi-v2.vercel.app/", "video": "https://cap.so/s/tp8jasm7bq0ezrd", "category": "Courts / Legal / Case tracking"}, {"num": "210", "name": "Paisa Kahan Hai", "team": "Parisha", "app": "https://paisa-kahan-hai.vercel.app/", "video": "https://paisa-kahan-hai.vercel.app/project#video", "category": "Insurance / Banking / Finance / UPI"}, {"num": "211", "name": "Simplified ITR", "team": "Meghna Ajith", "app": "https://simplified-itr.vercel.app/", "video": "https://www.youtube.com/watch?v=oJodmabsnq0", "category": "GST / Tax"}, {"num": "212", "name": "CBSE One", "team": "Nimay Ballal", "app": "https://cbse-one-indol.vercel.app", "video": "https://drive.google.com/file/d/1MW2qhQpBCn-UYWncWObHOMKisVmhU-RV/view?usp=sharing", "category": "Education / Scholarship / Skill"}, {"num": "213", "name": "Ration-Saathi", "team": "Hanshal Gajula", "app": "https://ration-saathi-sigma.vercel.app/login", "video": "https://www.loom.com/share/3f5b6e72fa234c2893b41030d41ed7a7", "category": "Ration / PDS / Consumer"}, {"num": "214", "name": "bhumisetu", "team": "Ankoor Patil", "app": "https://alpha-server-1.tail989e1a.ts.net/", "video": "https://youtu.be/WYyB8aWc-2A", "category": "Agriculture / Farmer / Land / Ration"}, {"num": "215", "name": "Samarthan", "team": "Amrudh Vishal & Parichay Prabhu", "app": "https://samarthan-ai-parichay-s-projects.vercel.app/", "video": "https://canva.link/a8hwym7q0fd13bl", "category": "Other / Uncategorized"}, {"num": "216", "name": "CivicPulse", "team": "Milind Shah", "app": "https://civicpulse-grievance-prototype.milindshah077375099.chatgpt.site/report-intake", "video": "https://youtu.be/I3i17XSq_98", "category": "Civic Portal / Government Interface (general)"}, {"num": "217", "name": "TransferShield - Vehicle ownership transfer", "team": "Ishan Pravin Parab", "app": "https://transfer-shield-eta.vercel.app/", "video": "https://drive.google.com/file/d/1nIjjnHBSyi1S5w2myua7s18igy4Py63t/view?usp=drivesdk", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "218", "name": "EPFO One", "team": "Aditya Palpattuwar", "app": "https://adityaa-p.github.io/epfo-next-gen/", "video": "https://drive.google.com/file/d/1HHiNGrTmv767c_QZrdSDsgAZ2plFFHnP/view?usp=sharing", "category": "EPFO / PF / Pension"}, {"num": "219", "name": "casePilot", "team": "Anuroop Phukan", "app": "https://casepath-two.vercel.app/", "video": "https://drive.google.com/drive/folders/1M4AxTUvIQfFJuPSPjTWsQz_9UWeF6Hth?usp=sharing", "category": "Courts / Legal / Case tracking"}, {"num": "220", "name": "Cybercrime portal redesighn", "team": "Vudattu Maniteja", "app": "https://varun-maya-last-try.vercel.app/", "video": "https://drive.google.com/file/d/1PgiSuKXE2Lsv_A8YUr0b4z34kaaOdGl0/view?usp=sharing", "category": "Cybercrime / Fraud / Scam"}, {"num": "221", "name": "Tatkal Copilot", "team": "Vishal Rao", "app": "https://tatkal-copilot.vercel.app", "video": "https://www.loom.com/share/cedc8e45c9424e4095f56dc93793d267", "category": "Railways / IRCTC / Tatkal"}, {"num": "222", "name": "PF Mitra", "team": "Madhushree Kunder", "app": "https://pf-mitra.vercel.app/", "video": "https://youtu.be/GUeaLVG9NDA", "category": "EPFO / PF / Pension"}, {"num": "223", "name": "Parivahan Reimagined", "team": "Reshma Baskaran", "app": "https://parivahan-reimagined.reshma-nurix.chatgpt.site/", "video": "https://www.loom.com/share/a60d86e068e646bfa2b302672412c6c3", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "224", "name": "MoveMyVehicle", "team": "Yash Shah", "app": "https://move-my-vehicle.vercel.app/", "video": "https://youtu.be/e_436tRvJO0", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "225", "name": "Cyber Crime Website Redesign", "team": "Anish Navali", "app": "https://cybercrimeanish.20.84.85.177.sslip.io", "video": "https://drive.google.com/file/d/1YgHoRVDq_ZB3VMYYgtIyC_TtUYwGwDa1/view?usp=drivesdk", "category": "Cybercrime / Fraud / Scam"}, {"num": "226", "name": "Am I Eligible? — Instant Government Scheme Matcher", "team": "Jakkireddy Eswar reddy", "app": "https://am-i-eligible.onrender.com", "video": "https://drive.google.com/file/d/1xOidKT0-9KgHKLGufouy-Mr3US5bqC26/view?usp=drivesdk", "category": "Civic Portal / Government Interface (general)"}, {"num": "227", "name": "FormEase AI", "team": "Kondal Reddy", "app": "https://formease-ai.onrender.com", "video": "https://drive.google.com/file/d/1km0T_TUsfRTlUWJcvPR8L-NTfIK_GslB/view?usp=drive_link", "category": "Company / MSME / Business Registration"}, {"num": "228", "name": "EPFO Version-2", "team": "Bolli Yaswanth Melki & Mahesh Thatiparthi", "app": "https://epfo-v2-citizen-service.kind-clock-1169.chatgpt.site/", "video": "https://www.loom.com/share/611546d69cd94fc78f4a0aacbd4ce16e", "category": "EPFO / PF / Pension"}, {"num": "229", "name": "EPFO, Reimagined as a Financial Product", "team": "Prajna Prayas", "app": "https://epfo-prajna.netlify.app/login", "video": "https://www.loom.com/share/0c2d4faf161b4290a7839a5b097cf17c", "category": "EPFO / PF / Pension"}, {"num": "230", "name": "ourmoney", "team": "Khushal Sahni", "app": "https://ourmoney.fyi/", "video": "https://www.loom.com/share/3bf9f8486f514c268c0c414a97550668", "category": "Insurance / Banking / Finance / UPI"}, {"num": "231", "name": "Unified RTI", "team": "Anudish Koshal & Ashi Jain", "app": "https://right-to-information-five.vercel.app/", "video": "https://www.loom.com/share/192442571de745efae3258db406fd0b3", "category": "RTI (Right to Information)"}, {"num": "232", "name": "AskAdhikar", "team": "Atyam Bhargava & Subhash Solleti", "app": "https://ask-adhikar.vercel.app/", "video": "https://drive.google.com/file/d/1bryV4ISfDu_I4UYdj_cWQarIBPShpWZm/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "233", "name": "Niriksh", "team": "Adithyan Madhu & Sahaj Singh", "app": "https://niriksh.scopophobic.xyz/", "video": "https://drive.google.com/file/d/1PHk1166rf6rS7Qg-CRmJTLzXGG3jFNNn/view?usp=sharing", "category": "Other / Uncategorized"}, {"num": "234", "name": "Parivahan Seva", "team": "Shourya Rajinder Kharbanda", "app": "https://parivahan-seva-peach.vercel.app", "video": "https://drive.google.com/file/d/1qzblmrmYBojAA_XnHiPx2omnLe6HqYH9/view?usp=sharing", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "235", "name": "Raahi - Driving Licenses Without Pain", "team": "Anirudh Iyer", "app": "https://parivahan-revamp.vercel.app/", "video": "https://www.loom.com/share/3544ba8425ff4fcd8027114618777854", "category": "Vehicle / Traffic Challan / RC / License"}, {"num": "236", "name": "Anna setu", "team": "Nitish Kumar Choudhury", "app": "https://anna-setu-eight.vercel.app", "video": "https://drive.google.com/file/d/1DHBT1pTMhkU0rdzAPQfbqbWQ--G-YQn1/view?usp=sharing", "category": "Civic Portal / Government Interface (general)"}, {"num": "237", "name": "Mera Rozgar", "team": "Dev Sharma & Harshit Singh", "app": "https://merarozgar.vercel.app/", "video": "https://drive.google.com/file/d/1XlHteYatccNmXqGOuzaucMY3c_rINGG8/view?usp=sharing", "category": "Employment / Jobs / Career"}, {"num": "238", "name": "MySarathi", "team": "Karan Pillai", "app": "https://mysarathi-three.vercel.app", "video": "https://www.loom.com/share/d775470e12604cffa5500d0236bbc5c8", "category": "Transport / Parivahan / Mobility"}, {"num": "239", "name": "ScamShield India", "team": "Rakesh", "app": "https://scam-shield-india-phi.vercel.app/", "video": "https://www.loom.com/share/878b072b6cb0463ba5ad1187dc610c0a", "category": "Cybercrime / Fraud / Scam"}, {"num": "240", "name": "Nivaran", "team": "Sreejeeta Roy", "app": "https://nivaran-theta.vercel.app/", "video": "https://youtu.be/--PXVavINTI?si=j-9tHu4BswlTzIc2", "category": "Grievance / CPGRAMS"}, {"num": "241", "name": "Nagrik: A civic help and transparency platform", "team": "Vyom Bhatnagar", "app": "https://nagrik.in.net/", "video": "https://www.loom.com/share/48a04f7532aa4f75b5d7c01ab48210eb", "category": "Grievance / CPGRAMS"}, {"num": "242", "name": "CyberSaathi", "team": "Arhaan Girdhar & Sahil Shah", "app": "https://cyber-saathi-zeta.vercel.app/", "video": "https://youtu.be/VLSfVLZOt8g?si=wTB9soJw0uyvqAzB", "category": "Cybercrime / Fraud / Scam"}, {"num": "243", "name": "Proud Passport Seva", "team": "Hari Nuti", "app": "https://passport-seva-six.vercel.app/", "video": "https://www.loom.com/share/39943110131d4d0d9f6ff733ad1498d9", "category": "Passport / Visa"}, {"num": "244", "name": "Unified Government Services", "team": "Anjali Kumari", "app": "https://unified-gov-web-plum.vercel.app/", "video": "https://www.loom.com/share/7a9afc1165614b07bb9944f9ff9ac6da", "category": "Civic Portal / Government Interface (general)"}, {"num": "245", "name": "PF Sahayak", "team": "Milan Kumar", "app": "https://pf-sahayak-eight.vercel.app", "video": "https://drive.google.com/file/d/1mEnIEzLvCf9Ahdpl4oLLn1En-LX0ZU5f/view?usp=sharing", "category": "EPFO / PF / Pension"}, {"num": "246", "name": "RTI-ONLINE-V3", "team": "Sashreek Pilla", "app": "https://sashreekpilla.github.io/rti-online-v3", "video": "https://www.loom.com/share/3cc6ea47399f4961941eb8f324a017bd", "category": "RTI (Right to Information)"}, {"num": "247", "name": "Nivaran — CPGRAMS that carries the burden for you", "team": "Akshat Darshi & Vijiyant Tanaji Shejwalkar", "app": "https://nivaran-woad.vercel.app/login", "video": "https://youtu.be/fHtAxArglkc", "category": "Grievance / CPGRAMS"}, {"num": "248", "name": "SARATHI IMPROVISED", "team": "Aditi Patil", "app": "https://profound-daifuku-82ae48.netlify.app/", "video": "https://www.loom.com/share/9fe06cad9be94217a68843d0ac751cc0", "category": "Transport / Parivahan / Mobility"}, {"num": "249", "name": "RailEase", "team": "Chirag Lalwani & Dhruv Haresh Nawani", "app": "https://irctc-hackathon.vercel.app/", "video": "https://www.youtube.com/watch?v=qhatTaESsTo", "category": "Railways / IRCTC / Tatkal"}, {"num": "250", "name": "Jansahay", "team": "Utkarsh Khurana & Yashasvi Aggarwal", "app": "https://www.jansahay.dev/", "video": "https://youtu.be/Mdrs5OFm5iQ?si=RIAysIHqV2n4AhJU", "category": "Civic Portal / Government Interface (general)"}];
+
+const RIVALS = [
+  {num:"012", name:"EPFO Reimagined", team:"Sudikhya Goswami & Tanmay Mehra", app:"https://pf-fix-india.sudikhya.chatgpt.site/memberinterface", depth:3, clarity:4, distinct:3, best:"Puts demo credentials and a \"never enter real data\" disclaimer front and center — turns distrust into a feature instead of hiding it.", status:"read"},
+  {num:"053", name:"Pf service check", team:"Bhoomika S Shetty & Raksha", app:"https://latentsig-pf-service-check.pages.dev/", depth:2, clarity:4, distinct:4, best:"Doesn't try to be a full portal — just a 12-month visual service-ledger for withdrawal eligibility, no UAN or Aadhaar needed to try it.", status:"read"},
+  {num:"112", name:"EPFO Member Portal", team:"Rishikesh Swaminathan & S Vishvajith Reddy", app:"https://preflight-epf.vercel.app/", depth:3, clarity:3, distinct:4, best:"Switches between five member profiles inside one signed-in session — no re-login. This is the exact persona-switch gap we've flagged on our own list.", status:"read", flag:true},
+  {num:"125", name:"Pension Saral", team:"Neeja Suva & Vraj Chauhan", app:"https://pension-saral.vercel.app", depth:4, clarity:5, distinct:5, best:"The most human-centered build in the cluster: three full languages (not translations bolted on), a family \"helper mode\" without identity deception, and live phone support on every screen. Designed for rural widows and elderly pensioners specifically.", status:"read"},
+  {num:"132", name:"EPFORedesign", team:"Aman Singh Dadsena", app:"https://epforedesign.vercel.app/", depth:5, clarity:4, distinct:5, best:"Decodes cryptic one-line claim rejections (cites 174 lakh rejected claims/yr) into next steps, plus a case-summary generator for advocates/NGOs and character-by-character Aadhaar/PAN/bank mismatch checks. Strongest single build in the cluster.", status:"read", flag:true},
+  {num:"164", name:"Pension Restart", team:"Yashdeep Jha", app:"https://pension-restart.yashdeep-jha.site", depth:3, clarity:4, distinct:4, best:"Different interaction model entirely — \"One call, clear guidance,\" a conversational/call-first path through Jeevan Pramaan and life-certificate renewal instead of forms.", status:"read"},
+  {num:"190", name:"EPFO Neo", team:"Abhishek Suresh", app:"https://epfo-neo.vercel.app/", depth:null, clarity:null, distinct:null, best:"Client-rendered app — couldn't inspect remotely. Worth a real click-through.", status:"needs-look"},
+  {num:"218", name:"EPFO One", team:"Aditya Palpattuwar", app:"https://adityaa-p.github.io/epfo-next-gen/", depth:null, clarity:null, distinct:null, best:"Client-rendered app — couldn't inspect remotely. Worth a real click-through.", status:"needs-look"},
+  {num:"222", name:"PF Mitra", team:"Madhushree Kunder", app:"https://pf-mitra.vercel.app/", depth:null, clarity:null, distinct:null, best:"Only the tagline \"Always with you\" came through. Worth a real click-through.", status:"needs-look"},
+  {num:"228", name:"EPFO Version-2", team:"Bolli Yaswanth Melki & Mahesh Thatiparthi", app:"https://epfo-v2-citizen-service.kind-clock-1169.chatgpt.site/", depth:5, clarity:5, distinct:5, best:"A \"Claim Investigator\" that maps a plain-language problem straight to the right form (31/19/10C), an Account Health score flagging what blocks a claim before submission, and a consistent Fact / Meaning / Next-move / Owner structure on every screen. The other strongest build — and it already ships our own planned \"account health\" feature.", status:"read", flag:true},
+  {num:"229", name:"EPFO, Reimagined as a Financial Product", team:"Prajna Prayas", app:"https://epfo-prajna.netlify.app/login", depth:3, clarity:3, distinct:4, best:"One login spanning Member, Establishment and Principal-employer types, plus phonetic code-mixed language variants (Hinglish, Banglish, Marathinglish) — an unusual, well-observed localization move.", status:"read"},
+  {num:"245", name:"PF Sahayak", team:"Milan Kumar", app:"https://pf-sahayak-eight.vercel.app", depth:2, clarity:4, distinct:3, best:"Zero friction on purpose: no login, no personal details, just \"tell us what's worrying you.\" A low-commitment entry point rather than a full portal.", status:"read"},
+  {num:"149", name:"NATS-Copilot", team:"Tanishka Suryawanshi & Rajat Viraj Adam", app:"https://nats-copilot.vercel.app/", depth:null, clarity:null, distinct:null, best:"Not actually EPFO — it's an apprenticeship (NATS) stipend matcher. False positive from the name search.", status:"false-lead"},
+];
+
+const YOU = {num:"208", name:"EPFO Reimagined", team:"Nihal Srivastava & Satyam Mishra", app:"https://nihal-srivastava05.github.io/epfo-build-what-moves-india/", depth:5, clarity:4, distinct:5, best:"One relational dataset across all three personas, live: file June as the employer and the member's balance and claim tracker update with no reload. Real passbook interest arithmetic, not sample numbers. Nobody else in the cluster demonstrates a cross-persona live update.", status:"read", isYou:true};
+
+const GAPS = [
+  {rival:"#112 EPFO Member Portal", theirs:"switches between profiles inside one session, no re-login", ours:"persona switch currently requires signing out and back in — flagged as our own P0 fix"},
+  {rival:"#132 EPFORedesign", theirs:"decodes one-line claim rejections into next steps, with a case-summary export for advocates", ours:"we don't surface rejection reasons at all yet"},
+  {rival:"#228 EPFO Version-2", theirs:"ships a standing Account Health score flagging what blocks a claim, computed continuously", ours:"same idea is sitting in our own next-round plan, not yet built"},
+];
+
+/* ---------- render stats ---------- */
+const catCounts = {};
+PROJECTS.forEach(p => { catCounts[p.category] = (catCounts[p.category]||0) + 1; });
+const epfoCount = catCounts["EPFO / PF / Pension"] || 0;
+
+document.getElementById('statRow').innerHTML = `
+  <div class="stat"><div class="n mono">250</div><div class="l">teams selected</div></div>
+  <div class="stat"><div class="n mono">20</div><div class="l">idea-families beyond ours</div></div>
+  <div class="stat"><div class="n mono">${epfoCount}</div><div class="l">building on EPFO / PF, us included</div></div>
+  <div class="stat"><div class="n mono">#208</div><div class="l">our listing number</div></div>
+`;
+
+/* ---------- render rival cards ---------- */
+function meterRow(label, cls, val){
+  if(val === null || val === undefined){
+    return `<div class="meter-row"><div class="meter-label">${label}</div><div class="meter-track"></div><div class="meter-val">—</div></div>`;
+  }
+  const pct = (val/5)*100;
+  return `<div class="meter-row"><div class="meter-label">${label}</div><div class="meter-track"><div class="meter-fill ${cls}" style="width:${pct}%"></div></div><div class="meter-val mono">${val}</div></div>`;
+}
+
+function rivalCard(r){
+  const isYou = !!r.isYou;
+  const statusLabel = r.status === "needs-look" ? "needs a click-through" : (r.status === "false-lead" ? "not actually EPFO" : "reviewed");
+  return `
+    <div class="rival ${isYou?'you':''}">
+      <div class="rival-top">
+        <div>
+          <div class="rival-num mono">#${r.num}</div>
+          <div class="rival-name">${r.name}</div>
+          <div class="rival-team">${r.team}</div>
+        </div>
+        ${isYou ? '<span class="you-badge">This is us</span>' : ''}
+      </div>
+      <div class="meters">
+        ${meterRow('Depth','depth', r.depth)}
+        ${meterRow('Clarity','clarity', r.clarity)}
+        ${meterRow('Distinct','distinct', r.distinct)}
+      </div>
+      <div class="best"><b>Best thing —</b> ${r.best}</div>
+      <div class="rival-foot">
+        <span class="status-pill ${r.status==='needs-look'?'needs-look':''}">${statusLabel}</span>
+        <a class="visit" href="${r.app}" target="_blank" rel="noopener noreferrer">Visit →</a>
+      </div>
+    </div>`;
+}
+
+const orderedRivals = [...RIVALS.filter(r=>r.status!=='false-lead')];
+orderedRivals.splice(orderedRivals.length, 0); // keep order
+// Insert YOU in numeric position
+const allCards = [...RIVALS.filter(r=>r.status!=='false-lead'), YOU].sort((a,b)=>a.num.localeCompare(b.num));
+const falseLead = RIVALS.find(r=>r.status==='false-lead');
+
+document.getElementById('rivalGrid').innerHTML = allCards.map(rivalCard).join('');
+
+/* ---------- gap callout ---------- */
+document.getElementById('gapList').innerHTML = GAPS.map(g => `
+  <li><span class="tag">${g.rival.split(' ')[0]}</span> <b>${g.rival.replace(/^#\\d+\\s*/,'')}</b> ${g.theirs}. Us: ${g.ours}.</li>
+`).join('');
+
+/* ---------- category bars ---------- */
+const catList = Object.entries(catCounts)
+  .filter(([c])=>c!=="EPFO / PF / Pension")
+  .sort((a,b)=>b[1]-a[1]);
+const maxCat = Math.max(...catList.map(c=>c[1]));
+document.getElementById('catBars').innerHTML = catList.map(([c,n]) => `
+  <div class="bar-row">
+    <div class="bar-label">${c}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${(n/maxCat)*100}%"></div></div>
+    <div class="bar-count">${n}</div>
+  </div>
+`).join('');
+
+/* ---------- suggested split ---------- */
+const SPLIT = [
+  {name:"Pile A — Wildcard", cats:[["Other / Uncategorized (names that don't self-describe)",62]]},
+  {name:"Pile B — Citizen access", cats:[["Grievance / CPGRAMS",22],["RTI (Right to Information)",10],["Transport / Parivahan / Mobility",10],["Passport / Visa",7],["Education / Scholarship / Skill",7],["Healthcare / Emergency / Blood",4],["Elections / Voter (ECI)",3]]},
+  {name:"Pile C — Movement & records", cats:[["Civic Portal / Government Interface (general)",21],["Railways / IRCTC / Tatkal",14],["Cybercrime / Fraud / Scam",8],["Insurance / Banking / Finance / UPI",7],["Aadhaar / Identity / KYC",5],["Digital Locker / Records / Documents",5],["Employment / Jobs / Career",3]]},
+  {name:"Pile D — Money & compliance", cats:[["Vehicle / Traffic Challan / RC / License",17],["EPFO / PF / Pension",14],["Company / MSME / Business Registration",10],["GST / Tax",8],["Courts / Legal / Case tracking",6],["Agriculture / Farmer / Land / Ration",5],["Ration / PDS / Consumer",2]]},
+];
+document.getElementById('splitGrid').innerHTML = SPLIT.map(pile => {
+  const total = pile.cats.reduce((s,[,n])=>s+n,0);
+  return `<div class="split-card">
+    <h4>${pile.name}</h4>
+    <div class="count mono">${total}</div>
+    <ul>${pile.cats.map(([c,n])=>`<li>${c} <span>(${n})</span></li>`).join('')}</ul>
+  </div>`;
+}).join('');
+
+/* ---------- directory ---------- */
+const catFilter = document.getElementById('catFilter');
+const allCats = Object.keys(catCounts).sort();
+catFilter.innerHTML = `<option value="">All categories</option>` + allCats.map(c=>`<option value="${c}">${c} (${catCounts[c]})</option>`).join('');
+
+const dirBody = document.getElementById('dirBody');
+const resultCount = document.getElementById('resultCount');
+
+function renderDir(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const cat = catFilter.value;
+  const rows = PROJECTS.filter(p => {
+    if(cat && p.category !== cat) return false;
+    if(q && !(p.name.toLowerCase().includes(q) || p.team.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  resultCount.textContent = `${rows.length} of 250 shown`;
+  dirBody.innerHTML = rows.map(p => `
+    <tr class="${p.num==='208'?'you-row':''}">
+      <td class="num">${p.num}</td>
+      <td class="name">${p.name}${p.num==='208'?'<span class="you-tag">YOU</span>':''}</td>
+      <td class="team">${p.team}</td>
+      <td><span class="badge">${p.category}</span></td>
+      <td class="link"><a href="${p.app}" target="_blank" rel="noopener noreferrer">Visit →</a></td>
+    </tr>
+  `).join('');
+}
+document.getElementById('search').addEventListener('input', renderDir);
+catFilter.addEventListener('change', renderDir);
+renderDir();
+</script>

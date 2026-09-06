@@ -32,6 +32,8 @@ const MemberServiceHistory = lazy(() => import('@/routes/member/service-history'
 const MemberClaims = lazy(() => import('@/routes/member/claims'))
 const MemberWithdraw = lazy(() => import('@/routes/member/withdraw'))
 const MemberClaimDetail = lazy(() => import('@/routes/member/claim-detail'))
+const MemberFamily = lazy(() => import('@/routes/member/family'))
+const MemberFamilyLink = lazy(() => import('@/routes/member/family-link'))
 const MemberKyc = lazy(() => import('@/routes/member/kyc'))
 const MemberGap = lazy(() => import('@/routes/member/gap'))
 const MemberHelp = lazy(() => import('@/routes/member/help'))
@@ -120,6 +122,8 @@ export default function App() {
             <Route path="member/claims" element={<MemberClaims />} />
             <Route path="member/claims/new" element={<MemberWithdraw />} />
             <Route path="member/claims/:claimId" element={<MemberClaimDetail />} />
+            <Route path="member/family" element={<MemberFamily />} />
+            <Route path="member/family/link" element={<MemberFamilyLink />} />
             <Route path="member/kyc" element={<MemberKyc />} />
             <Route path="member/gap/:month" element={<MemberGap />} />
             <Route path="member/help" element={<MemberHelp />} />

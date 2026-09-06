@@ -5,6 +5,7 @@ import type {
   Contribution,
   Employment,
   Establishment,
+  FamilyLink,
   GovNotice,
   KycItem,
   AppNotification,
@@ -73,6 +74,25 @@ export const people: Person[] = [
     email: 'd****a@example.com',
     roles: ['employer'],
   },
+  /**
+   * Priya's father — already named on her own record (`relationName`) and in
+   * `death-claim-file.tsx`'s mock lookup, under this same UAN. A real member
+   * in his own right, not a fixture invented for the family-linking feature.
+   */
+  {
+    id: 'p-anil',
+    name: 'Anil Sharma',
+    uan: '100234500021',
+    dob: '1965-01-18',
+    gender: 'male',
+    relationName: 'Kamla Sharma',
+    relationKind: 'spouse',
+    aadhaarMasked: 'XXXX XXXX 5588',
+    panMasked: 'AHRPS****D',
+    mobileMasked: '+91 98XXX XX776',
+    email: 'a****l@example.com',
+    roles: ['member'],
+  },
 ]
 
 export const establishments: Establishment[] = [
@@ -130,6 +150,16 @@ export const employments: Employment[] = [
     memberId: 'MHBAN00451230000000142',
     joined: '2024-04-01',
     monthlyWage: 52000,
+    current: true,
+  },
+  /** Anil Sharma's own, long-running employment — his passbook is real, not a stub. */
+  {
+    id: 'e-anil-meridian',
+    personId: 'p-anil',
+    estCode: 'MHPUN0031876000',
+    memberId: 'MHPUN00318760000009981',
+    joined: '1998-06-01',
+    monthlyWage: 38000,
     current: true,
   },
 ]
@@ -287,6 +317,27 @@ export const kycItems: KycItem[] = [
     status: 'verified',
     holder: 'employer',
   },
+]
+
+/**
+ * Anil Sharma's own KYC — fixed and fully verified. His account isn't the one
+ * with a problem to fix; the point of the family-linking feature is that
+ * Priya can act on a *clean* record on his behalf, not that his account also
+ * needs fixing.
+ */
+export const anilKyc: KycItem[] = [
+  { key: 'aadhaar', label: 'Aadhaar', value: 'XXXX XXXX 5588', status: 'verified', holder: 'epfo' },
+  { key: 'pan', label: 'PAN', value: 'AHRPS****D', status: 'verified', holder: 'epfo' },
+  {
+    key: 'bank',
+    label: 'Bank account',
+    value: 'Sahyadri Grameen Bank ****7742 · SGBK0004417',
+    status: 'verified',
+    holder: 'epfo',
+  },
+  { key: 'mobile', label: 'Mobile number', value: '+91 98XXX XX776', status: 'verified', holder: 'you' },
+  { key: 'nominee', label: 'Nominee', value: 'Kamla Sharma (spouse) · 100%', status: 'verified', holder: 'you' },
+  { key: 'exit', label: 'Exit dates', value: 'All past jobs marked', status: 'verified', holder: 'employer' },
 ]
 
 export const pensioner: Pensioner = {
@@ -573,6 +624,9 @@ export const notifications: AppNotification[] = [
   },
 ]
 
+/** No family linked yet, by default — the demo links one live. */
+export const familyLinks: FamilyLink[] = []
+
 export function personById(id: string) {
   return people.find((p) => p.id === id)!
 }
@@ -583,4 +637,14 @@ export function establishmentByCode(code: string) {
 
 export function employmentById(id: string) {
   return employments.find((e) => e.id === id)!
+}
+
+/**
+ * A person's own slice of the contribution ledger. Contributions carry an
+ * `employmentId`, not a `personId` directly, so this is the one join every
+ * caller needs instead of assuming the whole array belongs to one person.
+ */
+export function contributionsForPerson(all: Contribution[], personId: string): Contribution[] {
+  const ids = new Set(employments.filter((e) => e.personId === personId).map((e) => e.id))
+  return all.filter((c) => ids.has(c.employmentId))
 }

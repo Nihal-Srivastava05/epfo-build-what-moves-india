@@ -50,7 +50,7 @@ function factsFor(persona: Persona, signedIn: boolean): string {
     ].join('\n')
   }
 
-  const claim = activeClaim(claims)
+  const claim = activeClaim(claims.filter((c) => c.personId === 'p-priya'))
   const missing = contributions.filter((c) => c.status === 'missing')
   const bank = kyc.find((k) => k.key === 'bank')!
   return [
@@ -114,7 +114,7 @@ export function answer(question: string, persona: Persona, signedIn: boolean): A
   }
 
   if (/claim|where is my money|status|दावा|कहाँ/.test(q) && persona === 'member') {
-    const claim = activeClaim(store.claims)
+    const claim = activeClaim(store.claims.filter((c) => c.personId === 'p-priya'))
     if (!claim) {
       return { text: 'You have no claim in progress right now.', facts, allowRephrase: false, link: { to: '/member/claims', label: 'Start a withdrawal' } }
     }

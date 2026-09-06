@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Landmark,
   ShieldAlert,
+  Users,
   Wrench,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -26,7 +27,7 @@ import { useMotionOk } from '@/hooks/use-motion-ok'
 import { preflight, totalBalance, withdrawalReasons } from '@/lib/derive'
 import { WITHDRAW_STEPS } from '@/lib/claims'
 import { fmtDate, rupees } from '@/lib/format'
-import { TODAY, establishments } from '@/lib/mock/db'
+import { TODAY, anilKyc, contributionsForPerson, establishmentByCode, personById } from '@/lib/mock/db'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -46,17 +47,35 @@ function pctText(part: number, whole: number): string {
 export default function Withdraw() {
   const { t, lang } = useT()
   const motionOk = useMotionOk()
-  const { contributions, kyc, claimDraft, saveDraft, fileClaim, fixKyc } = useData()
+  const { contributions, kyc, claimDraft, saveDraft, fileClaim, fixKyc, familyLinks } = useData()
 
-  const reasons = useMemo(() => withdrawalReasons(contributions), [contributions])
-  const balance = useMemo(() => totalBalance(contributions), [contributions])
+  const [params] = useSearchParams()
+  /**
+   * Filing for a linked family member instead of yourself. Their own
+   * contributions/KYC stand in for the signed-in member's throughout this
+   * flow — everything below reads `activeContributions`/`activeKyc`, never
+   * the raw `contributions`/`kyc`, once this is set.
+   */
+  const onBehalfOf = params.get('onBehalfOf') || undefined
+  const delegateTarget = onBehalfOf ? personById(onBehalfOf) : undefined
+  const delegateLink = onBehalfOf ? familyLinks.find((f) => f.personId === onBehalfOf) : undefined
+  const activeContributions = useMemo(
+    () => (onBehalfOf ? contributionsForPerson(contributions, onBehalfOf) : contributions),
+    [contributions, onBehalfOf],
+  )
+  const activeKyc = onBehalfOf ? anilKyc : kyc
+
+  const reasons = useMemo(
+    () => withdrawalReasons(activeContributions, onBehalfOf ?? 'p-priya'),
+    [activeContributions, onBehalfOf],
+  )
+  const balance = useMemo(() => totalBalance(activeContributions), [activeContributions])
 
   /**
    * The reason arrives in the URL from a life-event card on the claims page —
    * this flow no longer asks for one. An unknown or ineligible key leaves the
    * flow without a reason, which sends it back to those cards.
    */
-  const [params] = useSearchParams()
   const handed = reasons.find((r) => r.key === params.get('reason') && r.eligible)
 
   /**
@@ -68,13 +87,17 @@ export default function Withdraw() {
    * A draft for the *same* reason is still resumed in full, amount and all. A
    * draft for some other reason is set aside: its amount was cleared against a
    * different cap and would be over the limit here.
+   *
+   * A delegate filing never resumes a draft — the one saved slot belongs to
+   * Priya's own withdrawal, and mixing the two would either show her a
+   * family member's half-filled amount or silently overwrite her own draft.
    */
-  const resuming = handed ? claimDraft?.reasonKey === handed.key : Boolean(claimDraft)
+  const resuming = onBehalfOf ? false : handed ? claimDraft?.reasonKey === handed.key : Boolean(claimDraft)
   /** Clamped, because a draft saved before the reason step was removed can
    *  carry a step number this flow no longer has. */
   const clampStep = (n: number) => Math.min(Math.max(1, n), WITHDRAW_STEPS.length)
   const [step, setStep] = useState(resuming ? clampStep(claimDraft?.step ?? 1) : 1)
-  const [reasonKey] = useState(handed?.key ?? claimDraft?.reasonKey ?? '')
+  const [reasonKey] = useState(handed?.key ?? (onBehalfOf ? '' : claimDraft?.reasonKey) ?? '')
   const [amount, setAmount] = useState<string>(
     resuming && claimDraft?.amount ? String(claimDraft.amount) : '',
   )
@@ -84,18 +107,20 @@ export default function Withdraw() {
   const [filedId, setFiledId] = useState<string | null>(null)
 
   const reason = reasons.find((r) => r.key === reasonKey)
-  const issues = preflight(kyc)
+  const issues = preflight(activeKyc)
   const blockers = issues.filter((i) => i.severity === 'blocker')
-  const bank = kyc.find((k) => k.key === 'bank')!
+  const bank = activeKyc.find((k) => k.key === 'bank')!
   const amountNum = Number(amount) || 0
   const overCap = reason ? amountNum > reason.cap : false
 
-  /** Every field autosaves. A dropped session resumes instead of starting over. */
+  /** Every field autosaves. A dropped session resumes instead of starting over.
+   *  Skipped entirely for a delegate filing — see the note on `resuming` above. */
   useEffect(() => {
+    if (onBehalfOf) return
     if (filedId) return
     if (!reasonKey) return
     saveDraft({ reasonKey, amount: amountNum, step, startedAt: claimDraft?.startedAt ?? TODAY })
-  }, [reasonKey, amountNum, step, filedId, saveDraft, claimDraft?.startedAt])
+  }, [onBehalfOf, reasonKey, amountNum, step, filedId, saveDraft, claimDraft?.startedAt])
 
   const labels = WITHDRAW_STEPS.map((s) => t(s.titleKey))
 
@@ -114,6 +139,13 @@ export default function Withdraw() {
           <p className="mt-2 text-muted-foreground">
             <Money value={claim.amount} size="lg" /> · {reason?.title}
           </p>
+          {claim.filedBy && delegateTarget ? (
+            <p className="mt-3 flex items-start gap-2 rounded-lg border border-info-line bg-info-soft p-3 text-left text-sm leading-relaxed">
+              <Users className="mt-0.5 size-4 shrink-0" aria-hidden />
+              Filed by Priya Sharma on {delegateTarget.name}'s account. {delegateTarget.name} will see this
+              in their own claim tracker too.
+            </p>
+          ) : null}
           <div className="mt-6 rounded-lg border bg-card p-4 text-left">
             <p className="eyebrow mb-1">{t('withdraw.reference')}</p>
             <p className="ident text-[1.125rem] font-bold">{claim.id}</p>
@@ -124,9 +156,10 @@ export default function Withdraw() {
           <div className="mt-4 rounded-lg border bg-card p-4 text-left">
             <p className="eyebrow mb-2">{t('withdraw.whoHasIt')}</p>
             <p className="text-sm leading-relaxed">
-              <span className="font-medium">{establishments[0].name}</span> has been sent this claim for
-              attestation. They have 3 days. EPFO settles within 7 days after that, so you should see the
-              money by <span className="num font-medium">{fmtDate(claim.expectedBy!, lang)}</span>.
+              <span className="font-medium">{establishmentByCode(claim.estCode).name}</span> has been sent
+              this claim for attestation. They have 3 days. EPFO settles within 7 days after that, so
+              {claim.filedBy ? ' ' + delegateTarget!.name + ' should' : ' you should'} see the money by{' '}
+              <span className="num font-medium">{fmtDate(claim.expectedBy!, lang)}</span>.
             </p>
             <p className="mt-3 text-sm text-muted-foreground">
               You do not need to contact them. We will tell you at every step.
@@ -164,6 +197,17 @@ export default function Withdraw() {
       <p className="-mt-6 mb-8 text-sm leading-relaxed text-muted-foreground">
         {t(WITHDRAW_STEPS[step - 1].blurbKey)}
       </p>
+
+      {delegateTarget ? (
+        <div className="-mt-4 mb-6 flex items-start gap-2.5 rounded-lg border border-info-line bg-info-soft p-4 text-sm leading-relaxed">
+          <Users className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span>
+            Filing for <span className="font-medium">{delegateTarget.name}</span>
+            {delegateLink ? ` · ${delegateLink.relation}` : ''} — linked & verified
+            {delegateLink ? ` on ${fmtDate(delegateLink.linkedOn, lang)}` : ''}.
+          </span>
+        </div>
+      ) : null}
 
       {/* Step 1 — the computed cap above the field, the verified bank shown not re-entered. */}
       {step === 1 && reason ? (
@@ -271,11 +315,15 @@ export default function Withdraw() {
             {/* Shown, not re-entered — but changeable, so it is a decision. */}
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
               <p className="text-sm text-muted-foreground">
-                This is the account EPFO has already verified against your UAN.
+                {delegateTarget
+                  ? `This is the account EPFO has already verified against ${delegateTarget.name}'s UAN.`
+                  : 'This is the account EPFO has already verified against your UAN.'}
               </p>
-              <Button asChild variant="outline" size="sm" className="h-9">
-                <Link to="/member/kyc">{t('withdraw.changeBank')}</Link>
-              </Button>
+              {delegateTarget ? null : (
+                <Button asChild variant="outline" size="sm" className="h-9">
+                  <Link to="/member/kyc">{t('withdraw.changeBank')}</Link>
+                </Button>
+              )}
             </div>
           </div>
 
@@ -337,9 +385,11 @@ export default function Withdraw() {
 
           <StepActions>
             {/* First step of the flow now, so back means out of it — to the
-                life events, which is where the reason was chosen. */}
+                life events, which is where the reason was chosen. A delegate
+                filing was never chosen from that page, so it exits to the
+                family list it actually came from instead. */}
             <Button asChild variant="ghost" size="lg">
-              <Link to="/member/claims">{t('withdraw.back')}</Link>
+              <Link to={onBehalfOf ? '/member/family' : '/member/claims'}>{t('withdraw.back')}</Link>
             </Button>
             <Button
               size="lg"
@@ -363,7 +413,11 @@ export default function Withdraw() {
         <div className="space-y-6">
           <dl className="divide-y rounded-lg border bg-card">
             {[
-              { k: 'Reason', v: lang === 'hi' ? reason.titleHi : reason.title, editTo: '/member/claims' },
+              {
+                k: 'Reason',
+                v: lang === 'hi' ? reason.titleHi : reason.title,
+                editTo: onBehalfOf ? undefined : '/member/claims',
+              },
               { k: 'Amount', v: rupees(amountNum), editStep: 1, big: true },
               { k: 'Paid into', v: bank.value, editStep: 1 },
               { k: 'Form used', v: reason.formNumber },
@@ -456,6 +510,7 @@ export default function Withdraw() {
                   reasonKey: reason.key,
                   formNumber: reason.formNumber,
                   amount: amountNum,
+                  onBehalfOfPersonId: onBehalfOf,
                 })
                 setFiledId(claim.id)
               }}

@@ -100,6 +100,8 @@ export interface Claim {
   stages: ClaimStage[]
   bankLast4: string
   estCode: string
+  /** Set only when a linked family delegate filed this — the account it's on is `personId`. */
+  filedBy?: string
 }
 
 export type KycStatus = 'verified' | 'attention' | 'pending'
@@ -226,6 +228,25 @@ export interface Grievance {
   escalatesOn: string
   status: 'open' | 'resolved'
   resolution?: string
+}
+
+/**
+ * A family member linked to an account, with explicit, revocable permissions.
+ * Deliberately not a second login: `personId` is that person's own record, so
+ * the same object (their balance, their claim) is visible from both sides —
+ * the same "one graph, two views" idea the rest of the data model runs on.
+ */
+export interface FamilyLink {
+  id: string
+  /** The signed-in member who added this link. */
+  ownerId: string
+  /** The family member's own person record. */
+  personId: string
+  relation: 'father' | 'mother' | 'spouse' | 'other'
+  linkedOn: string
+  /** True once the family member's own OTP confirmed the link — never one-sided. */
+  verified: boolean
+  scope: ('view-balance' | 'file-claims')[]
 }
 
 export interface LedgerRow {

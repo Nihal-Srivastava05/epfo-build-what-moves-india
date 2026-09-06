@@ -42,8 +42,10 @@ export default function Claims() {
   const { claims, claimDraft, saveDraft, contributions } = useData()
   const { t, lang } = useT()
   const motionOk = useMotionOk()
-  const open = claims.filter((c) => !c.settledOn)
-  const past = claims.filter((c) => c.settledOn)
+  /** Excludes claims filed for a linked family member — those live on their own record, not here. */
+  const own = claims.filter((c) => c.personId === 'p-priya')
+  const open = own.filter((c) => !c.settledOn)
+  const past = own.filter((c) => c.settledOn)
   const events = withdrawalReasons(contributions)
   /**
    * The denominator is the provident fund balance, which is what every cap is

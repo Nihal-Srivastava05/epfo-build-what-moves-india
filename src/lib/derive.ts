@@ -276,9 +276,17 @@ export function pensionShareTotal(contributions: Contribution[]) {
   return contributions.filter((c) => c.status !== 'missing').reduce((sum, c) => sum + c.epsShare, 0)
 }
 
-/** Total EPF membership in whole years, across every employer under the one UAN. */
-export function serviceYears() {
-  const first = employments.map((e) => e.joined).sort()[0]
+/**
+ * Total EPF membership in whole years, across every employer under one UAN.
+ * Scoped by `personId` — without that, the earliest `joined` date in the
+ * entire module would win regardless of whose record is being computed,
+ * which breaks the moment a second person's employments exist.
+ */
+export function serviceYears(personId = 'p-priya') {
+  const first = employments
+    .filter((e) => e.personId === personId)
+    .map((e) => e.joined)
+    .sort()[0]
   return Math.floor(daysBetween(first, TODAY) / 365.25)
 }
 
@@ -302,13 +310,18 @@ export interface WithdrawalReason {
 /**
  * Eligibility and caps are computed from the record and shown before the form
  * opens. The user picks a reason in plain language; the form number follows.
+ *
+ * `personId` scopes which employments count as "current" — without it, a
+ * second person's contributions would still compute a cap off whichever
+ * employment in the whole module happens to be `current`, which is wrong the
+ * moment more than one person's data exists in the same store.
  */
-export function withdrawalReasons(contributions: Contribution[]): WithdrawalReason[] {
-  const current = employments.find((e) => e.current)!
+export function withdrawalReasons(contributions: Contribution[], personId = 'p-priya'): WithdrawalReason[] {
+  const current = employments.find((e) => e.personId === personId && e.current)!
   const wage = current.monthlyWage
   const balance = totalBalance(contributions)
   const share = employeeShareTotal(contributions)
-  const years = serviceYears()
+  const years = serviceYears(personId)
 
   return [
     {

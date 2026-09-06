@@ -1,14 +1,17 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import {
+  anilKyc,
   approvals as seedApprovals,
   challans as seedChallans,
   claims as seedClaims,
   contributions as seedContributions,
+  familyLinks as seedFamilyLinks,
   kycItems as seedKyc,
   notifications as seedNotifications,
   pensioner as seedPensioner,
   pensionPayments as seedPayments,
+  personById,
   roster as seedRoster,
   splitContribution,
   ADMIN_RATE,
@@ -22,6 +25,7 @@ import type {
   Challan,
   Claim,
   Contribution,
+  FamilyLink,
   Grievance,
   KycItem,
   AppNotification,
@@ -30,6 +34,22 @@ import type {
   RosterEntry,
 } from '@/lib/types'
 import { addDays, fmtMonthLong, rupees } from '@/lib/format'
+
+/**
+ * The one place that knows how to bill a claim to someone other than Priya.
+ * Only Anil is a valid delegate target today — a real second identity, not a
+ * generic multi-tenant system, matching the scope of this feature.
+ */
+function delegateProfile(personId: string) {
+  const person = personById(personId)
+  const bank = anilKyc.find((k) => k.key === 'bank')!
+  return {
+    name: person.name,
+    uan: person.uan,
+    estCode: employments.find((e) => e.personId === personId && e.current)!.estCode,
+    bankLast4: bank.value.match(/\*{4}(\d{4})/)?.[1] ?? '0000',
+  }
+}
 
 export interface ClaimDraft {
   reasonKey: string
@@ -49,6 +69,7 @@ interface DataState {
   pensioner: Pensioner
   pensionPayments: PensionPayment[]
   roster: RosterEntry[]
+  familyLinks: FamilyLink[]
   /** Autosaved so a dropped session never loses a half-filled form. */
   claimDraft: ClaimDraft | null
   employerNotified: string[]
@@ -59,7 +80,9 @@ interface DataState {
   resolveApprovals: (ids: string[]) => void
   settleClaim: (claimId: string) => void
   fixKyc: (key: KycItem['key']) => void
-  fileClaim: (input: { reasonKey: string; formNumber: string; amount: number }) => Claim
+  fileClaim: (input: { reasonKey: string; formNumber: string; amount: number; onBehalfOfPersonId?: string }) => Claim
+  linkFamilyMember: (input: { personId: string; relation: FamilyLink['relation']; scope: FamilyLink['scope'] }) => FamilyLink
+  revokeFamilyLink: (id: string) => void
   fileDeathClaim: (input: {
     type: 'pf' | 'pension'
     deceasedName: string
@@ -85,6 +108,7 @@ const seed = () => ({
   pensioner: structuredClone(seedPensioner),
   pensionPayments: structuredClone(seedPayments),
   roster: structuredClone(seedRoster),
+  familyLinks: structuredClone(seedFamilyLinks),
   claimDraft: null,
   employerNotified: [] as string[],
 })
@@ -254,22 +278,29 @@ export const useData = create<DataState>()(
       /**
        * Filing a claim writes into the employer's approval queue in the same
        * action — the member never has to tell their employer a claim exists.
+       *
+       * `onBehalfOfPersonId` bills the claim to a linked family member's own
+       * account instead of Priya's — same action, same stages, a different
+       * `personId`/bank/establishment on the record.
        */
-      fileClaim: ({ reasonKey, formNumber, amount }) => {
+      fileClaim: ({ reasonKey, formNumber, amount, onBehalfOfPersonId }) => {
         const state = get()
         const id = `CLM-2026-${Math.floor(1000 + Math.random() * 8999)}`
+        const delegated = Boolean(onBehalfOfPersonId)
+        const target = onBehalfOfPersonId ? delegateProfile(onBehalfOfPersonId) : undefined
         const bank = state.kyc.find((k) => k.key === 'bank')
         const claim: Claim = {
           id,
-          personId: 'p-priya',
+          personId: onBehalfOfPersonId ?? 'p-priya',
           kind: 'withdraw-partial',
           reasonKey,
           formNumber,
           amount,
           filedOn: TODAY,
           expectedBy: addDays(TODAY, 10),
-          bankLast4: bank?.value.match(/\*{4}(\d{4})/)?.[1] ?? '4471',
-          estCode: 'MHBAN0045123000',
+          bankLast4: target?.bankLast4 ?? bank?.value.match(/\*{4}(\d{4})/)?.[1] ?? '4471',
+          estCode: target?.estCode ?? 'MHBAN0045123000',
+          filedBy: delegated ? 'p-priya' : undefined,
           stages: [
             { key: 'filed', label: 'Filed', labelHi: 'दायर किया गया', state: 'done', on: TODAY },
             { key: 'employer', label: 'Employer attestation', labelHi: 'नियोक्ता का सत्यापन', state: 'current', holder: 'employer', on: TODAY },
@@ -282,10 +313,10 @@ export const useData = create<DataState>()(
           approvals: [
             {
               id: `ap-${id}`,
-              estCode: 'MHBAN0045123000',
+              estCode: target?.estCode ?? 'MHBAN0045123000',
               kind: 'claim',
-              personName: 'Priya Sharma',
-              uan: '100234567890',
+              personName: target?.name ?? 'Priya Sharma',
+              uan: target?.uan ?? '100234567890',
               detail: 'Withdrawal — needs your attestation',
               amount,
               waitingSince: TODAY,
@@ -294,16 +325,56 @@ export const useData = create<DataState>()(
             ...state.approvals,
           ],
           claimDraft: null,
-          notifications: notify(state, {
-            personId: 'p-priya',
-            channel: 'sms',
-            title: `Claim ${id} received`,
-            body: `Your claim for ${rupees(amount)} was received today. It is with your employer for attestation.`,
-            aboutType: 'claim',
-            aboutId: id,
-          }),
+          notifications: delegated
+            ? [
+                {
+                  id: `n-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+                  sentAt: new Date().toISOString(),
+                  official: true,
+                  personId: onBehalfOfPersonId!,
+                  channel: 'sms',
+                  title: `Claim ${id} received`,
+                  body: `A claim for ${rupees(amount)} was filed on your account today by Priya Sharma (your linked family delegate). It is with your employer for attestation.`,
+                  aboutType: 'claim',
+                  aboutId: id,
+                },
+                ...notify(state, {
+                  personId: 'p-priya',
+                  channel: 'inbox',
+                  title: `You filed claim ${id} for ${target?.name}`,
+                  body: `Your claim for ${rupees(amount)} on ${target?.name}'s account was received today. They can see this in their own claim tracker too.`,
+                  aboutType: 'claim',
+                  aboutId: id,
+                }),
+              ]
+            : notify(state, {
+                personId: 'p-priya',
+                channel: 'sms',
+                title: `Claim ${id} received`,
+                body: `Your claim for ${rupees(amount)} was received today. It is with your employer for attestation.`,
+                aboutType: 'claim',
+                aboutId: id,
+              }),
         })
         return claim
+      },
+
+      linkFamilyMember: ({ personId, relation, scope }) => {
+        const link: FamilyLink = {
+          id: `fam-${Date.now()}`,
+          ownerId: 'p-priya',
+          personId,
+          relation,
+          linkedOn: TODAY,
+          verified: true,
+          scope,
+        }
+        set((s) => ({ familyLinks: [link, ...s.familyLinks] }))
+        return link
+      },
+
+      revokeFamilyLink: (id) => {
+        set((s) => ({ familyLinks: s.familyLinks.filter((f) => f.id !== id) }))
       },
 
       /**
@@ -422,7 +493,7 @@ export const useData = create<DataState>()(
 
       resetDemo: () => set({ ...seed() }),
     }),
-    { name: 'epfo-data', version: 4 },
+    { name: 'epfo-data', version: 5 },
   ),
 )
 
