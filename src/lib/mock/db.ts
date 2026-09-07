@@ -93,6 +93,24 @@ export const people: Person[] = [
     email: 'a****l@example.com',
     roles: ['member'],
   },
+  /**
+   * Priya's husband — a real member in his own right, linkable via the
+   * family tools, not a fixture invented for the family-linking feature.
+   */
+  {
+    id: 'p-karan',
+    name: 'Karan Mehta',
+    uan: '100278845512',
+    dob: '1992-11-08',
+    gender: 'male',
+    relationName: 'Priya Sharma',
+    relationKind: 'spouse',
+    aadhaarMasked: 'XXXX XXXX 7723',
+    panMasked: 'AMKPM****Q',
+    mobileMasked: '+91 99XXX XX441',
+    email: 'k****n@example.com',
+    roles: ['member'],
+  },
 ]
 
 export const establishments: Establishment[] = [
@@ -158,8 +176,18 @@ export const employments: Employment[] = [
     personId: 'p-anil',
     estCode: 'MHPUN0031876000',
     memberId: 'MHPUN00318760000009981',
-    joined: '2011-06-01',
+    joined: '2020-06-01',
     monthlyWage: 38000,
+    current: true,
+  },
+  /** Karan Mehta's own employment — his passbook is real, not a stub. */
+  {
+    id: 'e-karan-meridian',
+    personId: 'p-karan',
+    estCode: 'MHPUN0031876000',
+    memberId: 'MHPUN00318760000015567',
+    joined: '2020-01-01',
+    monthlyWage: 46000,
     current: true,
   },
 ]

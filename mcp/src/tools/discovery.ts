@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { ANIL_UAN, DEMO_OTP, DEMO_PPO, DEMO_UAN, TODAY, employments, establishmentByCode } from '../data/seed.js'
+import { ANIL_UAN, DEMO_OTP, DEMO_PPO, DEMO_UAN, KARAN_UAN, TODAY, employments, establishmentByCode } from '../data/seed.js'
 import { resolveMember, resolvePensionerPerson } from '../lib/identity.js'
 import { fmtMemberId, fmtTenure, fmtUan } from '../lib/format.js'
 import { errorResult, textResult } from './helpers.js'
@@ -27,6 +27,13 @@ export function registerDiscoveryTools(server: McpServer) {
             uan: ANIL_UAN,
             uanFormatted: fmtUan(ANIL_UAN),
             note: "Priya's father — an independent member account, not yet linked to hers until epfo_link_family_member is called.",
+          },
+          {
+            persona: 'member',
+            name: 'Karan Mehta',
+            uan: KARAN_UAN,
+            uanFormatted: fmtUan(KARAN_UAN),
+            note: "Priya's husband — an independent member account, not yet linked to hers until epfo_link_family_member is called.",
           },
         ],
       }),

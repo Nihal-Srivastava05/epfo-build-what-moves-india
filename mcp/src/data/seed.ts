@@ -41,6 +41,10 @@ export const RAM_PERSON_ID = 'p-ram'
  *  made through this server resolves to the exact same person and figures. */
 export const ANIL_PERSON_ID = 'p-anil'
 export const ANIL_UAN = '100234500021'
+/** Priya's husband — same UAN as the main app's `p-karan`, so a family link
+ *  made through this server resolves to the exact same person and figures. */
+export const KARAN_PERSON_ID = 'p-karan'
+export const KARAN_UAN = '100278845512'
 
 export const people: Person[] = [
   {
@@ -85,6 +89,22 @@ export const people: Person[] = [
     panMasked: 'AHRPS****D',
     mobileMasked: '+91 98XXX XX776',
     email: 'a****l@example.com',
+    roles: ['member'],
+  },
+  /** Priya's husband — a real member in his own right, linkable via the
+   *  family tools, not a fixture invented only for them. */
+  {
+    id: 'p-karan',
+    name: 'Karan Mehta',
+    uan: '100278845512',
+    dob: '1992-11-08',
+    gender: 'male',
+    relationName: 'Priya Sharma',
+    relationKind: 'spouse',
+    aadhaarMasked: 'XXXX XXXX 7723',
+    panMasked: 'AMKPM****Q',
+    mobileMasked: '+91 99XXX XX441',
+    email: 'k****n@example.com',
     roles: ['member'],
   },
 ]
@@ -154,6 +174,16 @@ export const employments: Employment[] = [
     memberId: 'MHPUN00318760000009981',
     joined: '1998-06-01',
     monthlyWage: 38000,
+    current: true,
+  },
+  /** Karan's own employment — his balance is real, not a stub. */
+  {
+    id: 'e-karan-meridian',
+    personId: 'p-karan',
+    estCode: 'MHPUN0031876000',
+    memberId: 'MHPUN00318760000015567',
+    joined: '2016-08-01',
+    monthlyWage: 46000,
     current: true,
   },
 ]

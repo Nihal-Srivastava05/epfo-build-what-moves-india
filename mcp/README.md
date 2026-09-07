@@ -56,7 +56,7 @@ claude mcp add epfo-demo -- node "$(pwd)/mcp/dist/index.js"
 **Cursor** — add the same shape to `.cursor/mcp.json`.
 
 Then ask your assistant something like *"What's Priya's PF balance?"*, *"Raise a grievance about my
-missing June contribution"*, or *"Link my father Anil Sharma to my account and check his balance"*
+missing June contribution"*, or *"Link my husband Karan Mehta to my account and check his balance"*
 and it should call the matching tool(s).
 
 ## Demo identities
@@ -68,6 +68,7 @@ No real sign-in — tools default to these if you don't pass an identifier:
 | Member | Priya Sharma | `100234567890` | `284116` |
 | Pensioner | Ram Prasad Verma | `MH/PUN/00123456` | `284116` |
 | Member | Anil Sharma (Priya's father — link him via the family tools below) | `100234500021` | `284116` |
+| Member | Karan Mehta (Priya's husband — link him via the family tools below) | `100278845512` | `284116` |
 
 Call `epfo_list_demo_accounts` to get this from the server itself.
 
