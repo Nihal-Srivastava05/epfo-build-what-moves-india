@@ -182,7 +182,16 @@ export default function SignIn() {
             <div className="min-w-0 flex-1">
               <p className="text-[0.8125rem] text-muted-foreground">{t('signin.mockOtp')}</p>
               <div className="mt-1.5 flex items-center gap-2">
-                <p className="ident text-lg font-bold tracking-[0.2em]">{DEMO_OTP}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtp(DEMO_OTP)
+                    setError('')
+                  }}
+                  className="ident rounded-xs text-lg font-bold tracking-[0.2em] underline decoration-dotted decoration-2 underline-offset-4 hover:text-primary"
+                >
+                  {DEMO_OTP}
+                </button>
                 <Button
                   type="button"
                   variant="ghost"

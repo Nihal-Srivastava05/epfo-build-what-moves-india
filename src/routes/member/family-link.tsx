@@ -199,7 +199,16 @@ export default function FamilyLink() {
                     aria-invalid={Boolean(otpError)}
                     className="ident h-12 max-w-40 text-center text-lg tracking-[0.3em]"
                   />
-                  <span className="ident text-sm text-muted-foreground">{DEMO_OTP}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtp(DEMO_OTP)
+                      setOtpError('')
+                    }}
+                    className="ident rounded-xs text-sm font-medium text-info underline underline-offset-4 hover:text-info/80"
+                  >
+                    {DEMO_OTP}
+                  </button>
                   <MockBadge what="No SMS is sent. This stands in for the family member confirming on their own device." />
                 </div>
                 {otpError ? <p className="text-sm font-medium text-stop">{otpError}</p> : null}

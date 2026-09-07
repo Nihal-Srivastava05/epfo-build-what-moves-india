@@ -615,7 +615,16 @@ export default function DeathClaimFile() {
                 aria-invalid={Boolean(otpError)}
                 className="ident h-12 max-w-40 text-center text-lg tracking-[0.3em]"
               />
-              <span className="ident text-sm text-muted-foreground">{DEMO_OTP}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setOtp(DEMO_OTP)
+                  setOtpError('')
+                }}
+                className="ident rounded-xs text-sm font-medium text-info underline underline-offset-4 hover:text-info/80"
+              >
+                {DEMO_OTP}
+              </button>
               <MockBadge what="No SMS is sent. The code is fixed for the prototype." />
             </div>
             {otpError ? <p className="text-sm font-medium text-stop">{otpError}</p> : null}
