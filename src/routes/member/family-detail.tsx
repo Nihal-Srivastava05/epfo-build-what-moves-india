@@ -36,7 +36,7 @@ const eventIcon: Record<string, typeof Wallet> = {
   'left-job': DoorOpen,
 }
 
-/** Years per page — a long career (Anil's is 28 years) otherwise turns this
+/** Years per page — a long career (Anil's is 15 years) otherwise turns this
  *  one section into most of the page's scroll, even with every year collapsed. */
 const YEARS_PER_PAGE = 5
 

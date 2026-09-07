@@ -125,17 +125,15 @@ export function AskBar() {
 
   return (
     <div
-      className={`rounded-lg border bg-card p-5 transition-shadow ${
-        speech.listening ? 'border-ai-line shadow-[0_0_0_3px_var(--ai-soft)]' : ''
-      }`}
+      className={`rounded-lg border bg-card p-5 transition-shadow ${speech.listening ? 'border-ai-line shadow-[0_0_0_3px_var(--ai-soft)]' : ''
+        }`}
     >
       <div className="mb-3 flex items-center gap-1.5">
         <Sparkles className="size-4 text-ai" aria-hidden />
-        <p className="text-sm font-semibold">Ask anything</p>
+        <p className="text-sm font-semibold">What do you want to do?</p>
         <span
-          className={`ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold ${
-            aiState === 'on' ? 'bg-ai-soft text-ai' : 'bg-muted text-muted-foreground'
-          }`}
+          className={`ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold ${aiState === 'on' ? 'bg-ai-soft text-ai' : 'bg-muted text-muted-foreground'
+            }`}
         >
           <Cpu className="size-3" aria-hidden />
           {aiState === 'on' ? 'On-device AI' : 'Built-in answers'}
@@ -254,15 +252,15 @@ export function AskBar() {
               it and never take a click, so the button stays a button. */}
           {speech.listening && motionOk
             ? [0, 0.75].map((delay) => (
-                <motion.span
-                  key={delay}
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 rounded-md border-2 border-ai"
-                  initial={{ scale: 1, opacity: 0.55 }}
-                  animate={{ scale: 1.7, opacity: 0 }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay, ease: 'easeOut' }}
-                />
-              ))
+              <motion.span
+                key={delay}
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-md border-2 border-ai"
+                initial={{ scale: 1, opacity: 0.55 }}
+                animate={{ scale: 1.7, opacity: 0 }}
+                transition={{ duration: 1.5, repeat: Infinity, delay, ease: 'easeOut' }}
+              />
+            ))
             : null}
           <Button
             type="button"

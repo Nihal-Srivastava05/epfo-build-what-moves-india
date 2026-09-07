@@ -5,6 +5,8 @@ import {
   ArrowRight,
   BadgeCheck,
   CheckCircle2,
+  FileCheck2,
+  FileUp,
   HandCoins,
   Landmark,
   ShieldAlert,
@@ -110,6 +112,7 @@ export default function DeathClaimFile() {
 
   // Step 2 — documents and where the money goes.
   const [deathCert, setDeathCert] = useState(false)
+  const [deathCertFile, setDeathCertFile] = useState<File | null>(null)
   const [relationProof, setRelationProof] = useState(false)
   const [payoutTo, setPayoutTo] = useState<'linked' | 'own'>(linkedBank ? 'linked' : 'own')
 
@@ -397,12 +400,49 @@ export default function DeathClaimFile() {
 
           <div className="rounded-lg border bg-card p-5">
             <p className="eyebrow mb-3">Documents</p>
-            <label className="flex cursor-pointer items-start gap-3 py-2">
-              <Checkbox checked={deathCert} onCheckedChange={(v) => setDeathCert(v === true)} className="mt-0.5" />
-              <span className="text-sm leading-relaxed">
-                I have the death certificate issued by the municipal authority.
-              </span>
-            </label>
+
+            <div className="space-y-2 py-2">
+              <p className="text-sm font-medium">Death certificate</p>
+              <p className="text-sm text-muted-foreground">Issued by the municipal authority.</p>
+              {deathCertFile ? (
+                <div className="mt-1 flex items-center justify-between gap-3 rounded-md border bg-muted/40 p-3">
+                  <span className="flex min-w-0 items-center gap-2 text-sm">
+                    <FileCheck2 className="size-4 shrink-0 text-ok" aria-hidden />
+                    <span className="truncate">{deathCertFile.name}</span>
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="!min-h-0 shrink-0"
+                    onClick={() => {
+                      setDeathCertFile(null)
+                      setDeathCert(false)
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ) : (
+                <label className="mt-1 flex w-fit cursor-pointer items-center gap-2 rounded-md border border-dashed px-3.5 py-2 text-sm font-medium text-primary transition-colors duration-[var(--dur-fast)] hover:border-brand">
+                  <FileUp className="size-4" aria-hidden />
+                  Upload death certificate
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        setDeathCertFile(file)
+                        setDeathCert(true)
+                      }
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+
             <label className="flex cursor-pointer items-start gap-3 py-2">
               <Checkbox
                 checked={relationProof}
@@ -414,7 +454,7 @@ export default function DeathClaimFile() {
                 certificate if none was registered).
               </span>
             </label>
-            <MockBadge what="Nothing is uploaded in the prototype — checking these stands in for document verification." />
+            <MockBadge what="The file you pick never leaves your device — nothing is actually uploaded in this prototype." />
           </div>
 
           <div className="space-y-4 rounded-lg border bg-card p-5">
