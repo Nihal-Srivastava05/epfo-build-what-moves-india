@@ -27,7 +27,7 @@ import { useMotionOk } from '@/hooks/use-motion-ok'
 import { preflight, totalBalance, withdrawalReasons } from '@/lib/derive'
 import { WITHDRAW_STEPS } from '@/lib/claims'
 import { fmtDate, rupees } from '@/lib/format'
-import { TODAY, anilKyc, contributionsForPerson, establishmentByCode, personById } from '@/lib/mock/db'
+import { TODAY, anilKyc, contributionsForPerson, establishmentByCode, isRegisteredNominee, personById } from '@/lib/mock/db'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -59,6 +59,19 @@ export default function Withdraw() {
   const onBehalfOf = params.get('onBehalfOf') || undefined
   const delegateTarget = onBehalfOf ? personById(onBehalfOf) : undefined
   const delegateLink = onBehalfOf ? familyLinks.find((f) => f.personId === onBehalfOf) : undefined
+  /**
+   * Filing on someone else's behalf requires being their registered nominee —
+   * the same fact a real EPFO claim runs on. Checked live against `scope`
+   * *and* the nominee on record, never trusted as a one-time grant: if either
+   * has changed since the link was made, this flow isn't reachable.
+   */
+  const delegateAllowed =
+    !onBehalfOf ||
+    Boolean(
+      delegateLink?.scope.includes('file-claims') &&
+        delegateTarget &&
+        isRegisteredNominee(delegateTarget.id, personById(delegateLink.ownerId).name),
+    )
   const activeContributions = useMemo(
     () => (onBehalfOf ? contributionsForPerson(contributions, onBehalfOf) : contributions),
     [contributions, onBehalfOf],
@@ -185,6 +198,10 @@ export default function Withdraw() {
    * it cannot fill in.
    */
   if (!reason) return <Navigate to="/member/claims" replace />
+
+  /** A crafted URL naming someone who hasn't actually made you their nominee
+   *  doesn't get a form either — it goes back to Family, not to an error page. */
+  if (onBehalfOf && !delegateAllowed) return <Navigate to="/member/family" replace />
 
   return (
     <div className="mx-auto max-w-2xl">

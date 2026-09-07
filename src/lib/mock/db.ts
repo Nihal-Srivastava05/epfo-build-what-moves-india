@@ -324,6 +324,12 @@ export const kycItems: KycItem[] = [
  * with a problem to fix; the point of the family-linking feature is that
  * Priya can act on a *clean* record on his behalf, not that his account also
  * needs fixing.
+ *
+ * His nominee is Priya, not incidentally: filing a claim on someone else's
+ * behalf is gated on being their registered nominee (see
+ * `isRegisteredNominee` below), the same fact a real EPFO claim runs on — so
+ * the pre-linked `file-claims` permission in `familyLinks` is grounded in
+ * something checkable, not just asserted.
  */
 export const anilKyc: KycItem[] = [
   { key: 'aadhaar', label: 'Aadhaar', value: 'XXXX XXXX 5588', status: 'verified', holder: 'epfo' },
@@ -336,7 +342,7 @@ export const anilKyc: KycItem[] = [
     holder: 'epfo',
   },
   { key: 'mobile', label: 'Mobile number', value: '+91 98XXX XX776', status: 'verified', holder: 'you' },
-  { key: 'nominee', label: 'Nominee', value: 'Kamla Sharma (spouse) · 100%', status: 'verified', holder: 'you' },
+  { key: 'nominee', label: 'Nominee', value: 'Priya Sharma (daughter) · 100%', status: 'verified', holder: 'you' },
   { key: 'exit', label: 'Exit dates', value: 'All past jobs marked', status: 'verified', holder: 'employer' },
 ]
 
@@ -667,4 +673,19 @@ export function employmentById(id: string) {
 export function contributionsForPerson(all: Contribution[], personId: string): Contribution[] {
   const ids = new Set(employments.filter((e) => e.personId === personId).map((e) => e.id))
   return all.filter((c) => ids.has(c.employmentId))
+}
+
+/**
+ * Whether `nomineeName` is `personId`'s own registered nominee — checked
+ * against their own KYC record, not just asserted by whoever is filing on
+ * their behalf. A real EPFO claim runs on exactly this fact, so a link's
+ * `file-claims` scope is only ever honoured live against it, here — never
+ * trusted as a one-time snapshot taken when the link was made. If the
+ * nominee on record ever changes, the permission follows it immediately.
+ */
+export function isRegisteredNominee(personId: string, nomineeName: string): boolean {
+  const kyc = personId === 'p-anil' ? anilKyc : kycItems
+  const nominee = kyc.find((k) => k.key === 'nominee')
+  if (!nominee || nominee.status !== 'verified') return false
+  return nominee.value.trim().toLowerCase().startsWith(nomineeName.trim().toLowerCase())
 }

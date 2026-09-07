@@ -3,7 +3,8 @@ import { motion } from 'motion/react'
 import { ArrowRight, HandCoins, HeartCrack, ShieldCheck, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/patterns/page-header'
-import { personById } from '@/lib/mock/db'
+import { Term } from '@/components/patterns/term'
+import { isRegisteredNominee, personById } from '@/lib/mock/db'
 import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { useMotionOk } from '@/hooks/use-motion-ok'
@@ -42,7 +43,13 @@ export default function DeathClaim() {
    *  re-verifying who they are. */
   const linked = params.get('linked') || undefined
   const linkedPerson = linked ? personById(linked) : undefined
-  const linkedOk = linked ? familyLinks.some((f) => f.personId === linked && f.scope.includes('file-claims')) : false
+  /** Skipping re-verification requires being the registered nominee, not just
+   *  a `file-claims` scope — the same fact a real death claim runs on. */
+  const linkedOk = linked
+    ? familyLinks.some(
+        (f) => f.personId === linked && f.scope.includes('file-claims') && isRegisteredNominee(linked, personById(f.ownerId).name),
+      )
+    : false
 
   const startHref = (type: 'pf' | 'pension') =>
     `/death-claim/file?type=${type}${linked && linkedOk ? `&linked=${linked}` : ''}`
@@ -78,7 +85,13 @@ export default function DeathClaim() {
                 {opt.facts.map((f) => (
                   <li key={f} className="flex items-start gap-2">
                     <span className="mt-1.5 size-1 shrink-0 rounded-full bg-faint" aria-hidden />
-                    {f}
+                    {f === 'Form 20' ? (
+                      <Term id="form-20">Form 20</Term>
+                    ) : f === 'Form 10D' ? (
+                      <Term id="form-10d">Form 10D</Term>
+                    ) : (
+                      f
+                    )}
                   </li>
                 ))}
               </ul>

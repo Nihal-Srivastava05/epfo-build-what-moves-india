@@ -89,6 +89,10 @@ interface DataState {
     deceasedUan: string
     relation: string
     amount: number
+    /** Last 4 of wherever the claimant chose to send it — the deceased's
+     *  account on file, or their own. Falls back to the claimant's own
+     *  verified bank when neither is given. */
+    bankLast4?: string
   }) => Claim
   notifyEmployer: (month: string) => void
   submitLifeCertificate: (routeLabel: string) => void
@@ -381,7 +385,7 @@ export const useData = create<DataState>()(
        * A death claim has no employer step — EPFO verifies the nominee and
        * documents directly, rather than an employer attesting a living member.
        */
-      fileDeathClaim: ({ type, deceasedName, deceasedUan, relation, amount }) => {
+      fileDeathClaim: ({ type, deceasedName, deceasedUan, relation, amount, bankLast4 }) => {
         const state = get()
         const id = `CLM-2026-${Math.floor(1000 + Math.random() * 8999)}`
         const bank = state.kyc.find((k) => k.key === 'bank')
@@ -395,7 +399,7 @@ export const useData = create<DataState>()(
           amount,
           filedOn: TODAY,
           expectedBy: addDays(TODAY, isPension ? 20 : 10),
-          bankLast4: bank?.value.match(/\*{4}(\d{4})/)?.[1] ?? '4471',
+          bankLast4: bankLast4 || bank?.value.match(/\*{4}(\d{4})/)?.[1] || '4471',
           estCode: 'MHBAN0045123000',
           stages: [
             { key: 'filed', label: 'Filed', labelHi: 'दायर किया गया', state: 'done', on: TODAY },

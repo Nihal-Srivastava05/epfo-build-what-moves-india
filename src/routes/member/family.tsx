@@ -3,10 +3,11 @@ import { motion } from 'motion/react'
 import { ChevronRight, HandCoins, ShieldCheck, UserPlus, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/patterns/page-header'
-import { personById } from '@/lib/mock/db'
+import { isRegisteredNominee, personById } from '@/lib/mock/db'
 import { fmtDate } from '@/lib/format'
 import { useData } from '@/store/data'
 import { useMotionOk } from '@/hooks/use-motion-ok'
+import { cn } from '@/lib/utils'
 
 const SCOPE_LABEL: Record<'view-balance' | 'file-claims', { label: string; icon: typeof ShieldCheck }> = {
   'view-balance': { label: 'View balance', icon: ShieldCheck },
@@ -23,7 +24,7 @@ export default function Family() {
   const motionOk = useMotionOk()
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto">
       <PageHeader
         title="Family"
         sub="Link a family member once, with their own consent, and act for them on the things you're both given permission for."
@@ -53,6 +54,11 @@ export default function Family() {
         <div className="space-y-3">
           {familyLinks.map((link, i) => {
             const person = personById(link.personId)
+            /** A granted scope can go stale — e.g. their nominee changed —
+             *  without the link itself being touched, so this is re-checked
+             *  live rather than trusted from when the link was made. */
+            const fileClaimsActive =
+              link.scope.includes('file-claims') && isRegisteredNominee(link.personId, personById(link.ownerId).name)
             return (
               <motion.div
                 key={link.id}
@@ -72,10 +78,15 @@ export default function Family() {
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       {link.scope.map((s) => {
                         const meta = SCOPE_LABEL[s]
+                        const stale = s === 'file-claims' && !fileClaimsActive
                         return (
                           <span
                             key={s}
-                            className="inline-flex items-center gap-1.5 rounded-full border bg-muted px-2.5 py-1 text-xs font-medium"
+                            className={cn(
+                              'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium',
+                              stale ? 'border-dashed text-muted-foreground line-through' : 'bg-muted',
+                            )}
+                            title={stale ? `Not currently active — you're not ${person.name}'s registered nominee.` : undefined}
                           >
                             <meta.icon className="size-3" aria-hidden />
                             {meta.label}

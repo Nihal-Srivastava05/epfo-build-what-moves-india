@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import {
@@ -10,9 +11,17 @@ import {
   MessageSquareWarning,
   RotateCcw,
   Stethoscope,
+  Users,
   Wallet,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { SectionTitle } from '@/components/patterns/page-header'
 import { Money } from '@/components/patterns/money'
 import { ClaimTracker } from '@/components/patterns/claim-tracker'
@@ -23,6 +32,7 @@ import { useMotionOk } from '@/hooks/use-motion-ok'
 import { reasonLabelKey } from '@/lib/claims'
 import { totalBalance, withdrawalReasons } from '@/lib/derive'
 import { fmtDate, inr } from '@/lib/format'
+import { contributionsForPerson, isRegisteredNominee, personById } from '@/lib/mock/db'
 import { cn } from '@/lib/utils'
 
 /**
@@ -39,20 +49,50 @@ const eventIcon: Record<string, typeof House> = {
 }
 
 export default function Claims() {
-  const { claims, claimDraft, saveDraft, contributions } = useData()
+  const { claims, claimDraft, saveDraft, contributions, familyLinks } = useData()
   const { t, lang } = useT()
   const motionOk = useMotionOk()
-  /** Excludes claims filed for a linked family member — those live on their own record, not here. */
-  const own = claims.filter((c) => c.personId === 'p-priya')
-  const open = own.filter((c) => !c.settledOn)
-  const past = own.filter((c) => c.settledOn)
-  const events = withdrawalReasons(contributions)
+
+  /**
+   * Who this page's life events are computed for. "My account" always works;
+   * a family member's only ever appears here if they're both scoped for
+   * `file-claims` *and* currently your registered nominee — checked live,
+   * not trusted from whenever the link was made, same as everywhere else
+   * this permission is read.
+   */
+  const delegateOptions = useMemo(
+    () =>
+      familyLinks
+        .filter((f) => f.scope.includes('file-claims') && isRegisteredNominee(f.personId, personById(f.ownerId).name))
+        .map((f) => ({ personId: f.personId, name: personById(f.personId).name, relation: f.relation })),
+    [familyLinks],
+  )
+  const [actingFor, setActingFor] = useState('p-priya')
+  /** A link revoked mid-session shouldn't leave the page silently filing for
+   *  someone no longer selectable. */
+  const isDelegate = actingFor !== 'p-priya' && delegateOptions.some((d) => d.personId === actingFor)
+  const activePersonId = isDelegate ? actingFor : 'p-priya'
+  const activePerson = isDelegate ? personById(activePersonId) : undefined
+
+  const activeContributions = useMemo(
+    () => (isDelegate ? contributionsForPerson(contributions, activePersonId) : contributions),
+    [contributions, isDelegate, activePersonId],
+  )
+
+  /** Whoever the dropdown is set to — a claim just filed for Anil has to
+   *  actually show up here while he's selected, not just on his own Family
+   *  page. Never mixes the two: switching back to "My account" switches the
+   *  list back too. */
+  const claimsForActive = claims.filter((c) => c.personId === activePersonId)
+  const open = claimsForActive.filter((c) => !c.settledOn)
+  const past = claimsForActive.filter((c) => c.settledOn)
+  const events = withdrawalReasons(activeContributions, activePersonId)
   /**
    * The denominator is the provident fund balance, which is what every cap is
    * worked out against. Pension (EPS) is a separate pot and is not withdrawable
    * here, so folding it in would quietly shrink every share on this page.
    */
-  const balance = totalBalance(contributions)
+  const balance = totalBalance(activeContributions)
   /** "<1" rather than a rounded-down 0, which would read as nothing at all. */
   const shareOfBalance = (cap: number) => {
     if (balance <= 0) return null
@@ -72,6 +112,38 @@ export default function Claims() {
         <p className="-mt-1 mb-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
           {t('claims.lifeEventsSub')}
         </p>
+
+        {/* Only shown once there's a real second option — a dropdown with one
+            choice in it is a dead end pretending to be a feature. */}
+        {delegateOptions.length > 0 ? (
+          <div className="mb-4 flex items-center gap-3">
+            <label htmlFor="acting-for" className="text-sm font-medium text-muted-foreground">
+              Filing for
+            </label>
+            <Select value={activePersonId} onValueChange={setActingFor}>
+              <SelectTrigger id="acting-for" className="w-64">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="p-priya">My account</SelectItem>
+                {delegateOptions.map((d) => (
+                  <SelectItem key={d.personId} value={d.personId}>
+                    {d.name} ({d.relation})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
+
+        {isDelegate && activePerson ? (
+          <p className="mb-4 flex items-start gap-2.5 rounded-lg border border-info-line bg-info-soft p-4 text-sm leading-relaxed">
+            <Users className="mt-0.5 size-4 shrink-0" aria-hidden />
+            These are computed from <span className="font-medium">{activePerson.name}'s</span> own
+            balance and eligibility, not yours — you can file because you're their registered
+            nominee. Switch back to "My account" any time.
+          </p>
+        ) : null}
 
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {events.map((e, i) => {
@@ -165,7 +237,7 @@ export default function Claims() {
               >
                 {e.eligible ? (
                   <Link
-                    to={`/member/claims/new?reason=${e.key}`}
+                    to={`/member/claims/new?reason=${e.key}${isDelegate ? `&onBehalfOf=${activePersonId}` : ''}`}
                     className="group flex w-full flex-col rounded-lg border bg-card p-4 transition-colors duration-[var(--dur-fast)] hover:border-brand hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   >
                     {body}
@@ -181,8 +253,9 @@ export default function Claims() {
         </ul>
       </section>
 
-      {/* Nothing typed is ever lost to a dropped session. */}
-      {claimDraft ? (
+      {/* Nothing typed is ever lost to a dropped session. Not shown while
+          filing for someone else — the draft is always Priya's own. */}
+      {claimDraft && !isDelegate ? (
         <motion.section
           initial={motionOk ? { opacity: 0, y: 6 } : false}
           animate={{ opacity: 1, y: 0 }}
@@ -213,7 +286,9 @@ export default function Claims() {
       {open.length > 0 ? (
         <section aria-labelledby="open">
           <SectionTitle>
-            <span id="open">{t('claims.inProgress')}</span>
+            <span id="open">
+              {isDelegate && activePerson ? `${activePerson.name}'s claims in progress` : t('claims.inProgress')}
+            </span>
           </SectionTitle>
           <div className="space-y-4">
             {open.map((c) => (
@@ -264,14 +339,16 @@ export default function Claims() {
 
       <section aria-labelledby="past">
         <SectionTitle>
-          <span id="past">{t('claims.past')}</span>
+          <span id="past">{isDelegate && activePerson ? `${activePerson.name}'s past claims` : t('claims.past')}</span>
         </SectionTitle>
         {past.length === 0 && open.length === 0 ? (
           <div className="rounded-lg border border-dashed p-8 text-center">
             <HandCoins className="mx-auto mb-3 size-8 text-muted-foreground" aria-hidden />
-            <p className="font-medium">{t('claims.none')}</p>
+            <p className="font-medium">
+              {isDelegate && activePerson ? `${activePerson.name} has never made a claim` : t('claims.none')}
+            </p>
             <p className="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              {t('claims.noneSub')}
+              {isDelegate ? 'When they do, it will appear here with a live tracker showing exactly where it is.' : t('claims.noneSub')}
             </p>
           </div>
         ) : past.length === 0 ? (

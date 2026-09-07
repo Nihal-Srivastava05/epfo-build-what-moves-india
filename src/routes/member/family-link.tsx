@@ -16,10 +16,11 @@ import {
 import { StepActions, StepProgress } from '@/components/patterns/step-flow'
 import { PageHeader } from '@/components/patterns/page-header'
 import { MockBadge } from '@/components/patterns/mock-badge'
-import { people } from '@/lib/mock/db'
+import { isRegisteredNominee, people, personById } from '@/lib/mock/db'
 import type { FamilyLink } from '@/lib/types'
 import { useData } from '@/store/data'
 import { useMotionOk } from '@/hooks/use-motion-ok'
+import { cn } from '@/lib/utils'
 
 const DEMO_OTP = '284116'
 
@@ -69,6 +70,10 @@ export default function FamilyLink() {
   const match = uanValid ? people.find((p) => p.uan === uan) : undefined
   const nameValid = name.trim().length > 1
   const alreadyLinked = match ? familyLinks.some((f) => f.personId === match.id) : false
+  /** Filing on someone's behalf is only ever available to their registered
+   *  nominee — the same fact a real EPFO claim runs on, checked here rather
+   *  than left as a checkbox anyone could tick. */
+  const isNominee = match ? isRegisteredNominee(match.id, personById('p-priya').name) : false
 
   if (linkedId) {
     return (
@@ -248,13 +253,28 @@ export default function FamilyLink() {
                 View their balance and claim status.
               </span>
             </label>
-            <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4">
-              <Checkbox checked={fileClaims} onCheckedChange={(v) => setFileClaims(v === true)} className="mt-0.5" />
+            <label
+              className={cn(
+                'flex items-start gap-3 rounded-lg border p-4',
+                isNominee ? 'cursor-pointer' : 'cursor-not-allowed opacity-60',
+              )}
+            >
+              <Checkbox
+                checked={fileClaims && isNominee}
+                disabled={!isNominee}
+                onCheckedChange={(v) => setFileClaims(v === true)}
+                className="mt-0.5"
+              />
               <span className="flex items-start gap-2 text-sm leading-relaxed">
                 <HandCoins className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
                 File a claim for them, against their own balance and eligibility.
               </span>
             </label>
+            <p className={cn('pl-7 text-xs leading-relaxed', isNominee ? 'text-ok' : 'text-muted-foreground')}>
+              {isNominee
+                ? `${match?.name} has registered you as their nominee, so this is available.`
+                : `Only available if ${match?.name} has registered you as their nominee — the same fact a real EPFO claim runs on. This checks their actual nominee record, not just this checkbox.`}
+            </p>
             <div className="flex items-start gap-2.5 rounded-lg border border-info-line bg-info-soft p-3.5 text-sm leading-relaxed">
               <Users className="mt-0.5 size-4 shrink-0" aria-hidden />
               Not a shared login — {match?.name} keeps their own account exactly as it is. This only
@@ -271,7 +291,7 @@ export default function FamilyLink() {
                   relation,
                   scope: [
                     ...(viewBalance ? (['view-balance'] as const) : []),
-                    ...(fileClaims ? (['file-claims'] as const) : []),
+                    ...(fileClaims && isNominee ? (['file-claims'] as const) : []),
                   ],
                 })
                 setLinkedId(link.id)

@@ -1,4 +1,4 @@
-import { personById } from '@/lib/mock/db'
+import { isRegisteredNominee, personById } from '@/lib/mock/db'
 import type { FamilyLink } from '@/lib/types'
 
 export interface DelegateClaimAction {
@@ -48,13 +48,24 @@ const REASON_WORDS: { key: DelegateClaimAction['reasonKey']; title: string; test
 ]
 
 /**
+ * `file-claims` alone isn't enough — filing on someone's behalf also
+ * requires being their registered nominee, the same fact a real EPFO claim
+ * runs on. Checked live against the nominee on record, never trusted as
+ * whatever was true the day the link was made.
+ */
+function canFileFor(link: FamilyLink): boolean {
+  return link.scope.includes('file-claims') && isRegisteredNominee(link.personId, personById(link.ownerId).name)
+}
+
+/**
  * Turns a sentence into an action, or returns null so the caller falls back
  * to plain Q&A. Deliberately regex-first and deterministic — this has to
  * work live, from a spoken sentence, without depending on whether an
  * on-device model happens to be available on the recording machine.
  *
  * A living-delegate claim only ever resolves to a family member who is both
- * linked *and* explicitly scoped for `file-claims` — the permission check is
+ * linked *and* actually eligible to be filed for right now (scoped for
+ * `file-claims` *and* a registered nominee) — the permission check is
  * load-bearing, not decorative. Anything else returns null, same as no
  * match at all.
  */
@@ -67,7 +78,7 @@ export function resolveAction(question: string, familyLinks: FamilyLink[]): Reso
   // Checked first: "raise a claim for my father" also matches the living
   // delegate pattern below, and the two lead to completely different flows.
   if (DEATH_WORDS.test(question)) {
-    const link = familyLinks.find((f) => f.relation === relation && f.scope.includes('file-claims'))
+    const link = familyLinks.find((f) => f.relation === relation && canFileFor(f))
     if (!link) return { kind: 'death-claim-suggestion', linked: false, relation }
     const target = personById(link.personId)
     return {
@@ -82,7 +93,7 @@ export function resolveAction(question: string, familyLinks: FamilyLink[]): Reso
 
   if (!CLAIM_VERB.test(question)) return null
 
-  const link = familyLinks.find((f) => f.relation === relation && f.scope.includes('file-claims'))
+  const link = familyLinks.find((f) => f.relation === relation && canFileFor(f))
   if (!link) return null
 
   const reason = REASON_WORDS.find((r) => r.test.test(question)) ?? REASON_WORDS[0]

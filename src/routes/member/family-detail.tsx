@@ -25,7 +25,7 @@ import { useData } from '@/store/data'
 import { useT } from '@/i18n'
 import { buildLedger, currentStage, groupLedgerByFy, interestBreakdown, withdrawalReasons } from '@/lib/derive'
 import { reasonLabelKey } from '@/lib/claims'
-import { contributionsForPerson, establishmentByCode, employments, personById } from '@/lib/mock/db'
+import { contributionsForPerson, establishmentByCode, employments, isRegisteredNominee, personById } from '@/lib/mock/db'
 import { fmtDate, inr } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -83,7 +83,9 @@ export default function FamilyMemberDetail() {
 
   const person = personById(link.personId)
   const canViewBalance = link.scope.includes('view-balance')
-  const canFileClaims = link.scope.includes('file-claims')
+  /** Live check, not a snapshot of what was true when the link was made —
+   *  filing on their behalf requires being their registered nominee right now. */
+  const canFileClaims = link.scope.includes('file-claims') && isRegisteredNominee(link.personId, personById(link.ownerId).name)
 
   const employment = employments.find((e) => e.personId === link.personId && e.current)
   const establishment = employment ? establishmentByCode(employment.estCode) : undefined
